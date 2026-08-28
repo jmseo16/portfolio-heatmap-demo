@@ -75,69 +75,33 @@ QUESTION_LABELS = {
     "5-2": "class curriculum",
     "5-3": "the instructor",
     "5-4": "finding it & directions",
+    "6-1": "the office",
+    "6-2": "office then vs. now",
+    "6-3": "first job",
+    "7-1": "tech at school",
+    "7-2": "daily tech",
+    "7-3": "home appliances",
+    "7-4": "tech then vs. now",
+    "7-5": "learning new tech",
+    "7-6": "tech for a project",
+    "8-1": "favorite park",
+    "8-2": "park problems",
+    "8-3": "kids vs. adults at the park",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
 # already double as a beat name (Opening, Reason1, Closing, ...) and don't
 # need an override. Keyed by paragraph id, which is stable across re-parses
 # as long as row order in the sheet doesn't change.
-PARAGRAPH_LABEL_OVERRIDES = {
-    "t0-q3-p2": "agentic AI",
-    "t0-q3-p3": "upcoming sequel",
-    "t0-q4-p0": "the gossip",
-    "t0-q4-p1": "drug scandal",
-    "t0-q4-p2": "quitting drugs",
-    "t0-q4-p3": "closing",
-    "t0-q5-p0": "watching with my sons",
-    "t0-q6-p0": "animation genre",
-    "t0-q6-p1": "teen action movies",
-    "t0-q6-p2": "closing",
-    "t1-q0-p1": "Coldplay concert",
-    "t1-q0-p2": "the atmosphere",
-    "t1-q0-p3": "closing",
-    "t1-q1-p0": "opening",
-    "t1-q1-p1": "losing my wallet",
-    "t1-q1-p2": "canceling the card",
-    "t1-q1-p3": "closing",
-    "t1-q2-p0": "opening",
-    "t1-q2-p3": "closing",
-    "t1-q3-p0": "opening",
-    "t1-q3-p1": "the CD player era",
-    "t1-q3-p2": "the streaming era",
-    "t1-q3-p3": "closing",
-    "t2-q0-p0": "opening",
-    "t2-q1-p0": "opening",
-    "t2-q2-p0": "opening",
-    "t2-q2-p1": "lesson learned",
-    "t2-q2-p2": "closing",
-    "t2-q3-p0": "opening",
-    "t2-q3-p1": "childhood home",
-    "t2-q3-p2": "married life",
-    "t2-q3-p3": "closing",
-    "t2-q4-p0": "rising prices",
-    "t2-q4-p1": "government's solution",
-    "t2-q4-p2": "closing",
-    "t2-q5-p0": "opening",
-    "t2-q5-p1": "the couch",
-    "t2-q5-p2": "the family bed",
-    "t2-q5-p3": "closing",
-    "t2-q6-p0": "opening",
-    "t2-q6-p1": "the closet",
-    "t2-q6-p2": "the bed",
-    "t2-q6-p3": "closing",
-    "t2-q7-p0": "opening",
-    "t2-q7-p1": "planning the party",
-    "t2-q7-p2": "the celebration",
-    "t2-q7-p3": "closing",
-    "t3-q0-p0": "opening",
-    "t3-q0-p1": "local food",
-    "t3-q0-p2": "the supermarket",
-    "t3-q0-p3": "closing",
-    "t3-q1-p0": "opening",
-    "t3-q1-p1": "Italy fatigue",
-    "t3-q1-p2": "staying in",
-    "t3-q1-p3": "closing",
-}
+#
+# As of the sheet's "(intro)/(body N)/(closing)" convention, every paragraph
+# already carries a clean cue, so this is empty — add an entry here only if
+# a future paragraph goes back to having no leading (Cue) at all. Note ids
+# are positional (t{topic}-q{question}-p{paragraph}), so an override written
+# against one version of the sheet can silently mislabel a later version's
+# different paragraph at that same position; if you do add entries, re-check
+# them after every re-parse rather than assuming they still apply.
+PARAGRAPH_LABEL_OVERRIDES = {}
 
 
 def translate(text: str) -> str:
@@ -199,6 +163,9 @@ TOPIC_SCRIPT_URLS = {
     "Household": "https://docs.google.com/document/d/19B4yCg203uv4W8XwnEmmOePxiSwpeQE45BRqak_7d1I/edit",
     "Trip": "https://docs.google.com/document/d/1V_8saPLmYYukbMmN6q1JK32SYemw-O_dKyIaxaKTJyg/edit",
     "Academy": "https://docs.google.com/document/d/1QY5SjUoTOrKaEmOfgulH1USn8w19cvQhBA8gVuqXWXs/edit",
+    "Workplace": "https://docs.google.com/document/d/1BhvIr78GekPdqhoJsyEdy3FZD3nXfOdWGJRBmggH4zI/edit",
+    "Technology": "https://docs.google.com/document/d/1QiMFGqbfunsrDgxqrJnJWs1Ofph6imUmsr56VPoO7As/edit",
+    "Park": "https://docs.google.com/document/d/1VFxUeG0e9lyxTiqjhI-J9GyTjcpAaf_CwMHPuShoyc0/edit",
 }
 
 
