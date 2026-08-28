@@ -95,9 +95,15 @@
 
   .app {
     height: 100vh;
+    height: 100dvh; /* mobile browsers resize the vh unit as chrome shows/hides; dvh tracks the real visible area */
     display: grid;
     grid-template-rows: auto 1fr;
     overflow: hidden;
+  }
+  /* pinned explicitly so hiding .topbar in focus mode can't let grid
+     auto-placement slide .layout into its (auto-sized) row */
+  .topbar { grid-row: 1; }
+  .layout { grid-row: 2; min-height: 0;
   }
 
   /* ---------- Top bar ---------- */
@@ -247,6 +253,7 @@
       position: fixed;
       inset: auto 0 0 0;
       max-height: 40vh;
+      max-height: 40dvh;
       padding: 14px 16px;
       z-index: 40;
       border-top: 1px solid var(--line);
@@ -258,7 +265,7 @@
     .reading.open .reading-crumb { font-size: 10px; }
   }
 
-  /* ---------- Focus mode: tap empty canvas to hide the chrome ---------- */
+  /* ---------- Focus mode: a button hides the top bar + grove rail ---------- */
   .app.focus-mode .topbar,
   .app.focus-mode .grove {
     display: none;
@@ -269,21 +276,26 @@
   @media (max-width: 900px) {
     .app.focus-mode .layout { grid-template-columns: 0 1fr; }
   }
-  .focus-hint {
+  .focus-toggle {
     position: absolute;
-    top: 10px;
-    left: 10px;
+    top: 12px;
+    left: 12px;
     z-index: 6;
-    font-size: 11px;
-    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
     background: var(--surface);
     border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 4px 9px;
-    display: none;
-    pointer-events: none;
+    border-radius: 8px;
+    padding: 6px 11px;
+    box-shadow: var(--shadow);
   }
-  .app.focus-mode .focus-hint { display: block; }
+  .focus-toggle .exit-label { display: none; }
+  .app.focus-mode .focus-toggle .enter-label { display: none; }
+  .app.focus-mode .focus-toggle .exit-label { display: inline; }
 
   /* ---------- Grove rail ---------- */
   .grove {
@@ -581,7 +593,10 @@
 
     <main class="canvas-wrap">
       <svg class="tree" id="tree" role="img" aria-label="Radial mindmap of the selected OPIc topic"></svg>
-      <p class="focus-hint">Tap empty space again to bring the panels back</p>
+      <button class="focus-toggle" id="focusToggle" type="button">
+        <span class="enter-label">⛶ Fullscreen</span>
+        <span class="exit-label">✕ Exit fullscreen</span>
+      </button>
       <div class="zoom-controls">
         <button class="zbtn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
         <button class="zbtn" id="zoomOut" type="button" aria-label="Zoom out">&minus;</button>
@@ -928,7 +943,7 @@
     const ys = nodes.map((d) => d.screenY);
     const minX = Math.min(...xs) - pad, maxX = Math.max(...xs) + pad;
     const minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad;
-    const scale = Math.min(bounds.width / (maxX - minX), bounds.height / (maxY - minY), 1.05);
+    const scale = Math.min(bounds.width / (maxX - minX), bounds.height / (maxY - minY), 1.8);
     const clamped = Math.max(scale, zoom.scaleExtent()[0]);
     const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
     const t = d3.zoomIdentity.translate(bounds.width / 2 - cx * clamped, bounds.height / 2 - cy * clamped).scale(clamped);
@@ -962,24 +977,20 @@
 
   document.getElementById("readingClose").addEventListener("click", () => reading.classList.remove("open"));
 
-  // ---- focus mode: tap empty canvas to hide the top bar + grove rail ----
+  // ---- focus mode: a button hides the top bar + grove rail ----
+  // (deliberately a button, not a tap-empty-canvas gesture: d3-zoom's touch
+  // handling can swallow the synthetic click a tap would otherwise fire, so
+  // a gesture-based toggle is unreliable on touch devices)
   const appEl = document.getElementById("app");
-  let pointerDownAt = null;
-  svg.on("pointerdown", (event) => {
-    pointerDownAt = [event.clientX, event.clientY];
-  });
-  svg.on("click", (event) => {
-    if (event.target.closest("g.node")) return; // a node's own handler already dealt with this
-    if (pointerDownAt) {
-      const dx = event.clientX - pointerDownAt[0];
-      const dy = event.clientY - pointerDownAt[1];
-      if (Math.hypot(dx, dy) > 6) return; // was a pan, not a tap
-    }
-    appEl.classList.toggle("focus-mode");
-    requestAnimationFrame(() => renderTree(false));
+  function setFocusMode(on) {
+    appEl.classList.toggle("focus-mode", on);
+    renderTree(false);
+  }
+  document.getElementById("focusToggle").addEventListener("click", () => {
+    setFocusMode(!appEl.classList.contains("focus-mode"));
   });
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") appEl.classList.remove("focus-mode");
+    if (event.key === "Escape" && appEl.classList.contains("focus-mode")) setFocusMode(false);
   });
 
   // ---- search across the whole forest ----
