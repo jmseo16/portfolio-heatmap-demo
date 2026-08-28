@@ -237,11 +237,16 @@
       display: block;
       position: fixed;
       inset: auto 0 0 0;
-      max-height: 60vh;
+      max-height: 40vh;
+      padding: 14px 16px;
       z-index: 40;
       border-top: 1px solid var(--line);
       border-left: none;
+      box-shadow: var(--shadow);
     }
+    .reading.open h3 { font-size: 14.5px; }
+    .reading.open .full-text { font-size: 12.5px; }
+    .reading.open .reading-crumb { font-size: 10px; }
   }
 
   /* ---------- Grove rail ---------- */
@@ -449,14 +454,14 @@
   .reading h3 {
     font-family: "Fraunces", Georgia, serif;
     font-weight: 600;
-    font-size: 18px;
+    font-size: 16px;
     line-height: 1.35;
     margin: 0 0 10px;
     text-wrap: balance;
   }
   .reading .full-text {
-    font-size: 14.5px;
-    line-height: 1.65;
+    font-size: 13.5px;
+    line-height: 1.6;
     color: var(--ink);
   }
   .reading-kicks {
@@ -559,12 +564,13 @@
     .on("zoom", (event) => g.attr("transform", event.transform));
   svg.call(zoom).on("dblclick.zoom", null);
 
-  // horizontal distance (px) of each depth from the topic, cumulative:
-  // [topic, question, paragraph, kick]
-  const DEPTH_X = [0, 180, 410, 640];
-  const ROW_GAP = 50;
-  const PILL_PAD_X = { topic: 20, question: 16, paragraph: 14, kick: 12 };
-  const PILL_PAD_Y = { topic: 12, question: 9, paragraph: 8, kick: 7 };
+  // column gaps are computed fresh every render from the actual measured
+  // pill widths (see fitColumns below) — this is just the minimum
+  // clearance added between two adjacent columns' widest pills
+  const COLUMN_BUFFER = 34;
+  const ROW_GAP = 44;
+  const PILL_PAD_X = { topic: 16, question: 12, paragraph: 10, kick: 9 };
+  const PILL_PAD_Y = { topic: 9, question: 7, paragraph: 6, kick: 5 };
   const WRAP_CHARS = { topic: 99, question: 26, paragraph: 18, kick: 18 };
 
   // remembers each node's last-drawn screen position, keyed by its id, so a
@@ -695,11 +701,11 @@
   }
 
   // lays out one side (an array of top-level question master-nodes) as an
-  // independent tidy tree, then converts each node's tree coordinates into
-  // screen coordinates: x grows outward (sign = -1 left, +1 right) by fixed
-  // per-depth columns, y is the node's row, recentered around this side's
-  // own vertical middle so left and right can have different extents.
-  function layoutSide(questionNodes, sign) {
+  // independent tidy tree and converts each node's row into a screen Y,
+  // recentered around this side's own vertical middle so left and right can
+  // have different extents. Screen X is filled in later, once every
+  // visible pill has been measured (see fitColumns).
+  function layoutSide(questionNodes, side) {
     if (!questionNodes.length) return [];
     const wrapper = d3.hierarchy({ children: questionNodes.map(mirrorVisible) });
     d3.tree()
@@ -712,10 +718,27 @@
     const mid = (extent[0] + extent[1]) / 2;
     rows.forEach((d) => {
       d.master = d.data.master;
-      d.screenX = sign * DEPTH_X[d.depth];
+      d.side = side;
       d.screenY = d.x - mid;
     });
     return rows;
+  }
+
+  // measures every node's wrapped label (as rendered, with its real font)
+  // and returns a per-depth column X, wide enough that even the widest
+  // pill at each depth clears its neighboring column with room to spare
+  function fitColumns(nodes) {
+    const maxHalf = [];
+    nodes.forEach((d) => {
+      maxHalf[d.depth] = Math.max(maxHalf[d.depth] || 0, d.pillW / 2);
+    });
+    const x = [0];
+    for (let depth = 1; depth < maxHalf.length; depth++) {
+      const prevHalf = maxHalf[depth - 1] || 0;
+      const half = maxHalf[depth] || 0;
+      x[depth] = x[depth - 1] + prevHalf + half + COLUMN_BUFFER;
+    }
+    return x;
   }
 
   function renderTree(recenter) {
@@ -729,28 +752,6 @@
     const leftRows = layoutSide(leftQuestions, -1);
     const nodes = [rootPseudo, ...rightRows, ...leftRows];
 
-    const links = nodes
-      .filter((d) => d !== rootPseudo)
-      .map((d) => ({ source: d.parent && d.parent.depth > 0 ? d.parent : rootPseudo, target: d }));
-
-    posById.clear();
-    nodes.forEach((d) => posById.set(d.master.id, { x: d.screenX, y: d.screenY }));
-
-    const linkSel = linkLayer.selectAll("path.link").data(links, (d) => d.target.master.id);
-    linkSel.exit().remove();
-    linkSel
-      .enter()
-      .append("path")
-      .attr("class", (d) => `link ${d.target.master.data.type[0]}-link`)
-      .merge(linkSel)
-      .attr("class", (d) => `link ${d.target.master.data.type[0]}-link`)
-      .attr("d", (d) => {
-        const sx = d.source.screenX, sy = d.source.screenY;
-        const tx = d.target.screenX, ty = d.target.screenY;
-        const mx = (sx + tx) / 2;
-        return `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
-      });
-
     const nodeSel = nodeLayer.selectAll("g.node").data(nodes, (d) => d.master.id);
     nodeSel.exit().remove();
 
@@ -761,8 +762,10 @@
 
     const nodeMerge = nodeEnter.merge(nodeSel);
     nodeMerge.attr("class", (d) => `node ${d.master.data.type}`);
-    nodeMerge.attr("transform", (d) => `translate(${d.screenX},${d.screenY})`);
 
+    // pass 1: set each node's label (as wrapped text) and measure the
+    // rendered result to size its pill — this has to happen before we can
+    // know how wide each depth's column needs to be
     nodeMerge.each(function (d) {
       const type = d.master.data.type;
       const name = type === "topic" ? d.master.data.name.toUpperCase() : d.master.data.name;
@@ -781,33 +784,67 @@
         .attr("dy", (_, i) => (i === 0 ? startDy : lineH) + "em")
         .text((line) => line);
 
-      const bbox = this.getBBox();
-      const padX = PILL_PAD_X[type];
-      const padY = PILL_PAD_Y[type];
-      const w = bbox.width + padX * 2;
-      const h = bbox.height + padY * 2;
+      // measure the text alone — this <g> can still hold the *previous*
+      // render's pill rect and badge, which would otherwise bloat the box
+      const bbox = text.node().getBBox();
+      d.pillW = bbox.width + PILL_PAD_X[type] * 2;
+      d.pillH = bbox.height + PILL_PAD_Y[type] * 2;
 
       d3.select(this)
         .select("rect.pill")
-        .attr("x", -w / 2)
-        .attr("y", -h / 2)
-        .attr("width", w)
-        .attr("height", h)
-        .attr("rx", h / 2);
+        .attr("x", -d.pillW / 2)
+        .attr("y", -d.pillH / 2)
+        .attr("width", d.pillW)
+        .attr("height", d.pillH)
+        .attr("rx", d.pillH / 2);
+    });
 
+    // pass 2: now that every pill's width is known, size each depth's
+    // column and place every node (root fixed at the origin)
+    const DEPTH_X = fitColumns(nodes);
+    nodes.forEach((d) => {
+      d.screenX = d.depth === 0 ? 0 : d.side * DEPTH_X[d.depth];
+    });
+
+    posById.clear();
+    nodes.forEach((d) => posById.set(d.master.id, { x: d.screenX, y: d.screenY }));
+
+    nodeMerge.attr("transform", (d) => `translate(${d.screenX},${d.screenY})`);
+
+    nodeMerge.each(function (d) {
+      const type = d.master.data.type;
       const expandable = type === "question" || type === "paragraph";
       const collapsedCount = d.master._children && !d.master.children ? d.master._children.length : 0;
       const badge = d3.select(this).select("g.badge");
       badge.selectAll("*").remove();
       if (expandable && collapsedCount > 0) {
         const dir = d.screenX < 0 ? -1 : 1;
-        badge.attr("transform", `translate(${(dir * w) / 2},0)`).style("display", null);
+        badge.attr("transform", `translate(${(dir * d.pillW) / 2},0)`).style("display", null);
         badge.append("circle").attr("r", 9);
         badge.append("text").attr("dy", "0.32em").attr("text-anchor", "middle").text(collapsedCount);
       } else {
         badge.style("display", "none");
       }
     });
+
+    const links = nodes
+      .filter((d) => d !== rootPseudo)
+      .map((d) => ({ source: d.parent && d.parent.depth > 0 ? d.parent : rootPseudo, target: d }));
+
+    const linkSel = linkLayer.selectAll("path.link").data(links, (d) => d.target.master.id);
+    linkSel.exit().remove();
+    linkSel
+      .enter()
+      .append("path")
+      .attr("class", (d) => `link ${d.target.master.data.type[0]}-link`)
+      .merge(linkSel)
+      .attr("class", (d) => `link ${d.target.master.data.type[0]}-link`)
+      .attr("d", (d) => {
+        const sx = d.source.screenX, sy = d.source.screenY;
+        const tx = d.target.screenX, ty = d.target.screenY;
+        const mx = (sx + tx) / 2;
+        return `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
+      });
 
     nodeMerge
       .attr("tabindex", (d) => (d.master.data.type === "topic" ? null : 0))
