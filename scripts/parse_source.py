@@ -188,10 +188,31 @@ def parse_csv(path: Path):
     return topics
 
 
+# Each topic's full, polished script lives in its own Google Doc in the
+# same "OPIc Speaking Log" Drive folder as the source sheet (titled
+# "1. Movie", "2. Concert/...", etc.) — this is what the topic node's
+# "Show script" button links to. Add an entry here whenever a new topic
+# gets its own script doc.
+TOPIC_SCRIPT_URLS = {
+    "Movie": "https://docs.google.com/document/d/1WluGZYRTxFM7hv4Pnlk6EZT109onSSZTaZbMoL9mQlE/edit",
+    "Concert": "https://docs.google.com/document/d/1BnG3r7CoET4cR8CaS4vyRPIR8--OiDZmJSprWvz1kOI/edit",
+    "Household": "https://docs.google.com/document/d/19B4yCg203uv4W8XwnEmmOePxiSwpeQE45BRqak_7d1I/edit",
+    "Trip": "https://docs.google.com/document/d/1V_8saPLmYYukbMmN6q1JK32SYemw-O_dKyIaxaKTJyg/edit",
+    "Academy": "https://docs.google.com/document/d/1QY5SjUoTOrKaEmOfgulH1USn8w19cvQhBA8gVuqXWXs/edit",
+}
+
+
 def to_forest(topics):
     forest = []
     for ti, t in enumerate(topics):
-        topic_node = {"id": f"t{ti}", "name": t["name"], "type": "topic", "full": t["name"], "children": []}
+        topic_node = {
+            "id": f"t{ti}",
+            "name": t["name"],
+            "type": "topic",
+            "full": t["name"],
+            "scriptUrl": TOPIC_SCRIPT_URLS.get(t["name"]),
+            "children": [],
+        }
         for qi, q in enumerate(t["questions"]):
             m = re.match(r"^(\d+-\d+)\.\s*(.*)$", q["text"])
             tag = m.group(1) if m else f"Q{qi + 1}"

@@ -2,8 +2,12 @@
 
 An interactive mindmap for OPIc (AL) speaking prep. Every topic from the
 script spreadsheet becomes its own tree in a small "forest": topic → question
-→ script beat → kick phrase, drawn as a radial, click-to-expand map so you
-can drill from a bare topic name down to the exact phrase you rehearsed.
+→ script beat → kick phrase, drawn as a horizontal, click-to-expand map (the
+topic in the middle, questions fanning left/right) so you can drill from a
+bare topic name down to the exact phrase you rehearsed.
+
+Tap empty canvas to hide the top bar and topic list for a fullscreen view;
+tap again (or Esc) to bring them back.
 
 Open **`mindmap.html`** directly in a browser — it's a single self-contained
 file (D3 + inlined data, loaded from the CDN allow-list), no build step or
@@ -42,6 +46,15 @@ touching `mindmap.html` directly.
    notes), the script will warn about leftover Korean text; add the word to
    the `TRANSLATIONS` dict at the top of `scripts/parse_source.py` and
    re-run — the mindmap is meant to stay all-English.
+   A new question or a paragraph with no leading `(Cue)` gets a plain
+   fallback label until you add a short hand-picked one to `QUESTION_LABELS`
+   / `PARAGRAPH_LABEL_OVERRIDES` in the same file (that's what puts
+   "favorite theater" or "the couch" inside a node instead of "1-2" or a
+   truncated sentence).
+   A new topic also needs its script doc added to `TOPIC_SCRIPT_URLS` in
+   `scripts/parse_source.py` — that's the link behind each topic node's
+   "Show script" button (its Google Doc, in the same Drive folder as the
+   source sheet).
 3. **Rebuild the page.** `python3 scripts/build.py`
    — injects `data/forest.json` into `templates/mindmap.template.html` and
    writes the final `mindmap.html`.
