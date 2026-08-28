@@ -337,38 +337,41 @@
   .link.p-link { stroke: color-mix(in srgb, var(--paragraph) 45%, var(--line)); }
   .link.k-link { stroke: color-mix(in srgb, var(--kick) 45%, var(--line)); }
 
-  .node circle { stroke-width: 2px; }
-  .node.topic circle { fill: var(--topic-soft); stroke: var(--topic); }
-  .node.question circle { fill: var(--question-soft); stroke: var(--question); }
-  .node.paragraph circle { fill: var(--paragraph-soft); stroke: var(--paragraph); }
-  .node.kick circle { fill: var(--kick-soft); stroke: var(--kick); }
-  .node.expandable circle { stroke-dasharray: 2.2 2.2; }
   .node { cursor: pointer; }
-  .node.kick { cursor: pointer; }
+  .node .pill { stroke-width: 1.6px; }
+  .node.topic .pill { fill: var(--topic-soft); stroke: var(--topic); }
+  .node.question .pill { fill: var(--question-soft); stroke: var(--question); }
+  .node.paragraph .pill { fill: var(--paragraph-soft); stroke: var(--paragraph); }
+  .node.kick .pill { fill: var(--kick-soft); stroke: var(--kick); }
 
   .node text {
     font-family: "Work Sans", sans-serif;
-    font-size: 11.5px;
+    font-weight: 500;
+    font-size: 12.5px;
     fill: var(--ink);
-    paint-order: stroke;
-    stroke: var(--bg);
-    stroke-width: 3px;
+    text-anchor: middle;
   }
   .node.topic text {
     font-family: "Fraunces", Georgia, serif;
     font-weight: 600;
     font-size: 15px;
+    letter-spacing: 0.02em;
   }
-  .node.question text { font-weight: 600; font-family: "IBM Plex Mono", monospace; font-size: 11px; }
-  .node.kick text { fill: var(--muted); }
+  .node.paragraph text { font-size: 12px; }
+  .node.kick text { font-family: "IBM Plex Mono", monospace; font-weight: 500; font-size: 11px; fill: var(--muted); }
 
-  .node.current circle { stroke-width: 3px; }
-  .node.match circle { filter: drop-shadow(0 0 0 var(--focus)); stroke-width: 3px; }
+  .node.current .pill { stroke-width: 3px; }
+  .node.match .pill { stroke-width: 3px; filter: drop-shadow(0 0 4px var(--focus)); }
 
-  .node-badge {
+  .node .badge circle { fill: var(--surface); stroke: currentColor; stroke-width: 1.4px; }
+  .node.topic .badge circle,
+  .node.question .badge circle { color: var(--question); }
+  .node.paragraph .badge circle { color: var(--paragraph); }
+  .node .badge text {
     font-family: "IBM Plex Mono", monospace;
     font-size: 9px;
-    fill: var(--surface);
+    font-weight: 600;
+    fill: var(--ink);
   }
 
   .zoom-controls {
@@ -556,8 +559,36 @@
     .on("zoom", (event) => g.attr("transform", event.transform));
   svg.call(zoom).on("dblclick.zoom", null);
 
-  function radialPoint(angle, radius) {
-    return [radius * Math.cos(angle - Math.PI / 2), radius * Math.sin(angle - Math.PI / 2)];
+  // horizontal distance (px) of each depth from the topic, cumulative:
+  // [topic, question, paragraph, kick]
+  const DEPTH_X = [0, 180, 410, 640];
+  const ROW_GAP = 50;
+  const PILL_PAD_X = { topic: 20, question: 16, paragraph: 14, kick: 12 };
+  const PILL_PAD_Y = { topic: 12, question: 9, paragraph: 8, kick: 7 };
+  const WRAP_CHARS = { topic: 99, question: 26, paragraph: 18, kick: 18 };
+
+  // remembers each node's last-drawn screen position, keyed by its id, so a
+  // search jump can pan the camera to it right after expanding it
+  const posById = new Map();
+
+  // splits a label into at most 2 roughly-balanced lines so a pill never
+  // has to stretch to fit one very long line of horizontal text
+  function wrapLabel(text, maxChars) {
+    const words = text.split(/\s+/);
+    const lines = [];
+    let cur = "";
+    for (const w of words) {
+      const trial = cur ? `${cur} ${w}` : w;
+      if (cur && trial.length > maxChars) {
+        lines.push(cur);
+        cur = w;
+      } else {
+        cur = trial;
+      }
+    }
+    if (cur) lines.push(cur);
+    if (lines.length > 2) return [lines[0], lines.slice(1).join(" ")];
+    return lines;
   }
 
   // ---- prepare per-topic hierarchy with collapse state ----
@@ -599,19 +630,11 @@
     groveList.selectAll(".grove-count").text((d) => `${d.children.length} questions`);
   }
 
-  function countKicks(q) {
-    return q.children.reduce((sum, p) => sum + (p.children ? p.children.length : 0), 0);
-  }
-
-  function labelFor(d) {
-    const t = d.data.type;
-    if (t === "topic") return d.data.name.toUpperCase();
-    if (t === "question") return d.data.name;
-    return d.data.name;
-  }
-
   function crumbFor(d) {
-    const chain = d.ancestors().reverse().map((n) => n.data.name);
+    const chain = d
+      .ancestors()
+      .reverse()
+      .map((n) => (n.data.tag ? `${n.data.tag} ${n.data.name}` : n.data.name));
     return chain.join(" ▸ ");
   }
 
@@ -621,7 +644,7 @@
 
   function setCurrent(node) {
     state.current = node;
-    nodeLayer.selectAll("g.node").classed("current", (d) => node && d.id === node.id);
+    nodeLayer.selectAll("g.node").classed("current", (d) => node && d.master.id === node.id);
     if (!node) {
       readingBody.innerHTML = '<p class="reading-empty">Select any node to read its full text here — the tree only ever shows short labels.</p>';
       return;
@@ -661,86 +684,163 @@
     renderTree(false);
   }
 
+  // wraps a master (state-tracking) hierarchy node in a plain object so a
+  // fresh, self-contained d3.hierarchy can be built for layout purposes
+  // without disturbing the master's own .parent chain
+  function mirrorVisible(masterNode) {
+    return {
+      master: masterNode,
+      children: masterNode.children ? masterNode.children.map(mirrorVisible) : undefined,
+    };
+  }
+
+  // lays out one side (an array of top-level question master-nodes) as an
+  // independent tidy tree, then converts each node's tree coordinates into
+  // screen coordinates: x grows outward (sign = -1 left, +1 right) by fixed
+  // per-depth columns, y is the node's row, recentered around this side's
+  // own vertical middle so left and right can have different extents.
+  function layoutSide(questionNodes, sign) {
+    if (!questionNodes.length) return [];
+    const wrapper = d3.hierarchy({ children: questionNodes.map(mirrorVisible) });
+    d3.tree()
+      .nodeSize([ROW_GAP, 1])
+      .separation((a, b) => (a.parent === b.parent ? 1 : 1.7))(wrapper);
+
+    const rows = wrapper.descendants().filter((d) => d.depth > 0);
+    if (!rows.length) return [];
+    const extent = d3.extent(rows, (d) => d.x);
+    const mid = (extent[0] + extent[1]) / 2;
+    rows.forEach((d) => {
+      d.master = d.data.master;
+      d.screenX = sign * DEPTH_X[d.depth];
+      d.screenY = d.x - mid;
+    });
+    return rows;
+  }
+
   function renderTree(recenter) {
     const root = roots[state.topicIndex];
     const bounds = svg.node().getBoundingClientRect();
-    const radius = Math.max(260, Math.min(bounds.width, bounds.height) / 2 - 40);
-    const step = radius / 3.15;
 
-    const treeLayout = d3.tree()
-      .size([2 * Math.PI, radius])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 1.6) / a.depth);
+    const rootPseudo = { master: root, depth: 0, screenX: 0, screenY: 0 };
+    const rightQuestions = root.children.filter((_, i) => i % 2 === 0);
+    const leftQuestions = root.children.filter((_, i) => i % 2 === 1);
+    const rightRows = layoutSide(rightQuestions, 1);
+    const leftRows = layoutSide(leftQuestions, -1);
+    const nodes = [rootPseudo, ...rightRows, ...leftRows];
 
-    treeLayout(root);
-    root.each((d) => (d.y = d.depth * step));
+    const links = nodes
+      .filter((d) => d !== rootPseudo)
+      .map((d) => ({ source: d.parent && d.parent.depth > 0 ? d.parent : rootPseudo, target: d }));
 
-    const nodes = root.descendants();
-    const links = root.links();
+    posById.clear();
+    nodes.forEach((d) => posById.set(d.master.id, { x: d.screenX, y: d.screenY }));
 
-    const linkSel = linkLayer.selectAll("path.link").data(links, (d) => d.target.id);
+    const linkSel = linkLayer.selectAll("path.link").data(links, (d) => d.target.master.id);
     linkSel.exit().remove();
-    const linkEnter = linkSel.enter().append("path").attr("class", (d) => `link ${d.target.data.type[0]}-link`);
-    linkEnter.merge(linkSel)
-      .attr("class", (d) => `link ${d.target.data.type[0]}-link`)
-      .attr("d", d3.linkRadial().angle((d) => d.x).radius((d) => d.y));
+    linkSel
+      .enter()
+      .append("path")
+      .attr("class", (d) => `link ${d.target.master.data.type[0]}-link`)
+      .merge(linkSel)
+      .attr("class", (d) => `link ${d.target.master.data.type[0]}-link`)
+      .attr("d", (d) => {
+        const sx = d.source.screenX, sy = d.source.screenY;
+        const tx = d.target.screenX, ty = d.target.screenY;
+        const mx = (sx + tx) / 2;
+        return `M${sx},${sy} C${mx},${sy} ${mx},${ty} ${tx},${ty}`;
+      });
 
-    const nodeSel = nodeLayer.selectAll("g.node").data(nodes, (d) => d.id);
+    const nodeSel = nodeLayer.selectAll("g.node").data(nodes, (d) => d.master.id);
     nodeSel.exit().remove();
 
-    const nodeEnter = nodeSel.enter().append("g").attr("class", (d) => `node ${d.data.type}`);
-    nodeEnter.append("circle");
+    const nodeEnter = nodeSel.enter().append("g");
+    nodeEnter.append("rect").attr("class", "pill");
     nodeEnter.append("text");
+    nodeEnter.append("g").attr("class", "badge");
 
     const nodeMerge = nodeEnter.merge(nodeSel);
-    nodeMerge.attr("class", (d) => {
-      const cls = ["node", d.data.type];
-      if (d.data.type === "question" || d.data.type === "paragraph") cls.push("expandable");
-      return cls.join(" ");
+    nodeMerge.attr("class", (d) => `node ${d.master.data.type}`);
+    nodeMerge.attr("transform", (d) => `translate(${d.screenX},${d.screenY})`);
+
+    nodeMerge.each(function (d) {
+      const type = d.master.data.type;
+      const name = type === "topic" ? d.master.data.name.toUpperCase() : d.master.data.name;
+      const lines = wrapLabel(name, WRAP_CHARS[type]);
+      const lineH = 1.15;
+      const startDy = -((lines.length - 1) * lineH) / 2 + 0.32;
+
+      const text = d3.select(this).select("text");
+      const tspans = text.selectAll("tspan").data(lines);
+      tspans.exit().remove();
+      tspans
+        .enter()
+        .append("tspan")
+        .merge(tspans)
+        .attr("x", 0)
+        .attr("dy", (_, i) => (i === 0 ? startDy : lineH) + "em")
+        .text((line) => line);
+
+      const bbox = this.getBBox();
+      const padX = PILL_PAD_X[type];
+      const padY = PILL_PAD_Y[type];
+      const w = bbox.width + padX * 2;
+      const h = bbox.height + padY * 2;
+
+      d3.select(this)
+        .select("rect.pill")
+        .attr("x", -w / 2)
+        .attr("y", -h / 2)
+        .attr("width", w)
+        .attr("height", h)
+        .attr("rx", h / 2);
+
+      const expandable = type === "question" || type === "paragraph";
+      const collapsedCount = d.master._children && !d.master.children ? d.master._children.length : 0;
+      const badge = d3.select(this).select("g.badge");
+      badge.selectAll("*").remove();
+      if (expandable && collapsedCount > 0) {
+        const dir = d.screenX < 0 ? -1 : 1;
+        badge.attr("transform", `translate(${(dir * w) / 2},0)`).style("display", null);
+        badge.append("circle").attr("r", 9);
+        badge.append("text").attr("dy", "0.32em").attr("text-anchor", "middle").text(collapsedCount);
+      } else {
+        badge.style("display", "none");
+      }
     });
-    nodeMerge.attr("transform", (d) => {
-      const [x, y] = radialPoint(d.x, d.y);
-      return `translate(${x},${y})`;
-    });
-    const R = { topic: 26, question: 13, paragraph: 9.5, kick: 6.5 };
-    nodeMerge.select("circle").attr("r", (d) => R[d.data.type]);
-    nodeMerge.select("text")
-      .attr("dy", "0.32em")
-      .attr("x", (d) => (d.depth === 0 ? 0 : (d.x < Math.PI ? 1 : -1) * (R[d.data.type] + 7)))
-      .attr("text-anchor", (d) => (d.depth === 0 ? "middle" : d.x < Math.PI ? "start" : "end"))
-      .attr("transform", (d) => (d.depth === 0 ? null : `rotate(${(d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * (180 / Math.PI)})`))
-      .text((d) => truncateLabel(labelFor(d), d.data.type));
 
     nodeMerge
-      .style("cursor", (d) => (d.data.type === "topic" ? "default" : "pointer"))
-      .attr("tabindex", (d) => (d.data.type === "topic" ? null : 0))
-      .attr("role", (d) => (d.data.type === "topic" ? null : "button"))
+      .attr("tabindex", (d) => (d.master.data.type === "topic" ? null : 0))
+      .attr("role", (d) => (d.master.data.type === "topic" ? null : "button"))
       .on("click", (event, d) => {
         event.stopPropagation();
-        setCurrent(d);
-        toggle(d);
+        setCurrent(d.master);
+        toggle(d.master);
       })
       .on("keydown", (event, d) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
-          setCurrent(d);
-          toggle(d);
+          setCurrent(d.master);
+          toggle(d.master);
         }
       });
 
-    nodeMerge.classed("current", (d) => state.current && d.id === state.current.id);
-    nodeMerge.classed("match", (d) => matchSet.has(d.id));
+    nodeMerge.classed("current", (d) => state.current && d.master.id === state.current.id);
+    nodeMerge.classed("match", (d) => matchSet.has(d.master.id));
 
-    if (recenter) {
-      const t = d3.zoomIdentity.translate(bounds.width / 2, bounds.height / 2).scale(0.82);
-      svg.call(zoom.transform, t);
-    }
-  }
-
-  function truncateLabel(label, type) {
-    const max = type === "topic" ? 16 : type === "question" ? 6 : 30;
-    if (type === "question") return label;
-    if (label.length > max) return label.slice(0, max - 1).trimEnd() + "…";
-    return label;
+    // keep the whole visible tree in frame: every render (initial load,
+    // topic switch, or a click that reveals/hides a branch) re-fits the
+    // zoom so newly expanded nodes never land outside the canvas
+    const pad = 130;
+    const xs = nodes.map((d) => d.screenX);
+    const ys = nodes.map((d) => d.screenY);
+    const minX = Math.min(...xs) - pad, maxX = Math.max(...xs) + pad;
+    const minY = Math.min(...ys) - pad, maxY = Math.max(...ys) + pad;
+    const scale = Math.min(bounds.width / (maxX - minX), bounds.height / (maxY - minY), 1.05);
+    const clamped = Math.max(scale, zoom.scaleExtent()[0]);
+    const cx = (minX + maxX) / 2, cy = (minY + maxY) / 2;
+    const t = d3.zoomIdentity.translate(bounds.width / 2 - cx * clamped, bounds.height / 2 - cy * clamped).scale(clamped);
+    (recenter ? svg : svg.transition().duration(350)).call(zoom.transform, t);
   }
 
   // ---- expand / collapse all (within current topic) ----
@@ -857,11 +957,15 @@
       (n.children || []).forEach(walk);
     })(root);
     if (!target) return;
-    const bounds = svg.node().getBoundingClientRect();
-    const [x, y] = radialPoint(target.x, target.y);
-    const scale = 1.05;
-    const t = d3.zoomIdentity.translate(bounds.width / 2 - x * scale, bounds.height / 2 - y * scale).scale(scale);
-    svg.transition().duration(500).call(zoom.transform, t);
+    const pos = posById.get(id);
+    if (pos) {
+      const bounds = svg.node().getBoundingClientRect();
+      const scale = 1.1;
+      const t = d3.zoomIdentity
+        .translate(bounds.width / 2 - pos.x * scale, bounds.height / 2 - pos.y * scale)
+        .scale(scale);
+      svg.transition().duration(500).call(zoom.transform, t);
+    }
     setCurrent(target);
   }
 
