@@ -1,0 +1,893 @@
+<!doctype html>
+<title>OPIc Forest</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap"
+  rel="stylesheet"
+/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+  :root {
+    --bg: #f6f2e7;
+    --surface: #fffdf8;
+    --surface-2: #ede6d3;
+    --ink: #23291f;
+    --muted: #6b7263;
+    --line: #ddd3b8;
+    --line-soft: #e8e0c9;
+    --topic: #8a5a34;
+    --topic-soft: #f0dcc4;
+    --question: #3e6b4c;
+    --question-soft: #dcead9;
+    --paragraph: #1f7a78;
+    --paragraph-soft: #d7ebe8;
+    --kick: #a9761f;
+    --kick-soft: #f2e3c4;
+    --focus: #1f7a78;
+    --shadow: 0 1px 2px rgba(35, 41, 31, 0.06), 0 8px 24px -12px rgba(35, 41, 31, 0.18);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #12160e;
+      --surface: #1a2015;
+      --surface-2: #202718;
+      --ink: #eae6d8;
+      --muted: #99a487;
+      --line: #313a26;
+      --line-soft: #262e1c;
+      --topic: #dba86e;
+      --topic-soft: #382a1c;
+      --question: #86c795;
+      --question-soft: #1e2f21;
+      --paragraph: #6dd0cb;
+      --paragraph-soft: #17302e;
+      --kick: #e8c073;
+      --kick-soft: #362a15;
+      --focus: #6dd0cb;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #12160e;
+    --surface: #1a2015;
+    --surface-2: #202718;
+    --ink: #eae6d8;
+    --muted: #99a487;
+    --line: #313a26;
+    --line-soft: #262e1c;
+    --topic: #dba86e;
+    --topic-soft: #382a1c;
+    --question: #86c795;
+    --question-soft: #1e2f21;
+    --paragraph: #6dd0cb;
+    --paragraph-soft: #17302e;
+    --kick: #e8c073;
+    --kick-soft: #362a15;
+    --focus: #6dd0cb;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 30px -14px rgba(0, 0, 0, 0.6);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Work Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection { background: var(--paragraph-soft); }
+
+  a { color: inherit; }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  .app {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr;
+    overflow: hidden;
+  }
+
+  /* ---------- Top bar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 22px;
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+    flex-wrap: wrap;
+  }
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .brand h1 {
+    font-family: "Fraunces", Georgia, serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: 21px;
+    margin: 0;
+    letter-spacing: 0.01em;
+  }
+  .brand .tag {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .hint {
+    font-size: 12.5px;
+    color: var(--muted);
+    max-width: 30ch;
+  }
+
+  .searchwrap { position: relative; flex: 1 1 260px; max-width: 380px; }
+  .searchbox {
+    width: 100%;
+    padding: 8px 12px 8px 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: 13.5px;
+    font-family: inherit;
+  }
+  .searchbox::placeholder { color: var(--muted); }
+  .searchicon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 14px;
+    height: 14px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .searchresults {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    max-height: 340px;
+    overflow-y: auto;
+    z-index: 30;
+    display: none;
+  }
+  .searchresults.open { display: block; }
+  .sr-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--line-soft);
+    color: var(--ink);
+  }
+  .sr-item:last-child { border-bottom: none; }
+  .sr-item:hover, .sr-item:focus-visible { background: var(--surface-2); }
+  .sr-topic {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .sr-snippet { font-size: 13px; line-height: 1.35; }
+  .sr-empty { padding: 12px; font-size: 13px; color: var(--muted); }
+  mark {
+    background: var(--kick-soft);
+    color: var(--ink);
+    border-radius: 2px;
+    padding: 0 1px;
+  }
+
+  .topbar-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .btn {
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    border-radius: 7px;
+    padding: 7px 11px;
+    font-size: 12.5px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+  }
+  .btn:hover { border-color: var(--muted); }
+
+  /* ---------- Layout ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr 300px;
+    min-height: 0;
+  }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 180px 1fr; }
+    .reading { display: none; }
+    .reading.open {
+      display: block;
+      position: fixed;
+      inset: auto 0 0 0;
+      max-height: 60vh;
+      z-index: 40;
+      border-top: 1px solid var(--line);
+      border-left: none;
+    }
+  }
+
+  /* ---------- Grove rail ---------- */
+  .grove {
+    border-right: 1px solid var(--line);
+    background: var(--surface);
+    overflow-y: auto;
+    padding: 16px 12px;
+  }
+  .grove h2 {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 6px 10px;
+    font-weight: 600;
+  }
+  .grove-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  .grove-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 9px;
+    border: 1px solid transparent;
+    background: none;
+    text-align: left;
+  }
+  .grove-item:hover { background: var(--surface-2); }
+  .grove-item.active {
+    background: var(--topic-soft);
+    border-color: color-mix(in srgb, var(--topic) 35%, transparent);
+  }
+  .grove-ring {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 2.5px solid var(--topic);
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+  .grove-ring::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--topic);
+  }
+  .grove-name {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    line-height: 1.15;
+  }
+  .grove-count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+
+  .legend {
+    margin-top: 18px;
+    padding: 12px 10px 4px;
+    border-top: 1px solid var(--line-soft);
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .legend-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ---------- Canvas ---------- */
+  .canvas-wrap {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 20px 20px, color-mix(in srgb, var(--line-soft) 70%, transparent) 1px, transparent 1.4px) 0 0/28px 28px,
+      var(--bg);
+  }
+  svg.tree { width: 100%; height: 100%; display: block; cursor: grab; }
+  svg.tree:active { cursor: grabbing; }
+
+  .link {
+    fill: none;
+    stroke: var(--line);
+    stroke-width: 1.4px;
+  }
+  .link.q-link { stroke: color-mix(in srgb, var(--question) 45%, var(--line)); }
+  .link.p-link { stroke: color-mix(in srgb, var(--paragraph) 45%, var(--line)); }
+  .link.k-link { stroke: color-mix(in srgb, var(--kick) 45%, var(--line)); }
+
+  .node circle { stroke-width: 2px; }
+  .node.topic circle { fill: var(--topic-soft); stroke: var(--topic); }
+  .node.question circle { fill: var(--question-soft); stroke: var(--question); }
+  .node.paragraph circle { fill: var(--paragraph-soft); stroke: var(--paragraph); }
+  .node.kick circle { fill: var(--kick-soft); stroke: var(--kick); }
+  .node.expandable circle { stroke-dasharray: 2.2 2.2; }
+  .node { cursor: pointer; }
+  .node.kick { cursor: pointer; }
+
+  .node text {
+    font-family: "Work Sans", sans-serif;
+    font-size: 11.5px;
+    fill: var(--ink);
+    paint-order: stroke;
+    stroke: var(--bg);
+    stroke-width: 3px;
+  }
+  .node.topic text {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 15px;
+  }
+  .node.question text { font-weight: 600; font-family: "IBM Plex Mono", monospace; font-size: 11px; }
+  .node.kick text { fill: var(--muted); }
+
+  .node.current circle { stroke-width: 3px; }
+  .node.match circle { filter: drop-shadow(0 0 0 var(--focus)); stroke-width: 3px; }
+
+  .node-badge {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px;
+    fill: var(--surface);
+  }
+
+  .zoom-controls {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 5;
+  }
+  .zbtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1;
+    box-shadow: var(--shadow);
+  }
+
+  .empty-canvas {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  /* ---------- Reading panel ---------- */
+  .reading {
+    border-left: 1px solid var(--line);
+    background: var(--surface);
+    overflow-y: auto;
+    padding: 20px;
+  }
+  .reading-empty {
+    color: var(--muted);
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+  .reading-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 9px 3px 7px;
+    border-radius: 999px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  .reading-chip .dot { width: 7px; height: 7px; border-radius: 50%; }
+  .chip-topic { background: var(--topic-soft); color: var(--topic); }
+  .chip-topic .dot { background: var(--topic); }
+  .chip-question { background: var(--question-soft); color: var(--question); }
+  .chip-question .dot { background: var(--question); }
+  .chip-paragraph { background: var(--paragraph-soft); color: var(--paragraph); }
+  .chip-paragraph .dot { background: var(--paragraph); }
+  .chip-kick { background: var(--kick-soft); color: var(--kick); }
+  .chip-kick .dot { background: var(--kick); }
+
+  .reading-crumb {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    line-height: 1.5;
+  }
+  .reading h3 {
+    font-family: "Fraunces", Georgia, serif;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.35;
+    margin: 0 0 10px;
+    text-wrap: balance;
+  }
+  .reading .full-text {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--ink);
+  }
+  .reading-kicks {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .kick-chip {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: var(--kick-soft);
+    color: var(--kick);
+    border: 1px solid color-mix(in srgb, var(--kick) 30%, transparent);
+  }
+  .reading-close {
+    display: none;
+  }
+  @media (max-width: 900px) {
+    .reading-close {
+      display: inline-flex;
+      float: right;
+      border: none;
+      background: none;
+      color: var(--muted);
+      font-size: 18px;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .node, .link { transition: opacity 180ms ease; }
+  }
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>OPIc Forest</h1>
+      <span class="tag">mindmap</span>
+    </div>
+    <p class="hint">Click a question to branch into its script beats, click a beat for its kick phrases.</p>
+    <div class="searchwrap">
+      <svg class="searchicon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8.5" cy="8.5" r="6"/><line x1="13" y1="13" x2="18" y2="18"/></svg>
+      <input class="searchbox" id="search" type="text" placeholder="Search every topic, question, beat, kick…" autocomplete="off" />
+      <div class="searchresults" id="searchResults"></div>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn" id="expandAll" type="button">Expand tree</button>
+      <button class="btn" id="collapseAll" type="button">Collapse tree</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="grove" aria-label="Topics">
+      <h2>The Grove</h2>
+      <ul class="grove-list" id="groveList"></ul>
+      <div class="legend">
+        <div class="legend-row"><span class="legend-dot" style="background:var(--topic)"></span>Topic</div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--question)"></span>Question</div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--paragraph)"></span>Script beat</div>
+        <div class="legend-row"><span class="legend-dot" style="background:var(--kick)"></span>Kick phrase</div>
+      </div>
+    </nav>
+
+    <main class="canvas-wrap">
+      <svg class="tree" id="tree" role="img" aria-label="Radial mindmap of the selected OPIc topic"></svg>
+      <div class="zoom-controls">
+        <button class="zbtn" id="zoomIn" type="button" aria-label="Zoom in">+</button>
+        <button class="zbtn" id="zoomOut" type="button" aria-label="Zoom out">&minus;</button>
+        <button class="zbtn" id="zoomReset" type="button" aria-label="Reset view">&#8635;</button>
+      </div>
+    </main>
+
+    <aside class="reading" id="reading">
+      <button class="reading-close" id="readingClose" aria-label="Close">&times;</button>
+      <div id="readingBody">
+        <p class="reading-empty">Select any node to read its full text here — the tree only ever shows short labels.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  const FOREST = /*__FOREST_DATA__*/[]/*__END_FOREST_DATA__*/;
+
+  const state = { topicIndex: 0, current: null };
+
+  const groveList = d3.select("#groveList");
+  const svg = d3.select("#tree");
+  const g = svg.append("g").attr("class", "viewport");
+  const linkLayer = g.append("g").attr("class", "links");
+  const nodeLayer = g.append("g").attr("class", "nodes");
+  const readingBody = document.getElementById("readingBody");
+  const reading = document.getElementById("reading");
+
+  const zoom = d3.zoom()
+    .scaleExtent([0.35, 3])
+    .on("zoom", (event) => g.attr("transform", event.transform));
+  svg.call(zoom).on("dblclick.zoom", null);
+
+  function radialPoint(angle, radius) {
+    return [radius * Math.cos(angle - Math.PI / 2), radius * Math.sin(angle - Math.PI / 2)];
+  }
+
+  // ---- prepare per-topic hierarchy with collapse state ----
+  function buildRoot(topicData) {
+    const root = d3.hierarchy(topicData);
+    root.descendants().forEach((d) => (d.id = d.data.id));
+    root.descendants().forEach((d) => {
+      if (d.depth >= 1 && d.children) {
+        d._children = d.children;
+        d.children = null;
+      }
+    });
+    return root;
+  }
+
+  let roots = FOREST.map(buildRoot);
+
+  function renderGrove() {
+    const items = groveList.selectAll("li").data(FOREST, (d) => d.id);
+    const li = items.enter().append("li");
+    const btn = li.append("button").attr("class", "grove-item");
+    btn.append("span").attr("class", "grove-ring");
+    const text = btn.append("span");
+    text.append("span").attr("class", "grove-name").style("display", "block");
+    text.append("span").attr("class", "grove-count").style("display", "block");
+
+    groveList.selectAll(".grove-item")
+      .on("click", (event, d) => {
+        state.topicIndex = FOREST.indexOf(d);
+        setCurrent(null);
+        renderTree(true);
+        renderGrove();
+      })
+      .classed("active", (d, i) => i === state.topicIndex)
+      .select(".grove-ring")
+      .style("border-color", (d, i) => (i === state.topicIndex ? "var(--topic)" : "var(--line)"));
+
+    groveList.selectAll(".grove-name").text((d) => d.name);
+    groveList.selectAll(".grove-count").text((d) => `${d.children.length} questions`);
+  }
+
+  function countKicks(q) {
+    return q.children.reduce((sum, p) => sum + (p.children ? p.children.length : 0), 0);
+  }
+
+  function labelFor(d) {
+    const t = d.data.type;
+    if (t === "topic") return d.data.name.toUpperCase();
+    if (t === "question") return d.data.name;
+    return d.data.name;
+  }
+
+  function crumbFor(d) {
+    const chain = d.ancestors().reverse().map((n) => n.data.name);
+    return chain.join(" ▸ ");
+  }
+
+  function typeLabel(t) {
+    return { topic: "Topic", question: "Question", paragraph: "Script beat", kick: "Kick phrase" }[t];
+  }
+
+  function setCurrent(node) {
+    state.current = node;
+    nodeLayer.selectAll("g.node").classed("current", (d) => node && d.id === node.id);
+    if (!node) {
+      readingBody.innerHTML = '<p class="reading-empty">Select any node to read its full text here — the tree only ever shows short labels.</p>';
+      return;
+    }
+    const t = node.data.type;
+    let html = `<div class="reading-crumb">${crumbFor(node)}</div>`;
+    html += `<div class="reading-chip chip-${t}"><span class="dot"></span>${typeLabel(t)}</div>`;
+    html += `<h3>${escapeHtml(node.data.full || node.data.name)}</h3>`;
+    if (t === "question") {
+      html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
+    }
+    if (t === "paragraph" && node.data.children && node.data.children.length) {
+      html += `<div class="reading-kicks">` + node.data.children.map((k) => `<span class="kick-chip">${escapeHtml(k.name)}</span>`).join("") + `</div>`;
+    }
+    if (t === "topic") {
+      const qCount = node.data.children.length;
+      const pCount = node.data.children.reduce((s, q) => s + q.children.length, 0);
+      html += `<p class="full-text">${qCount} questions, ${pCount} script beats in this tree.</p>`;
+    }
+    readingBody.innerHTML = html;
+    if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  function toggle(d) {
+    if (d.data.type !== "question" && d.data.type !== "paragraph") return;
+    if (d.children) {
+      d._children = d.children;
+      d.children = null;
+    } else if (d._children) {
+      d.children = d._children;
+      d._children = null;
+    }
+    renderTree(false);
+  }
+
+  function renderTree(recenter) {
+    const root = roots[state.topicIndex];
+    const bounds = svg.node().getBoundingClientRect();
+    const radius = Math.max(260, Math.min(bounds.width, bounds.height) / 2 - 40);
+    const step = radius / 3.15;
+
+    const treeLayout = d3.tree()
+      .size([2 * Math.PI, radius])
+      .separation((a, b) => (a.parent === b.parent ? 1 : 1.6) / a.depth);
+
+    treeLayout(root);
+    root.each((d) => (d.y = d.depth * step));
+
+    const nodes = root.descendants();
+    const links = root.links();
+
+    const linkSel = linkLayer.selectAll("path.link").data(links, (d) => d.target.id);
+    linkSel.exit().remove();
+    const linkEnter = linkSel.enter().append("path").attr("class", (d) => `link ${d.target.data.type[0]}-link`);
+    linkEnter.merge(linkSel)
+      .attr("class", (d) => `link ${d.target.data.type[0]}-link`)
+      .attr("d", d3.linkRadial().angle((d) => d.x).radius((d) => d.y));
+
+    const nodeSel = nodeLayer.selectAll("g.node").data(nodes, (d) => d.id);
+    nodeSel.exit().remove();
+
+    const nodeEnter = nodeSel.enter().append("g").attr("class", (d) => `node ${d.data.type}`);
+    nodeEnter.append("circle");
+    nodeEnter.append("text");
+
+    const nodeMerge = nodeEnter.merge(nodeSel);
+    nodeMerge.attr("class", (d) => {
+      const cls = ["node", d.data.type];
+      if (d.data.type === "question" || d.data.type === "paragraph") cls.push("expandable");
+      return cls.join(" ");
+    });
+    nodeMerge.attr("transform", (d) => {
+      const [x, y] = radialPoint(d.x, d.y);
+      return `translate(${x},${y})`;
+    });
+    const R = { topic: 26, question: 13, paragraph: 9.5, kick: 6.5 };
+    nodeMerge.select("circle").attr("r", (d) => R[d.data.type]);
+    nodeMerge.select("text")
+      .attr("dy", "0.32em")
+      .attr("x", (d) => (d.depth === 0 ? 0 : (d.x < Math.PI ? 1 : -1) * (R[d.data.type] + 7)))
+      .attr("text-anchor", (d) => (d.depth === 0 ? "middle" : d.x < Math.PI ? "start" : "end"))
+      .attr("transform", (d) => (d.depth === 0 ? null : `rotate(${(d.x < Math.PI ? d.x - Math.PI / 2 : d.x + Math.PI / 2) * (180 / Math.PI)})`))
+      .text((d) => truncateLabel(labelFor(d), d.data.type));
+
+    nodeMerge
+      .style("cursor", (d) => (d.data.type === "topic" ? "default" : "pointer"))
+      .attr("tabindex", (d) => (d.data.type === "topic" ? null : 0))
+      .attr("role", (d) => (d.data.type === "topic" ? null : "button"))
+      .on("click", (event, d) => {
+        event.stopPropagation();
+        setCurrent(d);
+        toggle(d);
+      })
+      .on("keydown", (event, d) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          setCurrent(d);
+          toggle(d);
+        }
+      });
+
+    nodeMerge.classed("current", (d) => state.current && d.id === state.current.id);
+    nodeMerge.classed("match", (d) => matchSet.has(d.id));
+
+    if (recenter) {
+      const t = d3.zoomIdentity.translate(bounds.width / 2, bounds.height / 2).scale(0.82);
+      svg.call(zoom.transform, t);
+    }
+  }
+
+  function truncateLabel(label, type) {
+    const max = type === "topic" ? 16 : type === "question" ? 6 : 30;
+    if (type === "question") return label;
+    if (label.length > max) return label.slice(0, max - 1).trimEnd() + "…";
+    return label;
+  }
+
+  // ---- expand / collapse all (within current topic) ----
+  document.getElementById("expandAll").addEventListener("click", () => {
+    roots[state.topicIndex].each((d) => {
+      if (d._children) {
+        d.children = d._children;
+        d._children = null;
+      }
+    });
+    renderTree(false);
+  });
+  document.getElementById("collapseAll").addEventListener("click", () => {
+    roots[state.topicIndex].descendants().forEach((d) => {
+      if (d.depth >= 1 && d.children) {
+        d._children = d.children;
+        d.children = null;
+      }
+    });
+    renderTree(false);
+  });
+
+  // ---- zoom controls ----
+  document.getElementById("zoomIn").addEventListener("click", () => svg.transition().duration(200).call(zoom.scaleBy, 1.3));
+  document.getElementById("zoomOut").addEventListener("click", () => svg.transition().duration(200).call(zoom.scaleBy, 1 / 1.3));
+  document.getElementById("zoomReset").addEventListener("click", () => renderTree(true));
+
+  document.getElementById("readingClose").addEventListener("click", () => reading.classList.remove("open"));
+
+  // ---- search across the whole forest ----
+  let matchSet = new Set();
+  const searchInput = document.getElementById("search");
+  const searchResults = document.getElementById("searchResults");
+
+  function flattenAll(topic) {
+    const out = [];
+    function walk(node, topicNode) {
+      out.push({ node, topic: topicNode });
+      (node.children || []).forEach((c) => walk(c, topicNode));
+    }
+    walk(topic, topic);
+    return out;
+  }
+  const ALL_NODES = FOREST.flatMap((t) => flattenAll(t));
+
+  function highlight(text, q) {
+    const idx = text.toLowerCase().indexOf(q.toLowerCase());
+    if (idx === -1) return escapeHtml(text);
+    return (
+      escapeHtml(text.slice(0, idx)) +
+      "<mark>" + escapeHtml(text.slice(idx, idx + q.length)) + "</mark>" +
+      escapeHtml(text.slice(idx + q.length))
+    );
+  }
+
+  searchInput.addEventListener("input", () => {
+    const q = searchInput.value.trim();
+    matchSet = new Set();
+    if (q.length < 2) {
+      searchResults.classList.remove("open");
+      renderTree(false);
+      return;
+    }
+    const ql = q.toLowerCase();
+    const hits = ALL_NODES.filter(({ node }) => {
+      const hay = `${node.name} ${node.full || ""}`.toLowerCase();
+      return hay.includes(ql);
+    }).slice(0, 24);
+
+    hits.forEach(({ node }) => matchSet.add(node.id));
+
+    searchResults.innerHTML = hits.length
+      ? hits.map(({ node, topic }) => `
+          <button class="sr-item" data-topic="${topic.id}" data-node="${node.id}">
+            <span class="sr-topic">${escapeHtml(topic.name)} · ${typeLabel(node.type)}</span>
+            <span class="sr-snippet">${highlight(node.full || node.name, q)}</span>
+          </button>`).join("")
+      : `<p class="sr-empty">No matches across any topic.</p>`;
+    searchResults.classList.add("open");
+
+    renderTree(false);
+  });
+
+  // finds a node anywhere in the hierarchy (visible or collapsed) and expands
+  // every ancestor on the path down to it
+  function findAndReveal(root, id) {
+    let target = null;
+    (function walk(node) {
+      if (node.id === id) {
+        target = node;
+        return true;
+      }
+      const kids = node.children || node._children;
+      if (!kids) return false;
+      for (const kid of kids) {
+        if (walk(kid)) {
+          if (node._children && !node.children) {
+            node.children = node._children;
+            node._children = null;
+          }
+          return true;
+        }
+      }
+      return false;
+    })(root);
+    return target;
+  }
+
+  function focusOnNode(id) {
+    const root = roots[state.topicIndex];
+    let target = null;
+    (function walk(n) {
+      if (n.id === id) target = n;
+      (n.children || []).forEach(walk);
+    })(root);
+    if (!target) return;
+    const bounds = svg.node().getBoundingClientRect();
+    const [x, y] = radialPoint(target.x, target.y);
+    const scale = 1.05;
+    const t = d3.zoomIdentity.translate(bounds.width / 2 - x * scale, bounds.height / 2 - y * scale).scale(scale);
+    svg.transition().duration(500).call(zoom.transform, t);
+    setCurrent(target);
+  }
+
+  searchResults.addEventListener("click", (e) => {
+    const btn = e.target.closest(".sr-item");
+    if (!btn) return;
+    const topicId = btn.dataset.topic;
+    const nodeId = btn.dataset.node;
+    const topicIdx = FOREST.findIndex((t) => t.id === topicId);
+    if (topicIdx !== state.topicIndex) {
+      state.topicIndex = topicIdx;
+      renderGrove();
+    }
+    findAndReveal(roots[topicIdx], nodeId);
+    renderTree(false);
+    focusOnNode(nodeId);
+    searchResults.classList.remove("open");
+    searchInput.blur();
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".searchwrap")) searchResults.classList.remove("open");
+  });
+
+  window.addEventListener("resize", () => renderTree(false));
+
+  renderGrove();
+  renderTree(true);
+</script>
