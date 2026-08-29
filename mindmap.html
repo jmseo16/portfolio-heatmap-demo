@@ -1914,15 +1914,25 @@
     } catch (e) {}
     if (saved) root.style.setProperty("--reading-w", clamp(parseInt(saved, 10) || 300) + "px");
 
+    // pointermove/pointerup are bound to window, not the (6px-wide) handle
+    // itself: setPointerCapture is supposed to keep them firing on handle
+    // as the finger/cursor travels off it, but that didn't hold up on at
+    // least one tablet browser — the drag would go dead the instant the
+    // touch point left the thin strip. Listening on window sidesteps
+    // needing capture to work at all; the `dragging` flag is the only
+    // gate we actually rely on.
     let dragging = false;
     handle.addEventListener("pointerdown", (event) => {
       dragging = true;
-      handle.setPointerCapture(event.pointerId);
+      try {
+        handle.setPointerCapture(event.pointerId);
+      } catch (e) {}
       handle.classList.add("dragging");
       document.body.style.cursor = "col-resize";
       document.body.style.userSelect = "none";
+      event.preventDefault();
     });
-    handle.addEventListener("pointermove", (event) => {
+    window.addEventListener("pointermove", (event) => {
       if (!dragging) return;
       root.style.setProperty("--reading-w", clamp(window.innerWidth - event.clientX) + "px");
     });
@@ -1937,8 +1947,8 @@
         if (current) localStorage.setItem("opic-reading-width", String(current));
       } catch (e) {}
     }
-    handle.addEventListener("pointerup", stopDrag);
-    handle.addEventListener("pointercancel", stopDrag);
+    window.addEventListener("pointerup", stopDrag);
+    window.addEventListener("pointercancel", stopDrag);
 
     window.addEventListener("resize", () => {
       const current = parseInt(getComputedStyle(root).getPropertyValue("--reading-w"), 10);
