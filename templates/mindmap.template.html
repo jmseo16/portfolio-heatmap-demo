@@ -998,8 +998,8 @@
       html += `<button type="button" class="practice-reset" id="practiceReset"${practiceCount ? "" : " hidden"}>↺ Reset</button>`;
       html += `</div></div>`;
       html += `<p class="practice-count-display" id="practiceCountDisplay">take#${practiceCount}</p>`;
-      html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += allKicksHtml(node.data);
+      html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
       html += `<div class="script-head"><span class="script-label">Your script</span><div class="script-actions">`;
       html += `<button type="button" class="script-load">⬆ Load file</button>`;
