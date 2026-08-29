@@ -21,6 +21,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from parse_docs import load_doc_scripts  # noqa: E402
 
 # Korean delivery/tone cues that have shown up in the sheet, mapped to their
 # English equivalent. Add to this dict if new Korean notes appear later.
@@ -169,7 +171,8 @@ TOPIC_SCRIPT_URLS = {
 }
 
 
-def to_forest(topics):
+def to_forest(topics, doc_scripts=None):
+    doc_scripts = doc_scripts or {}
     forest = []
     for ti, t in enumerate(topics):
         topic_node = {
@@ -185,7 +188,15 @@ def to_forest(topics):
             tag = m.group(1) if m else f"Q{qi + 1}"
             qtext = (m.group(2) if m else q["text"]).strip()
             q_label = QUESTION_LABELS.get(tag, tag)
-            q_node = {"id": f"t{ti}-q{qi}", "name": q_label, "tag": tag, "type": "question", "full": qtext, "children": []}
+            q_node = {
+                "id": f"t{ti}-q{qi}",
+                "name": q_label,
+                "tag": tag,
+                "type": "question",
+                "full": qtext,
+                "script": doc_scripts.get(tag, ""),
+                "children": [],
+            }
             for pi, p in enumerate(q["paragraphs"]):
                 ptext = p["text"].strip()
                 if not ptext and not p["kick"].strip():
@@ -214,7 +225,15 @@ def main():
     out = Path(sys.argv[2]) if len(sys.argv) > 2 else ROOT / "data" / "forest.json"
 
     topics = parse_csv(src)
-    forest = to_forest(topics)
+    doc_scripts = load_doc_scripts()
+    forest = to_forest(topics, doc_scripts)
+
+    missing_scripts = [
+        q["tag"] for t in forest for q in t["children"] if not q.get("script")
+    ]
+    if missing_scripts:
+        print(f"warning: no doc script found for tags: {missing_scripts}", file=sys.stderr)
+        print("add the topic's Google Doc under data/docs/ and re-run.", file=sys.stderr)
 
     remaining = {ch for t in forest for ch in json.dumps(t, ensure_ascii=False) if KOREAN.match(ch)}
     if remaining:

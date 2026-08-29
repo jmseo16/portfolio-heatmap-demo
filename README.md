@@ -6,8 +6,8 @@ script spreadsheet becomes its own tree in a small "forest": topic → question
 topic in the middle, questions fanning left/right) so you can drill from a
 bare topic name down to the exact phrase you rehearsed.
 
-Tap empty canvas to hide the top bar and topic list for a fullscreen view;
-tap again (or Esc) to bring them back.
+Use the **Fullscreen** button (top-left of the canvas) to hide the top bar
+and topic list; press it again (or Esc) to bring them back.
 
 Open **`mindmap.html`** directly in a browser — it's a single self-contained
 file (D3 + inlined data, loaded from the CDN allow-list), no build step or
@@ -31,6 +31,25 @@ Click a question to reveal its beats; click a beat to reveal its kicks;
 click again to collapse. A search box in the top bar matches across every
 topic at once (question text, beat text, kick phrases) and jumps + expands
 the tree to the result.
+
+Clicking a question also opens **"Your script"**: an editable text box
+seeded with that question's full, polished answer, copied verbatim from
+the topic's own Google Doc (the same doc the topic node's "Show script"
+button links to) and matched by question tag — not a stitching of the
+sheet's short per-beat text. Edits autosave to the browser (`localStorage`),
+but since that's a per-browser convenience rather than a durable save,
+the box also has:
+
+- **Save as .txt** — downloads the current box content as a standalone
+  text file (`opic-<tag>-<slug>.txt`).
+- **Load file** — reads a `.txt`/`.csv` file back into the box, replacing
+  its content (and re-saving to `localStorage`).
+- **Reset to original** — discards the local edit and restores the Doc's
+  original text.
+
+Handing a downloaded `.txt` back to Claude is the intended way to get an
+edited practice script folded back into the *original* Google Doc — Claude
+can read the file and apply the edit there directly.
 
 ## Updating after you edit the spreadsheet
 
@@ -61,6 +80,35 @@ touching `mindmap.html` directly.
 4. Commit the changed `data/opic-source.csv`, `data/forest.json`, and
    `mindmap.html`.
 
+## Updating after you edit a topic's script Doc
+
+Each question's editable "Your script" box (see above) is sourced from
+`data/docs/<n>-<slug>.txt` — a plain-text export of that topic's Google
+Doc — not from the spreadsheet. These are a second, separate source of
+truth from `data/opic-source.csv`, so they need their own re-export when
+a Doc's *wording* changes (fixing a typo in the sheet doesn't touch these).
+
+1. **Export the Doc.** In Google Docs: File → Download → Plain text
+   (`.txt`), and save it over the matching `data/docs/<n>-<slug>.txt`
+   (same filename, so `scripts/parse_docs.py` still finds it).
+2. **Re-parse and rebuild.** `python3 scripts/parse_source.py && python3
+   scripts/build.py` — `parse_source.py` calls into `scripts/parse_docs.py`
+   to re-extract each question's script (keyed by its tag, e.g. `"1-1"`)
+   from every file in `data/docs/`, folds it into `data/forest.json` as
+   that question node's `script` field, then `build.py` re-injects it into
+   `mindmap.html`. If a question's tag can't be found in any doc,
+   `parse_source.py` prints a warning naming it — that question's script
+   box falls back to stitching the sheet's own beat text until fixed.
+3. Commit the changed `data/docs/*.txt`, `data/forest.json`, and
+   `mindmap.html`.
+
+Doc formatting is inconsistent from one topic to the next (missing periods
+after a tag, stray Korean planning notes, an extra numbered list spliced
+into the Trip doc, etc.) — `scripts/parse_docs.py` documents each quirk
+it works around inline. If a *new* Doc introduces a new quirk, the parser
+will either mis-split it or silently swallow a line; spot-check the
+printed preview (`python3 scripts/parse_docs.py`) after any re-export.
+
 No Node/npm install needed for this — both scripts are plain Python 3
 (standard library only) and `mindmap.html` runs entirely in the browser.
 
@@ -78,9 +126,11 @@ a different default-expanded state, or a layout change.
 
 ```
 data/opic-source.csv          the sheet, exported as CSV (source of truth)
+data/docs/*.txt               each topic's Google Doc, exported as plain text
 data/forest.json              parsed topic → question → beat → kick tree
 templates/mindmap.template.html  page template with a data placeholder
-scripts/parse_source.py       CSV -> data/forest.json
+scripts/parse_docs.py         data/docs/*.txt -> {tag: script text}
+scripts/parse_source.py       CSV + parse_docs -> data/forest.json
 scripts/build.py              data/forest.json + template -> mindmap.html
 mindmap.html                  the built, self-contained page
 ```

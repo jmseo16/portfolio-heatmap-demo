@@ -556,15 +556,29 @@
     letter-spacing: 0.06em;
     color: var(--muted);
   }
-  .script-reset {
+  .script-actions {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .script-reset, .script-download, .script-load {
     border: none;
     background: none;
     padding: 2px 4px;
     color: var(--paragraph);
     font-size: 11.5px;
     font-weight: 500;
+    cursor: pointer;
   }
-  .script-reset:hover { text-decoration: underline; }
+  .script-reset:hover, .script-download:hover, .script-load:hover { text-decoration: underline; }
+  .script-file-input { display: none; }
+  .script-status {
+    display: block;
+    min-height: 14px;
+    margin-top: 4px;
+    font-size: 11px;
+    color: var(--muted);
+  }
   .script-box {
     width: 100%;
     min-height: 220px;
@@ -771,8 +785,14 @@
     html += `<h3>${escapeHtml(node.data.full || node.data.name)}</h3>`;
     if (t === "question") {
       html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
-      html += `<div class="script-head"><span class="script-label">Your script</span><button type="button" class="script-reset">↺ Reset to original</button></div>`;
+      html += `<div class="script-head"><span class="script-label">Your script</span><div class="script-actions">`;
+      html += `<button type="button" class="script-load">⬆ Load file</button>`;
+      html += `<button type="button" class="script-download">⬇ Save as .txt</button>`;
+      html += `<button type="button" class="script-reset">↺ Reset to original</button>`;
+      html += `</div></div>`;
       html += `<textarea class="script-box" spellcheck="false" aria-label="Editable script for this question"></textarea>`;
+      html += `<span class="script-status"></span>`;
+      html += `<input type="file" class="script-file-input" accept=".txt,.csv,text/plain,text/csv" aria-hidden="true" tabindex="-1">`;
     }
     if (t === "paragraph" && node.data.children && node.data.children.length) {
       html += `<div class="reading-kicks">` + node.data.children.map((k) => `<span class="kick-chip">${escapeHtml(k.name)}</span>`).join("") + `</div>`;
@@ -791,17 +811,47 @@
   }
 
   // the editable per-question script box: defaults to that question's
-  // script beats (column C, in order) stitched into one script, but a
-  // viewer's own edits persist in this browser (localStorage) so the same
-  // box comes back edited next time they open this question, until they
-  // reset it
+  // polished script, copied verbatim from the original Google Doc (the
+  // same doc the topic's "Show script" button opens) and keyed by
+  // question tag — NOT a stitching of the CSV's short script-beat labels.
+  // A viewer's own edits persist in this browser (localStorage) so the
+  // same box comes back edited next time they open this question, until
+  // they reset it. localStorage is a convenience only, though — it can be
+  // cleared or unavailable — so the box also offers a real file round
+  // trip: "Save as .txt" downloads the current text, and "Load file" reads
+  // a .txt/.csv back in, so edits can be handed back for the source Doc
+  // to be updated from.
   function defaultScriptFor(node) {
+    if (node.data.script) return node.data.script;
+    // fallback for a question whose Doc script hasn't been parsed yet:
+    // stitch the CSV's own script-beat text together instead of leaving
+    // the box empty.
     return (node.data.children || []).map((p) => p.full).join("\n\n");
+  }
+
+  function scriptFilename(node) {
+    const tag = node.data.tag || node.id;
+    const slug = (node.data.name || "question").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    return `opic-${tag}-${slug || "script"}.txt`;
+  }
+
+  function showScriptStatus(el, text, isError) {
+    if (!el) return;
+    el.textContent = text;
+    el.style.color = isError ? "var(--kick)" : "var(--muted)";
+    window.clearTimeout(el._fadeTimer);
+    el._fadeTimer = window.setTimeout(() => {
+      el.textContent = "";
+    }, 3200);
   }
 
   function wireScriptBox(node) {
     const box = readingBody.querySelector(".script-box");
     const resetBtn = readingBody.querySelector(".script-reset");
+    const downloadBtn = readingBody.querySelector(".script-download");
+    const loadBtn = readingBody.querySelector(".script-load");
+    const fileInput = readingBody.querySelector(".script-file-input");
+    const status = readingBody.querySelector(".script-status");
     if (!box) return;
     const key = `opic-script:${node.id}`;
     const original = defaultScriptFor(node);
@@ -824,7 +874,54 @@
         localStorage.removeItem(key);
       } catch (e) {}
       box.focus();
+      showScriptStatus(status, "Reset to the original script.");
     });
+
+    if (downloadBtn) {
+      downloadBtn.addEventListener("click", async () => {
+        if (!window.claude || typeof window.claude.use !== "function") {
+          showScriptStatus(status, "Downloads aren't available in this view.", true);
+          return;
+        }
+        try {
+          const downloads = await window.claude.use("downloads");
+          if (!downloads) {
+            showScriptStatus(status, "Downloads aren't available in this view.", true);
+            return;
+          }
+          await downloads.save({ filename: scriptFilename(node), data: box.value });
+          showScriptStatus(status, "Saved.");
+        } catch (err) {
+          const code = err && err.code;
+          if (code === "declined") {
+            showScriptStatus(status, "Download declined.");
+          } else if (code === "rate_limited") {
+            showScriptStatus(status, "Try again in a moment.", true);
+          } else {
+            showScriptStatus(status, "Couldn't save the file.", true);
+          }
+        }
+      });
+    }
+
+    if (loadBtn && fileInput) {
+      loadBtn.addEventListener("click", () => fileInput.click());
+      fileInput.addEventListener("change", () => {
+        const file = fileInput.files && fileInput.files[0];
+        fileInput.value = "";
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          box.value = String(reader.result || "");
+          try {
+            localStorage.setItem(key, box.value);
+          } catch (e) {}
+          showScriptStatus(status, `Loaded ${file.name}.`);
+        };
+        reader.onerror = () => showScriptStatus(status, "Couldn't read that file.", true);
+        reader.readAsText(file);
+      });
+    }
   }
 
   function escapeHtml(s) {
