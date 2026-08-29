@@ -32,10 +32,19 @@ click again to collapse. A search box in the top bar matches across every
 topic at once (question text, beat text, kick phrases) and jumps + expands
 the tree to the result.
 
-Clicking a question shows a **"Kick phrases to use"** list right away —
-every beat's kick phrases for that question, grouped by beat, never
-hidden — so you can read the question and answer it out loud using just
-those phrases as cues, the way you'd actually rehearse for the test.
+Clicking a question also shows its **practice count** — how many times
+you've logged rehearsing it — right under the hint text: "take#5" in the
+panel, "+ Log a practice" to bump it, "↺ Reset" to clear it back to 0. The
+same count shows on the question's node in the tree itself, as a small
+"take#N" chip on its top-left corner (once it's been logged at least
+once) — deliberately not the same spot as the tree's own branch-count
+badge, which sits centered on the pill's outward side edge, so the two
+never collide.
+
+Below that is a **"Kick phrases to use"** list, shown right away — every
+beat's kick phrases for that question, grouped by beat, never hidden — so
+you can read the question and answer it out loud using just those
+phrases as cues, the way you'd actually rehearse for the test.
 
 Below that sits **"Your script"**: an editable text box seeded with that
 question's full, polished answer, copied verbatim from the topic's own
@@ -68,6 +77,9 @@ just one) in a single `.txt` file, each question under its own
 `===== tag | topic | question =====` heading — export it, edit as many
 answers as you like, and either load it back into the page or hand the
 whole file to Claude to fold every edit back into its source Doc at once.
+Each question's block also carries a `[practice]` section with its
+current practice count, so the bulk file round-trips take-counts too, not
+just scripts and kicks.
 
 Clicking a script beat (a "(intro)"/"(body N)"/"(closing)" node) opens the
 same kind of editor for its **kick phrases**: add one, edit one in place,

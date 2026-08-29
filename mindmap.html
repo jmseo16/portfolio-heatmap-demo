@@ -474,6 +474,18 @@
     fill: var(--ink);
   }
 
+  /* how many times a question has been practiced — a small corner chip
+     straddling the pill's top-left corner, deliberately not the branch-
+     count badge's spot (that one sits centered on the pill's outward
+     edge, left or right depending on which side of the topic it's on) */
+  .node .take-badge rect { fill: var(--kick-soft); stroke: var(--kick); stroke-width: 1px; }
+  .node .take-badge text {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9px;
+    font-weight: 600;
+    fill: var(--kick);
+  }
+
   .zoom-controls {
     position: absolute;
     right: 16px;
@@ -677,7 +689,7 @@
   }
   .script-toggle:hover { opacity: 0.9; }
 
-  .script-head {
+  .script-head, .practice-head {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
@@ -685,6 +697,23 @@
     margin-bottom: 6px;
   }
   .script-panel .script-head { margin-top: 10px; }
+  .practice-count-display {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--kick);
+    margin: 0;
+  }
+  .practice-log, .practice-reset {
+    border: none;
+    background: none;
+    padding: 2px 4px;
+    color: var(--paragraph);
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .practice-log:hover, .practice-reset:hover { text-decoration: underline; }
   .script-label {
     font-family: "IBM Plex Mono", monospace;
     font-size: 10.5px;
@@ -963,6 +992,12 @@
     html += `<h3>${escapeHtml(node.data.full || node.data.name)}</h3>`;
     if (t === "question") {
       html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
+      const practiceCount = getPracticeCount(node.data.id);
+      html += `<div class="practice-head"><span class="script-label">Practice count</span><div class="script-actions">`;
+      html += `<button type="button" class="practice-log" id="practiceLog">+ Log a practice</button>`;
+      html += `<button type="button" class="practice-reset" id="practiceReset"${practiceCount ? "" : " hidden"}>↺ Reset</button>`;
+      html += `</div></div>`;
+      html += `<p class="practice-count-display" id="practiceCountDisplay">take#${practiceCount}</p>`;
       html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += allKicksHtml(node.data);
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
@@ -1005,6 +1040,25 @@
           toggleBtn.setAttribute("aria-expanded", String(!nowHidden));
         });
       }
+
+      const logBtn = readingBody.querySelector("#practiceLog");
+      const resetBtn = readingBody.querySelector("#practiceReset");
+      const display = readingBody.querySelector("#practiceCountDisplay");
+      function refreshPracticeUI(count) {
+        display.textContent = `take#${count}`;
+        resetBtn.hidden = count === 0;
+        renderTree(false); // updates the corner chip on this question's pill
+      }
+      if (logBtn) {
+        logBtn.addEventListener("click", () => {
+          refreshPracticeUI(setPracticeCount(node.id, getPracticeCount(node.id) + 1));
+        });
+      }
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          refreshPracticeUI(setPracticeCount(node.id, 0));
+        });
+      }
     }
     if (t === "paragraph") wireKickEditor(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
@@ -1044,6 +1098,32 @@
       saved = localStorage.getItem(`opic-script:${q.id}`);
     } catch (e) {}
     return saved !== null ? saved : scriptTextFor(q);
+  }
+
+  // ---- practice-count tracking: how many times a question's been
+  // rehearsed. Just a number in localStorage, keyed by question id — no
+  // pristine "original" to reset to (unlike scripts/kicks, there's no
+  // Doc/CSV source for this), so 0 both means "never logged" and "reset". ----
+  function practiceKey(questionId) {
+    return `opic-practice:${questionId}`;
+  }
+
+  function getPracticeCount(questionId) {
+    let raw = null;
+    try {
+      raw = localStorage.getItem(practiceKey(questionId));
+    } catch (e) {}
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) && n > 0 ? n : 0;
+  }
+
+  function setPracticeCount(questionId, n) {
+    const clamped = Math.max(0, Math.floor(n) || 0);
+    try {
+      if (clamped > 0) localStorage.setItem(practiceKey(questionId), String(clamped));
+      else localStorage.removeItem(practiceKey(questionId));
+    } catch (e) {}
+    return clamped;
   }
 
   // ---- kick-phrase editing: same localStorage-override pattern as the
@@ -1450,6 +1530,7 @@
     nodeEnter.append("rect").attr("class", "pill");
     nodeEnter.append("text");
     nodeEnter.append("g").attr("class", "badge");
+    nodeEnter.append("g").attr("class", "take-badge");
 
     const nodeMerge = nodeEnter.merge(nodeSel);
     nodeMerge.attr("class", (d) => `node ${d.master.data.type}`);
@@ -1528,6 +1609,25 @@
         badge.append("text").attr("dy", "0.32em").attr("text-anchor", "middle").text(collapsedCount);
       } else {
         badge.style("display", "none");
+      }
+
+      // practice-count corner chip (questions only) — straddles the pill's
+      // top-left corner so it never lands on the branch-count badge above,
+      // which sits centered on the pill's outward side edge instead.
+      const takeBadge = d3.select(this).select("g.take-badge");
+      takeBadge.selectAll("*").remove();
+      const practiceCount = type === "question" ? getPracticeCount(d.master.data.id) : 0;
+      if (practiceCount > 0) {
+        takeBadge.attr("transform", `translate(${-d.pillW / 2},${-d.pillH / 2})`).style("display", null);
+        const label = `take#${practiceCount}`;
+        const t = takeBadge.append("text").attr("text-anchor", "middle").attr("dy", "0.32em").text(label);
+        const bbox = t.node().getBBox();
+        const padX = 5, padY = 3;
+        const w = bbox.width + padX * 2;
+        const h = bbox.height + padY * 2;
+        takeBadge.insert("rect", "text").attr("x", -w / 2).attr("y", -h / 2).attr("width", w).attr("height", h).attr("rx", h / 2);
+      } else {
+        takeBadge.style("display", "none");
       }
     });
 
@@ -1634,6 +1734,7 @@
   // phrases, tagged with that beat's id in brackets so an edit still finds
   // its way back even if the label text or line order changes. ----
   const ALL_SCRIPTS_HEADING_RE = /^===== (\S+) \|/;
+  const PRACTICE_MARKER = "[practice]";
   const KICKS_MARKER = "[kicks]";
   const KICK_LINE_RE = /^.*\[([\w-]+)\]:\s*(.*)$/;
 
@@ -1649,6 +1750,9 @@
     questionIndex.forEach((e) => {
       lines.push(`===== ${e.tag} | ${e.topic} | ${e.question} =====`);
       lines.push(effectiveScriptFor(e.node));
+      lines.push("");
+      lines.push(PRACTICE_MARKER);
+      lines.push(String(getPracticeCount(e.id)));
       lines.push("");
       lines.push(KICKS_MARKER);
       (e.node.children || []).forEach((p) => {
@@ -1680,9 +1784,18 @@
     flush();
 
     return rawEntries.map(({ tag, raw }) => {
-      const markerIdx = raw.indexOf(KICKS_MARKER);
-      const scriptPart = markerIdx === -1 ? raw : raw.slice(0, markerIdx);
-      const kicksPart = markerIdx === -1 ? "" : raw.slice(markerIdx + KICKS_MARKER.length);
+      const kicksIdx = raw.indexOf(KICKS_MARKER);
+      const beforeKicks = kicksIdx === -1 ? raw : raw.slice(0, kicksIdx);
+      const kicksPart = kicksIdx === -1 ? "" : raw.slice(kicksIdx + KICKS_MARKER.length);
+
+      const practiceIdx = beforeKicks.indexOf(PRACTICE_MARKER);
+      const scriptPart = practiceIdx === -1 ? beforeKicks : beforeKicks.slice(0, practiceIdx);
+      const practicePart = practiceIdx === -1 ? "" : beforeKicks.slice(practiceIdx + PRACTICE_MARKER.length);
+      // null (not undefined) means "this file predates the [practice]
+      // marker" — leave the existing count alone rather than reset it to 0.
+      const practiceMatch = practicePart.match(/-?\d+/);
+      const practiceCount = practiceMatch ? Math.max(0, parseInt(practiceMatch[0], 10)) : null;
+
       const kickEntries = [];
       kicksPart.split("\n").forEach((line) => {
         const km = KICK_LINE_RE.exec(line.trim());
@@ -1690,15 +1803,16 @@
           kickEntries.push({ id: km[1], kicks: km[2].split(";").map((s) => s.trim()).filter((s) => s.length) });
         }
       });
-      return { tag, body: scriptPart.trim(), kickEntries };
+      return { tag, body: scriptPart.trim(), practiceCount, kickEntries };
     });
   }
 
   function applyImportedScripts(entries) {
     let applied = 0;
     let kicksApplied = 0;
+    let practiceApplied = 0;
     const unknown = [];
-    entries.forEach(({ tag, body, kickEntries }) => {
+    entries.forEach(({ tag, body, practiceCount, kickEntries }) => {
       const e = questionByTag[tag];
       if (!e) {
         unknown.push(tag);
@@ -1708,9 +1822,19 @@
         localStorage.setItem(`opic-script:${e.id}`, body);
       } catch (err) {}
       applied++;
+      if (practiceCount !== null) {
+        setPracticeCount(e.id, practiceCount);
+        practiceApplied++;
+      }
       if (state.current && state.current.data && state.current.data.id === e.id) {
         const box = readingBody.querySelector(".script-box");
         if (box) box.value = body;
+        const display = readingBody.querySelector("#practiceCountDisplay");
+        const resetBtn = readingBody.querySelector("#practiceReset");
+        if (display && practiceCount !== null) {
+          display.textContent = `take#${practiceCount}`;
+          if (resetBtn) resetBtn.hidden = practiceCount === 0;
+        }
       }
 
       (kickEntries || []).forEach(({ id: pid, kicks }) => {
@@ -1732,8 +1856,12 @@
       roots = FOREST.map(buildRoot);
       setCurrent(null);
       renderTree(true);
+    } else if (practiceApplied) {
+      // no hierarchy change needed for a practice-count-only import — just
+      // redraw so every question's corner chip picks up its new count.
+      renderTree(false);
     }
-    return { applied, unknown, kicksApplied };
+    return { applied, unknown, kicksApplied, practiceApplied };
   }
 
   const topbarStatus = document.getElementById("topbarStatus");
@@ -1756,9 +1884,14 @@
     const reader = new FileReader();
     reader.onload = () => {
       const entries = parseAllScriptsText(String(reader.result || ""));
-      const { applied, unknown, kicksApplied } = applyImportedScripts(entries);
+      const { applied, unknown, kicksApplied, practiceApplied } = applyImportedScripts(entries);
       let msg = applied ? `Imported ${applied} script${applied === 1 ? "" : "s"}` : "No matching questions found in that file.";
-      if (applied) msg += kicksApplied ? ` and ${kicksApplied} beats' kick phrases.` : ".";
+      if (applied) {
+        const extras = [];
+        if (practiceApplied) extras.push(`${practiceApplied} practice count${practiceApplied === 1 ? "" : "s"}`);
+        if (kicksApplied) extras.push(`${kicksApplied} beats' kick phrases`);
+        msg += extras.length ? ` and ${extras.join(", ")}.` : ".";
+      }
       if (unknown.length) msg += ` ${unknown.length} unrecognized tag${unknown.length === 1 ? "" : "s"} skipped.`;
       showScriptStatus(topbarStatus, msg, applied === 0);
     };
