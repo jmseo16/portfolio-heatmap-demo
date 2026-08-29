@@ -85,6 +85,7 @@
   a { color: inherit; }
   button {
     font-family: inherit;
+    color: inherit;
     cursor: pointer;
   }
   :focus-visible {
@@ -233,6 +234,11 @@
     white-space: nowrap;
   }
   .btn:hover { border-color: var(--muted); }
+  .btn[aria-pressed="true"] {
+    background: var(--question-soft);
+    border-color: color-mix(in srgb, var(--question) 45%, transparent);
+    color: var(--question);
+  }
   .topbar-status {
     font-size: 11px;
     color: var(--muted);
@@ -392,6 +398,7 @@
     font-weight: 600;
     font-size: 14.5px;
     line-height: 1.15;
+    color: var(--ink);
   }
   .grove-count {
     font-family: "IBM Plex Mono", monospace;
@@ -634,6 +641,20 @@
     font-weight: 600;
     text-decoration: none;
   }
+  .script-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--question);
+    color: var(--surface);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+  }
+  .script-toggle:hover { opacity: 0.9; }
 
   .script-head {
     display: flex;
@@ -642,6 +663,7 @@
     margin-top: 16px;
     margin-bottom: 6px;
   }
+  .script-panel .script-head { margin-top: 10px; }
   .script-label {
     font-family: "IBM Plex Mono", monospace;
     font-size: 10.5px;
@@ -721,6 +743,7 @@
     <div class="topbar-actions">
       <button class="btn" id="expandAll" type="button">Expand tree</button>
       <button class="btn" id="collapseAll" type="button">Collapse tree</button>
+      <button class="btn" id="scriptsVisibleToggle" type="button" aria-pressed="false">👁 View all scripts</button>
       <button class="btn" id="exportAllBtn" type="button">⬇ Export all scripts</button>
       <button class="btn" id="importAllBtn" type="button">⬆ Import all scripts</button>
       <input type="file" id="importAllInput" accept=".txt,.csv,text/plain,text/csv" style="display:none" aria-hidden="true" tabindex="-1">
@@ -793,7 +816,16 @@
     });
   });
 
-  const state = { topicIndex: 0, current: null };
+  // whether a question's script panel starts open. Off by default (open it
+  // per-question with its own "Show script" button) — persisted so a
+  // viewer who flips the topbar's "View all scripts" on gets that as the
+  // default again next visit too.
+  let initialScriptsVisible = false;
+  try {
+    initialScriptsVisible = localStorage.getItem("opic-scripts-visible") === "1";
+  } catch (e) {}
+
+  const state = { topicIndex: 0, current: null, scriptsVisible: initialScriptsVisible };
 
   const groveList = d3.select("#groveList");
   const svg = d3.select("#tree");
@@ -910,6 +942,8 @@
     html += `<h3>${escapeHtml(node.data.full || node.data.name)}</h3>`;
     if (t === "question") {
       html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
+      html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
+      html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
       html += `<div class="script-head"><span class="script-label">Your script</span><div class="script-actions">`;
       html += `<button type="button" class="script-load">⬆ Load file</button>`;
       html += `<button type="button" class="script-download">⬇ Save as .txt</button>`;
@@ -918,6 +952,7 @@
       html += `<textarea class="script-box" spellcheck="false" aria-label="Editable script for this question"></textarea>`;
       html += `<span class="script-status"></span>`;
       html += `<input type="file" class="script-file-input" accept=".txt,.csv,text/plain,text/csv" aria-hidden="true" tabindex="-1">`;
+      html += `</div>`;
     }
     if (t === "paragraph") {
       html += `<div class="kick-editor-head"><span class="script-label">Kick phrases</span><div class="kick-actions">`;
@@ -936,7 +971,19 @@
       }
     }
     readingBody.innerHTML = html;
-    if (t === "question") wireScriptBox(node);
+    if (t === "question") {
+      wireScriptBox(node);
+      const toggleBtn = readingBody.querySelector("#scriptToggle");
+      const panel = readingBody.querySelector("#scriptPanel");
+      if (toggleBtn && panel) {
+        toggleBtn.addEventListener("click", () => {
+          const nowHidden = !panel.hidden;
+          panel.hidden = nowHidden;
+          toggleBtn.textContent = nowHidden ? "▸ Show script" : "▾ Hide script";
+          toggleBtn.setAttribute("aria-expanded", String(!nowHidden));
+        });
+      }
+    }
     if (t === "paragraph") wireKickEditor(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
   }
@@ -1511,6 +1558,26 @@
     });
     renderTree(false);
   });
+
+  // ---- global default for whether a question's script panel opens
+  // expanded. The per-question "Show script" button still overrides this
+  // for a single view; this just sets what a freshly opened question
+  // starts as, and re-syncs the currently open one so the effect is
+  // immediate rather than waiting for the next click. ----
+  const scriptsVisibleToggle = document.getElementById("scriptsVisibleToggle");
+  function setScriptsVisible(on) {
+    state.scriptsVisible = on;
+    try {
+      localStorage.setItem("opic-scripts-visible", on ? "1" : "0");
+    } catch (e) {}
+    scriptsVisibleToggle.setAttribute("aria-pressed", String(on));
+    scriptsVisibleToggle.textContent = on ? "👁 Hide all scripts" : "👁 View all scripts";
+    if (state.current && state.current.data && state.current.data.type === "question") {
+      setCurrent(state.current);
+    }
+  }
+  setScriptsVisible(state.scriptsVisible);
+  scriptsVisibleToggle.addEventListener("click", () => setScriptsVisible(!state.scriptsVisible));
 
   // ---- bulk script + kick export / import: every question, Q1-1 through
   // the last topic's last question, as one file. The heading lines

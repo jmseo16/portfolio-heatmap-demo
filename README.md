@@ -32,13 +32,17 @@ click again to collapse. A search box in the top bar matches across every
 topic at once (question text, beat text, kick phrases) and jumps + expands
 the tree to the result.
 
-Clicking a question also opens **"Your script"**: an editable text box
+Clicking a question also offers **"Your script"**: an editable text box
 seeded with that question's full, polished answer, copied verbatim from
 the topic's own Google Doc (the same doc the topic node's "Show script"
 button links to) and matched by question tag — not a stitching of the
-sheet's short per-beat text. Edits autosave to the browser (`localStorage`),
-but since that's a per-browser convenience rather than a durable save,
-the box also has:
+sheet's short per-beat text. The box stays collapsed behind a "▸ Show
+script" button by default (so you can quiz yourself on a question before
+peeking at the answer) — click it to reveal the box, or flip the top bar's
+**"👁 View all scripts"** toggle to make every question's script open
+automatically from then on (that preference is remembered too). Edits
+autosave to the browser (`localStorage`), but since that's a per-browser
+convenience rather than a durable save, the box also has:
 
 - **Save as .txt** — downloads the current box content as a standalone
   text file (`opic-<tag>-<slug>.txt`).
