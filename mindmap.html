@@ -263,6 +263,7 @@
     .reading.open h3 { font-size: 14.5px; }
     .reading.open .full-text { font-size: 12.5px; }
     .reading.open .reading-crumb { font-size: 10px; }
+    .reading.open .script-box { min-height: 120px; font-size: 12.5px; }
   }
 
   /* ---------- Focus mode: a button hides the top bar + grove rail ---------- */
@@ -540,6 +541,43 @@
     font-weight: 600;
     text-decoration: none;
   }
+
+  .script-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+  .script-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+  }
+  .script-reset {
+    border: none;
+    background: none;
+    padding: 2px 4px;
+    color: var(--paragraph);
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  .script-reset:hover { text-decoration: underline; }
+  .script-box {
+    width: 100%;
+    min-height: 220px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-family: "Work Sans", sans-serif;
+    font-size: 13.5px;
+    line-height: 1.6;
+    resize: vertical;
+  }
   .btn-script:hover { opacity: 0.9; }
 
   .reading-close {
@@ -633,19 +671,25 @@
 
   // column gaps are computed fresh every render from the actual measured
   // pill widths (see fitColumns below) — this is just the minimum
-  // clearance added between two adjacent columns' widest pills
+  // clearance added between two adjacent columns' widest pills. Row spacing
+  // is likewise computed fresh from measured pill heights (see renderTree)
+  // since a script-beat pill now shows its full verbatim text and can run
+  // to several lines — ROW_BUFFER is just the clearance added on top of the
+  // tallest pill anywhere in the current view.
   const COLUMN_BUFFER = 34;
-  const ROW_GAP = 44;
-  const PILL_PAD_X = { topic: 16, question: 12, paragraph: 10, kick: 9 };
-  const PILL_PAD_Y = { topic: 9, question: 7, paragraph: 6, kick: 5 };
-  const WRAP_CHARS = { topic: 99, question: 26, paragraph: 18, kick: 18 };
+  const ROW_BUFFER = 16;
+  const PILL_PAD_X = { topic: 16, question: 12, paragraph: 12, kick: 9 };
+  const PILL_PAD_Y = { topic: 9, question: 7, paragraph: 8, kick: 5 };
+  const WRAP_CHARS = { topic: 99, question: 30, paragraph: 32, kick: 18 };
 
   // remembers each node's last-drawn screen position, keyed by its id, so a
   // search jump can pan the camera to it right after expanding it
   const posById = new Map();
 
-  // splits a label into at most 2 roughly-balanced lines so a pill never
-  // has to stretch to fit one very long line of horizontal text
+  // splits a label into as many lines as it takes to keep each one under
+  // maxChars, so a pill never has to stretch to fit one very long line —
+  // a script beat's full text can run to several lines, which is fine
+  // since row height is measured and laid out after wrapping (see below)
   function wrapLabel(text, maxChars) {
     const words = text.split(/\s+/);
     const lines = [];
@@ -660,7 +704,6 @@
       }
     }
     if (cur) lines.push(cur);
-    if (lines.length > 2) return [lines[0], lines.slice(1).join(" ")];
     return lines;
   }
 
@@ -728,6 +771,8 @@
     html += `<h3>${escapeHtml(node.data.full || node.data.name)}</h3>`;
     if (t === "question") {
       html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
+      html += `<div class="script-head"><span class="script-label">Your script</span><button type="button" class="script-reset">↺ Reset to original</button></div>`;
+      html += `<textarea class="script-box" spellcheck="false" aria-label="Editable script for this question"></textarea>`;
     }
     if (t === "paragraph" && node.data.children && node.data.children.length) {
       html += `<div class="reading-kicks">` + node.data.children.map((k) => `<span class="kick-chip">${escapeHtml(k.name)}</span>`).join("") + `</div>`;
@@ -741,7 +786,45 @@
       }
     }
     readingBody.innerHTML = html;
+    if (t === "question") wireScriptBox(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
+  }
+
+  // the editable per-question script box: defaults to that question's
+  // script beats (column C, in order) stitched into one script, but a
+  // viewer's own edits persist in this browser (localStorage) so the same
+  // box comes back edited next time they open this question, until they
+  // reset it
+  function defaultScriptFor(node) {
+    return (node.data.children || []).map((p) => p.full).join("\n\n");
+  }
+
+  function wireScriptBox(node) {
+    const box = readingBody.querySelector(".script-box");
+    const resetBtn = readingBody.querySelector(".script-reset");
+    if (!box) return;
+    const key = `opic-script:${node.id}`;
+    const original = defaultScriptFor(node);
+
+    let saved = null;
+    try {
+      saved = localStorage.getItem(key);
+    } catch (e) {}
+    box.value = saved !== null ? saved : original;
+
+    box.addEventListener("input", () => {
+      try {
+        localStorage.setItem(key, box.value);
+      } catch (e) {}
+    });
+
+    resetBtn.addEventListener("click", () => {
+      box.value = original;
+      try {
+        localStorage.removeItem(key);
+      } catch (e) {}
+      box.focus();
+    });
   }
 
   function escapeHtml(s) {
@@ -770,16 +853,27 @@
     };
   }
 
-  // lays out one side (an array of top-level question master-nodes) as an
-  // independent tidy tree and converts each node's row into a screen Y,
-  // recentered around this side's own vertical middle so left and right can
-  // have different extents. Screen X is filled in later, once every
-  // visible pill has been measured (see fitColumns).
-  function layoutSide(questionNodes, side) {
-    if (!questionNodes.length) return [];
-    const wrapper = d3.hierarchy({ children: questionNodes.map(mirrorVisible) });
+  // builds one side's (an array of top-level question master-nodes)
+  // self-contained hierarchy for layout purposes, without disturbing the
+  // master's own .parent chain
+  function buildSideHierarchy(questionNodes) {
+    if (!questionNodes.length) return null;
+    return d3.hierarchy({ children: questionNodes.map(mirrorVisible) });
+  }
+
+  // lays out one side's hierarchy as a tidy tree at the given row spacing,
+  // converting each node's row into a screen Y recentered around this
+  // side's own vertical middle so left and right can have different
+  // extents. Screen X is filled in later, once every visible pill has been
+  // measured (see fitColumns). Safe to call twice on the same wrapper:
+  // d3.tree() re-lays-out the very same node objects in place, so calling
+  // this again with the real row gap (once pill heights are known) just
+  // updates .screenY on the exact objects the first, placeholder-gap call
+  // already attached pill measurements to.
+  function layoutSideRows(wrapper, side, rowGap) {
+    if (!wrapper) return [];
     d3.tree()
-      .nodeSize([ROW_GAP, 1])
+      .nodeSize([rowGap, 1])
       .separation((a, b) => (a.parent === b.parent ? 1 : 1.7))(wrapper);
 
     const rows = wrapper.descendants().filter((d) => d.depth > 0);
@@ -818,8 +912,14 @@
     const rootPseudo = { master: root, depth: 0, screenX: 0, screenY: 0 };
     const rightQuestions = root.children.filter((_, i) => i % 2 === 0);
     const leftQuestions = root.children.filter((_, i) => i % 2 === 1);
-    const rightRows = layoutSide(rightQuestions, 1);
-    const leftRows = layoutSide(leftQuestions, -1);
+    const rightWrapper = buildSideHierarchy(rightQuestions);
+    const leftWrapper = buildSideHierarchy(leftQuestions);
+
+    // pass 0: lay out rows at a placeholder gap just to get stable node
+    // identities to attach measurements to — the real gap depends on pill
+    // heights, which aren't known until those pills exist and are measured
+    const rightRows = layoutSideRows(rightWrapper, 1, 40);
+    const leftRows = layoutSideRows(leftWrapper, -1, 40);
     const nodes = [rootPseudo, ...rightRows, ...leftRows];
 
     const nodeSel = nodeLayer.selectAll("g.node").data(nodes, (d) => d.master.id);
@@ -838,7 +938,12 @@
     // know how wide each depth's column needs to be
     nodeMerge.each(function (d) {
       const type = d.master.data.type;
-      const name = type === "topic" ? d.master.data.name.toUpperCase() : d.master.data.name;
+      const data = d.master.data;
+      let name;
+      if (type === "topic") name = data.name.toUpperCase();
+      else if (type === "question") name = `Q${data.tag}. ${data.name}`;
+      else if (type === "paragraph") name = data.full; // the sheet's own column-C text, verbatim
+      else name = data.name; // kick
       const lines = wrapLabel(name, WRAP_CHARS[type]);
       const lineH = 1.15;
       const startDy = -((lines.length - 1) * lineH) / 2 + 0.32;
@@ -869,8 +974,16 @@
         .attr("rx", d.pillH / 2);
     });
 
-    // pass 2: now that every pill's width is known, size each depth's
-    // column and place every node (root fixed at the origin)
+    // pass 2: now that every pill's size is known, re-lay-out each side at
+    // the real row gap (tall enough to clear the tallest pill anywhere in
+    // this view — a script beat's full text can wrap to several lines) and
+    // size each depth's column, then place every node (root at the origin).
+    // layoutSideRows mutates the same node objects nodes[] already holds,
+    // so this updates their .screenY in place — no need to rebuild nodes[].
+    const rowGap = Math.max(...nodes.map((d) => d.pillH)) + ROW_BUFFER;
+    layoutSideRows(rightWrapper, 1, rowGap);
+    layoutSideRows(leftWrapper, -1, rowGap);
+
     const DEPTH_X = fitColumns(nodes);
     nodes.forEach((d) => {
       d.screenX = d.depth === 0 ? 0 : d.side * DEPTH_X[d.depth];
