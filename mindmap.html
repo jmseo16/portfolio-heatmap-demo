@@ -628,6 +628,27 @@
     color: var(--muted);
     margin: 4px 0 0;
   }
+  .all-kicks-head {
+    margin-top: 16px;
+    margin-bottom: 8px;
+  }
+  .all-kicks {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .all-kicks-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .all-kicks-cue {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    color: var(--paragraph);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
   .btn-script {
     display: inline-flex;
     align-items: center;
@@ -943,6 +964,7 @@
     if (t === "question") {
       html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
       html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
+      html += allKicksHtml(node.data);
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
       html += `<div class="script-head"><span class="script-label">Your script</span><div class="script-actions">`;
       html += `<button type="button" class="script-load">⬆ Load file</button>`;
@@ -1050,6 +1072,29 @@
       } catch (e) {}
     }
     return (paragraphData.children || []).map((k) => k.name);
+  }
+
+  // every kick phrase across every beat of a question, grouped by beat —
+  // shown right under "Show script" on a question's panel, always visible
+  // (unlike the script itself) so it can double as a practice cue sheet:
+  // read the question, answer using just these phrases, only peek at the
+  // full script if you get stuck.
+  function allKicksHtml(questionData) {
+    const beats = questionData.children || [];
+    if (!beats.length) return "";
+    let html = `<div class="all-kicks-head"><span class="script-label">Kick phrases to use</span></div>`;
+    html += `<div class="all-kicks">`;
+    beats.forEach((p) => {
+      const kicks = effectiveKicksFor(p);
+      html += `<div class="all-kicks-group">`;
+      html += `<span class="all-kicks-cue">${escapeHtml(p.name)}</span>`;
+      html += kicks.length
+        ? `<div class="reading-kicks">` + kicks.map((k) => `<span class="kick-chip">${escapeHtml(k)}</span>`).join("") + `</div>`
+        : `<p class="kick-empty">No kick phrases yet.</p>`;
+      html += `</div>`;
+    });
+    html += `</div>`;
+    return html;
   }
 
   // rebuilds a paragraph's kick-hierarchy children from its (already
