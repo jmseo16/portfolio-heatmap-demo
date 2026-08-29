@@ -553,7 +553,7 @@
     color: var(--ink);
   }
   .reading-kicks {
-    margin-top: 16px;
+    margin-top: 0;
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
@@ -566,6 +566,60 @@
     background: var(--kick-soft);
     color: var(--kick);
     border: 1px solid color-mix(in srgb, var(--kick) 30%, transparent);
+  }
+  .kick-editor-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 16px;
+    margin-bottom: 6px;
+  }
+  .kick-actions {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .kick-add, .kick-reset {
+    border: none;
+    background: none;
+    padding: 2px 4px;
+    color: var(--paragraph);
+    font-size: 11.5px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .kick-add:hover, .kick-reset:hover { text-decoration: underline; }
+  .kick-chip-edit {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 2px 2px 8px;
+  }
+  .kick-input {
+    font-family: inherit;
+    font-size: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    outline: none;
+    padding: 2px 0;
+    min-width: 24px;
+  }
+  .kick-del {
+    border: none;
+    background: none;
+    color: inherit;
+    opacity: 0.6;
+    font-size: 13px;
+    line-height: 1;
+    padding: 2px 6px;
+    cursor: pointer;
+  }
+  .kick-del:hover { opacity: 1; }
+  .kick-empty {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin: 4px 0 0;
   }
   .btn-script {
     display: inline-flex;
@@ -726,6 +780,19 @@
     questionByTag[e.tag] = e;
   });
 
+  // flat lookup of every script-beat (paragraph) object across every
+  // topic, keyed by its id — used to apply kick-phrase edits (from the
+  // in-panel editor or a bulk import) to the right beat regardless of
+  // which topic is currently on screen.
+  const paragraphById = {};
+  FOREST.forEach((t) => {
+    t.children.forEach((q) => {
+      (q.children || []).forEach((p) => {
+        paragraphById[p.id] = p;
+      });
+    });
+  });
+
   const state = { topicIndex: 0, current: null };
 
   const groveList = d3.select("#groveList");
@@ -852,8 +919,13 @@
       html += `<span class="script-status"></span>`;
       html += `<input type="file" class="script-file-input" accept=".txt,.csv,text/plain,text/csv" aria-hidden="true" tabindex="-1">`;
     }
-    if (t === "paragraph" && node.data.children && node.data.children.length) {
-      html += `<div class="reading-kicks">` + node.data.children.map((k) => `<span class="kick-chip">${escapeHtml(k.name)}</span>`).join("") + `</div>`;
+    if (t === "paragraph") {
+      html += `<div class="kick-editor-head"><span class="script-label">Kick phrases</span><div class="kick-actions">`;
+      html += `<button type="button" class="kick-add">+ Add</button>`;
+      html += `<button type="button" class="kick-reset">↺ Reset</button>`;
+      html += `</div></div>`;
+      html += `<div class="reading-kicks" id="kickEditor"></div>`;
+      html += `<span class="script-status" id="kickStatus"></span>`;
     }
     if (t === "topic") {
       const qCount = node.data.children.length;
@@ -865,6 +937,7 @@
     }
     readingBody.innerHTML = html;
     if (t === "question") wireScriptBox(node);
+    if (t === "paragraph") wireKickEditor(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
   }
 
@@ -902,6 +975,72 @@
       saved = localStorage.getItem(`opic-script:${q.id}`);
     } catch (e) {}
     return saved !== null ? saved : scriptTextFor(q);
+  }
+
+  // ---- kick-phrase editing: same localStorage-override pattern as the
+  // script box, but a kick is also a real node in the tree (not just text
+  // in a panel), so an edit has to update three things in step: the raw
+  // FOREST paragraph object's .children (so exports/search see it), the
+  // d3-hierarchy node's own children/_children (so the tree redraws it),
+  // and localStorage (so it survives a reload). ----
+  function kicksKey(paragraphId) {
+    return `opic-kicks:${paragraphId}`;
+  }
+
+  // works on a raw FOREST paragraph object — the kick-phrases a viewer
+  // would actually see for this beat right now: their own saved edit if
+  // there is one, else whatever .children currently holds (which is
+  // itself the pristine parse until the first edit rewrites it in place).
+  function effectiveKicksFor(paragraphData) {
+    let saved = null;
+    try {
+      saved = localStorage.getItem(kicksKey(paragraphData.id));
+    } catch (e) {}
+    if (saved !== null) {
+      try {
+        const arr = JSON.parse(saved);
+        if (Array.isArray(arr)) return arr;
+      } catch (e) {}
+    }
+    return (paragraphData.children || []).map((k) => k.name);
+  }
+
+  // rebuilds a paragraph's kick-hierarchy children from its (already
+  // updated) raw .children array. Kick nodes are leaves, so a fresh
+  // d3.hierarchy() per kick — reparented onto the paragraph master node —
+  // is simpler and safer than hand-patching the old node objects.
+  function rebuildKickChildren(paragraphMaster, forceExpand) {
+    const kickNodes = (paragraphMaster.data.children || []).map((kickData) => {
+      const kn = d3.hierarchy(kickData);
+      kn.parent = paragraphMaster;
+      kn.depth = paragraphMaster.depth + 1;
+      kn.height = 0;
+      kn.id = kickData.id;
+      return kn;
+    });
+    if (forceExpand || paragraphMaster.children) {
+      paragraphMaster.children = kickNodes;
+      paragraphMaster._children = null;
+    } else {
+      paragraphMaster._children = kickNodes;
+      paragraphMaster.children = null;
+    }
+  }
+
+  // ALL_NODES (built once, below, for search) is a flat list of raw data
+  // objects; a kick edit has to patch it too or search would keep
+  // matching removed kicks and never find new ones. Kick ids are always
+  // "<paragraphId>-k<n>", so they're easy to pick out and replace. The
+  // topic is looked up from the id's own "tN-" prefix rather than
+  // state.topicIndex, since a bulk import can edit a paragraph that isn't
+  // in the topic currently on screen.
+  function reindexKicksFor(paragraphData) {
+    const m = /^t(\d+)-/.exec(paragraphData.id);
+    const topicData = m ? FOREST[Number(m[1])] : FOREST[state.topicIndex];
+    for (let i = ALL_NODES.length - 1; i >= 0; i--) {
+      if (ALL_NODES[i].node.id.startsWith(paragraphData.id + "-k")) ALL_NODES.splice(i, 1);
+    }
+    (paragraphData.children || []).forEach((k) => ALL_NODES.push({ node: k, topic: topicData }));
   }
 
   function scriptFilename(node) {
@@ -1002,6 +1141,117 @@
         };
         reader.onerror = () => showScriptStatus(status, "Couldn't read that file.", true);
         reader.readAsText(file);
+      });
+    }
+  }
+
+  // the editable kick-phrase list on a script-beat panel: add / edit / delete
+  // a chip and the change shows up immediately as kick nodes under that beat
+  // in the tree (see rebuildKickChildren) — not just in this panel — and
+  // persists to localStorage the same way the script box does.
+  function wireKickEditor(node) {
+    const editor = readingBody.querySelector("#kickEditor");
+    const addBtn = readingBody.querySelector(".kick-add");
+    const resetBtn = readingBody.querySelector(".kick-reset");
+    const status = readingBody.querySelector("#kickStatus");
+    if (!editor) return;
+
+    // capture the pristine kick list once, before this session's first
+    // edit ever touches node.data.children — this is what "Reset" restores.
+    if (!node.data.__originalKicks) {
+      node.data.__originalKicks = (node.data.children || []).map((k) => k.name);
+    }
+
+    function currentKicks() {
+      return effectiveKicksFor(node.data);
+    }
+
+    function applyKicks(kicks, persist) {
+      const cleaned = kicks.map((k) => k.trim()).filter((k) => k.length);
+      try {
+        if (persist === false) localStorage.removeItem(kicksKey(node.id));
+        else localStorage.setItem(kicksKey(node.id), JSON.stringify(cleaned));
+      } catch (e) {}
+      node.data.children = cleaned.map((text, i) => ({ id: `${node.id}-k${i}`, name: text, type: "kick", full: text }));
+      reindexKicksFor(node.data);
+      rebuildKickChildren(node, true);
+      renderTree(false);
+      renderEditor(cleaned);
+    }
+
+    function renderEditor(kicks) {
+      editor.innerHTML = "";
+      kicks.forEach((text, i) => {
+        const chip = document.createElement("span");
+        chip.className = "kick-chip kick-chip-edit";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "kick-input";
+        input.value = text;
+        input.setAttribute("aria-label", `Kick phrase ${i + 1}`);
+        input.size = Math.max(4, text.length);
+        input.addEventListener("input", () => {
+          input.size = Math.max(4, input.value.length);
+        });
+        input.addEventListener("change", () => {
+          const kicks2 = currentKicks();
+          kicks2[i] = input.value;
+          applyKicks(kicks2);
+          showScriptStatus(status, "Saved.");
+        });
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            input.blur();
+          }
+        });
+
+        const del = document.createElement("button");
+        del.type = "button";
+        del.className = "kick-del";
+        del.setAttribute("aria-label", `Remove kick phrase ${i + 1}`);
+        del.textContent = "×";
+        del.addEventListener("click", () => {
+          const kicks2 = currentKicks();
+          kicks2.splice(i, 1);
+          applyKicks(kicks2);
+          showScriptStatus(status, "Removed.");
+        });
+
+        chip.appendChild(input);
+        chip.appendChild(del);
+        editor.appendChild(chip);
+      });
+      if (!kicks.length) {
+        const empty = document.createElement("p");
+        empty.className = "kick-empty";
+        empty.textContent = "No kick phrases yet.";
+        editor.appendChild(empty);
+      }
+    }
+
+    renderEditor(currentKicks());
+
+    if (addBtn) {
+      addBtn.addEventListener("click", () => {
+        const kicks = currentKicks();
+        kicks.push("new kick");
+        applyKicks(kicks);
+        showScriptStatus(status, "Added.");
+        const inputs = editor.querySelectorAll(".kick-input");
+        const last = inputs[inputs.length - 1];
+        if (last) {
+          last.focus();
+          last.select();
+        }
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", () => {
+        applyKicks(node.data.__originalKicks.slice(), false);
+        showScriptStatus(status, "Reset to the original kick phrases.");
       });
     }
   }
@@ -1262,26 +1512,36 @@
     renderTree(false);
   });
 
-  // ---- bulk script export / import: every question, Q1-1 through the
-  // last topic's last question, as one file. The heading lines
+  // ---- bulk script + kick export / import: every question, Q1-1 through
+  // the last topic's last question, as one file. The heading lines
   // ("===== tag | topic | question =====") are how a re-imported file gets
   // matched back to the right question, so they're the one thing a viewer
   // (or Claude, handed this file back later) shouldn't rewrite — the body
   // under each heading is exactly what ends up in that question's script
-  // box (and localStorage) on import. ----
+  // box, and each "[kicks]" line under it is one script beat's kick
+  // phrases, tagged with that beat's id in brackets so an edit still finds
+  // its way back even if the label text or line order changes. ----
   const ALL_SCRIPTS_HEADING_RE = /^===== (\S+) \|/;
+  const KICKS_MARKER = "[kicks]";
+  const KICK_LINE_RE = /^.*\[([\w-]+)\]:\s*(.*)$/;
 
   function buildAllScriptsText() {
     const lines = [
-      "# OPIc Forest — all practice scripts",
+      "# OPIc Forest — all practice scripts and kick phrases",
       `# Exported ${new Date().toISOString().slice(0, 10)}.`,
       '# Edit the text under a heading, then use "Import all scripts" to load your edits back in.',
-      "# Don't edit the heading lines themselves (===== tag | topic | question =====) — they're how an edit gets matched back to the right question.",
+      "# Don't edit the heading lines themselves (===== tag | topic | question =====) or the [id] tag on a kicks line — they're how an edit gets matched back to the right question/beat.",
+      "# Kick phrases for a beat go on one line, separated by semicolons.",
       "",
     ];
     questionIndex.forEach((e) => {
       lines.push(`===== ${e.tag} | ${e.topic} | ${e.question} =====`);
       lines.push(effectiveScriptFor(e.node));
+      lines.push("");
+      lines.push(KICKS_MARKER);
+      (e.node.children || []).forEach((p) => {
+        lines.push(`${p.name} [${p.id}]: ${effectiveKicksFor(p).join("; ")}`);
+      });
       lines.push("");
     });
     return lines.join("\n").trim() + "\n";
@@ -1289,11 +1549,11 @@
 
   function parseAllScriptsText(text) {
     const lines = text.replace(/\r\n/g, "\n").split("\n");
-    const entries = [];
+    const rawEntries = [];
     let currentTag = null;
     let buf = [];
     function flush() {
-      if (currentTag) entries.push({ tag: currentTag, body: buf.join("\n").trim() });
+      if (currentTag) rawEntries.push({ tag: currentTag, raw: buf.join("\n") });
       buf = [];
     }
     for (const line of lines) {
@@ -1306,13 +1566,27 @@
       }
     }
     flush();
-    return entries;
+
+    return rawEntries.map(({ tag, raw }) => {
+      const markerIdx = raw.indexOf(KICKS_MARKER);
+      const scriptPart = markerIdx === -1 ? raw : raw.slice(0, markerIdx);
+      const kicksPart = markerIdx === -1 ? "" : raw.slice(markerIdx + KICKS_MARKER.length);
+      const kickEntries = [];
+      kicksPart.split("\n").forEach((line) => {
+        const km = KICK_LINE_RE.exec(line.trim());
+        if (km) {
+          kickEntries.push({ id: km[1], kicks: km[2].split(";").map((s) => s.trim()).filter((s) => s.length) });
+        }
+      });
+      return { tag, body: scriptPart.trim(), kickEntries };
+    });
   }
 
   function applyImportedScripts(entries) {
     let applied = 0;
+    let kicksApplied = 0;
     const unknown = [];
-    entries.forEach(({ tag, body }) => {
+    entries.forEach(({ tag, body, kickEntries }) => {
       const e = questionByTag[tag];
       if (!e) {
         unknown.push(tag);
@@ -1326,8 +1600,28 @@
         const box = readingBody.querySelector(".script-box");
         if (box) box.value = body;
       }
+
+      (kickEntries || []).forEach(({ id: pid, kicks }) => {
+        const paragraphData = paragraphById[pid];
+        if (!paragraphData) return;
+        try {
+          localStorage.setItem(kicksKey(pid), JSON.stringify(kicks));
+        } catch (err) {}
+        paragraphData.children = kicks.map((text, i) => ({ id: `${pid}-k${i}`, name: text, type: "kick", full: text }));
+        reindexKicksFor(paragraphData);
+        kicksApplied++;
+      });
     });
-    return { applied, unknown };
+    // a bulk import can touch beats in topics that aren't on screen right
+    // now, so rebuild every topic's tree fresh from the (already mutated)
+    // FOREST data rather than trying to patch hierarchy nodes scattered
+    // across roots we may not have visited yet.
+    if (kicksApplied) {
+      roots = FOREST.map(buildRoot);
+      setCurrent(null);
+      renderTree(true);
+    }
+    return { applied, unknown, kicksApplied };
   }
 
   const topbarStatus = document.getElementById("topbarStatus");
@@ -1350,8 +1644,9 @@
     const reader = new FileReader();
     reader.onload = () => {
       const entries = parseAllScriptsText(String(reader.result || ""));
-      const { applied, unknown } = applyImportedScripts(entries);
-      let msg = applied ? `Imported ${applied} script${applied === 1 ? "" : "s"}.` : "No matching questions found in that file.";
+      const { applied, unknown, kicksApplied } = applyImportedScripts(entries);
+      let msg = applied ? `Imported ${applied} script${applied === 1 ? "" : "s"}` : "No matching questions found in that file.";
+      if (applied) msg += kicksApplied ? ` and ${kicksApplied} beats' kick phrases.` : ".";
       if (unknown.length) msg += ` ${unknown.length} unrecognized tag${unknown.length === 1 ? "" : "s"} skipped.`;
       showScriptStatus(topbarStatus, msg, applied === 0);
     };

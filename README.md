@@ -60,6 +60,18 @@ just one) in a single `.txt` file, each question under its own
 answers as you like, and either load it back into the page or hand the
 whole file to Claude to fold every edit back into its source Doc at once.
 
+Clicking a script beat (a "(intro)"/"(body N)"/"(closing)" node) opens the
+same kind of editor for its **kick phrases**: add one, edit one in place,
+delete one with its `×`, or reset the beat back to its original set — every
+change shows up immediately as kick-phrase nodes under that beat in the
+tree itself (not just in the panel). These edits also autosave to
+`localStorage` and are included in the bulk export/import above: each
+question's block in the exported `.txt` carries a `[kicks]` section
+listing every one of its beats' kick phrases (tagged with that beat's own
+id, so an edit survives even if you reorder or relabel lines), so importing
+a file restores scripts *and* kick phrases together, for every topic at
+once, not just whichever one happens to be on screen.
+
 ## Updating after you edit the spreadsheet
 
 The page is generated, not hand-edited — re-run the pipeline instead of
