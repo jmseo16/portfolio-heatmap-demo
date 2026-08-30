@@ -1285,32 +1285,51 @@
     }, 3200);
   }
 
-  // shared by the per-question "Save as .txt" button and the topbar's
-  // "Export all scripts" button — offers a generated file to the viewer
-  // via the artifact's downloads capability, never a direct download link.
+  // shared by every "Save as .txt"/"Export all scripts"/recording-download
+  // button. Inside the claude.ai artifact sandbox, a direct <a download>
+  // link is inert — so this goes through the artifact's downloads
+  // capability there. Outside that sandbox (e.g. this same page hosted on
+  // GitHub Pages, where window.claude simply doesn't exist), a plain
+  // Blob-URL download link is the normal, unblocked way to save a file in
+  // any real browser tab — so it falls back to that instead of just
+  // giving up, letting the one HTML file serve both contexts.
   async function saveTextFile(filename, text, statusEl, successMessage) {
-    if (!window.claude || typeof window.claude.use !== "function") {
-      showScriptStatus(statusEl, "Downloads aren't available in this view.", true);
-      return false;
-    }
-    try {
-      const downloads = await window.claude.use("downloads");
-      if (!downloads) {
-        showScriptStatus(statusEl, "Downloads aren't available in this view.", true);
+    if (window.claude && typeof window.claude.use === "function") {
+      try {
+        const downloads = await window.claude.use("downloads");
+        if (!downloads) {
+          showScriptStatus(statusEl, "Downloads aren't available in this view.", true);
+          return false;
+        }
+        await downloads.save({ filename, data: text });
+        showScriptStatus(statusEl, successMessage || "Saved.");
+        return true;
+      } catch (err) {
+        const code = err && err.code;
+        if (code === "declined") {
+          showScriptStatus(statusEl, "Download declined.");
+        } else if (code === "rate_limited") {
+          showScriptStatus(statusEl, "Try again in a moment.", true);
+        } else {
+          showScriptStatus(statusEl, "Couldn't save the file.", true);
+        }
         return false;
       }
-      await downloads.save({ filename, data: text });
+    }
+    try {
+      const blob = text instanceof Blob ? text : new Blob([text], { type: "text/plain;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 4000);
       showScriptStatus(statusEl, successMessage || "Saved.");
       return true;
     } catch (err) {
-      const code = err && err.code;
-      if (code === "declined") {
-        showScriptStatus(statusEl, "Download declined.");
-      } else if (code === "rate_limited") {
-        showScriptStatus(statusEl, "Try again in a moment.", true);
-      } else {
-        showScriptStatus(statusEl, "Couldn't save the file.", true);
-      }
+      showScriptStatus(statusEl, "Couldn't save the file.", true);
       return false;
     }
   }
