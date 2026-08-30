@@ -9,6 +9,12 @@ bare topic name down to the exact phrase you rehearsed.
 Use the **Fullscreen** button (top-left of the canvas) to hide the top bar
 and topic list; press it again (or Esc) to bring them back.
 
+The page carries its own tree favicon (🌲, baked in as a generated PNG, no
+external file) — including as an `apple-touch-icon`, so saving a Home
+Screen shortcut to the GitHub Pages copy shows the tree, not a generic
+icon. `index.html`'s redirect page carries the same icon, in case a
+shortcut gets saved from the bare Pages URL before the redirect fires.
+
 Open **`mindmap.html`** directly in a browser — it's a single self-contained
 file (D3 + inlined data, loaded from the CDN allow-list), no build step or
 server required.
@@ -63,11 +69,14 @@ time you've rehearsed this question. A **"‹ Back"** button (or a
 left-swipe) slides back. **🎙 Record** captures audio (mic permission
 prompt, then Stop when you're done) and adds it as a new take; **+ Log
 without recording** adds one with no audio, for a silent run-through.
-Each take gets its own row: its filename (see below) shown to the left of
-▶ Play, then ▶ Play it back, ⬇ download it, or 🗑 delete just that one —
-and a per-take **kick-phrase checklist**, click-to-toggle, so after
-listening back you can mark which kicks you actually landed ("kick check:
-5/9 marked"). **↺ Reset all** clears every take for the question (asks to
+Each take gets its own row: its label ("Take #3") with a **5-star
+rating** right next to it — click a star to rate that take, click the
+same star again to clear it, purely a self-review score, nothing computed
+or graded automatically. Below that is the take's title (see below), then
+▶ Play it back, ⬇ download it, or 🗑 delete just that one — and a
+per-take **kick-phrase checklist**, click-to-toggle, so after listening
+back you can mark which kicks you actually landed ("kick check: 5/9
+marked"). **↺ Reset all** clears every take for the question (asks to
 confirm first, since it deletes recordings too). The
 highest take number reached shows both on the "🎙 Takes" button itself and
 on the question's node in the tree, as a small "take#N" chip on its
@@ -87,22 +96,28 @@ small quota) — per-device only, same as everything else here. Use a
 take's ⬇ download to grab one recording, or the top bar's **Export data**
 (below) to back up every recording at once.
 
-A take's ⬇ download always saves an actual, playable **`.mp3`**, named
-`<tag> <question name>_Take#<n>_<date>.mp3` (e.g.
-`1-1 viewing pattern_Take#3_2026-08-30.mp3`) — chosen so a file you send
-over KakaoTalk or anywhere else opens correctly and is self-explanatory
-without needing this page open. Browsers only ever *record* audio as
-webm/opus (Chrome, Firefox, Android) or mp4/AAC (Safari) — never mp3 — so
-this is a real conversion, not just a renamed extension: clicking ⬇ loads
-[lamejs](https://github.com/zhuker/lamejs) (a small pure-JS MP3 encoder,
-fetched from a CDN the first time you download anything, then cached by
-the browser) and re-encodes the recording client-side. If that conversion
-ever fails (no network for the one-time library fetch, an unsupported
-browser), the download falls back to the original recorded file instead,
-with a status message saying so — so ⬇ never hands you a mislabeled file
-that fails to open elsewhere. The `_<date>` part of the filename is the
-take's own recorded date, so an older take logged before this existed
-just omits that segment.
+Every take with a recording shows its title right there in the row (next
+to ▶ Play), in the form `<tag> <question name>_Take#<n>_<date>_<length>`
+— e.g. `1-1 viewing pattern_Take#3_260830_02:30` (`260830` = August 30,
+2026; `02:30` = 2 minutes 30 seconds long) — so what a take *is* is
+visible without playing it first. ⬇ download saves the same thing as an
+actual, playable **`.mp3`** file (just with a `-` instead of `:` in the
+length, since `:` isn't valid in a Windows filename, and a `.mp3`
+extension), chosen so a file you send over KakaoTalk or anywhere else
+opens correctly and is self-explanatory without needing this page open.
+Browsers only ever *record* audio as webm/opus (Chrome, Firefox, Android)
+or mp4/AAC (Safari) — never mp3 — so this is a real conversion, not just a
+renamed extension: clicking ⬇ loads [lamejs](https://github.com/zhuker/lamejs)
+(a small pure-JS MP3 encoder, fetched from a CDN the first time you
+download anything, then cached by the browser) and re-encodes the
+recording client-side. If that conversion ever fails (no network for the
+one-time library fetch, an unsupported browser), the download falls back
+to the original recorded file instead, with a status message saying so —
+so ⬇ never hands you a mislabeled file that fails to open elsewhere. The
+date and length come from the take's own `createdAt`/measured duration,
+so an older take logged before those existed just omits the segment it's
+missing (and quietly fills its length back in, the next time its panel
+opens, once its recording's been fetched to measure it).
 
 Below that is a **"Kick phrases to use"** list, shown right away — every
 beat's kick phrases for that question, grouped by beat, never hidden — so
