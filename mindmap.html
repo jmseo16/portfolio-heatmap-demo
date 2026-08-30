@@ -860,6 +860,9 @@
   .takes-record.recording {
     background: #d64545;
     animation: takes-record-pulse 1.4s ease-in-out infinite;
+    font-variant-numeric: tabular-nums;
+    min-width: 74px;
+    justify-content: center;
   }
   @keyframes takes-record-pulse {
     0%, 100% { opacity: 1; }
@@ -2255,6 +2258,14 @@
         let chunks = [];
         let stream = null;
         let recording = false;
+        let recordStartedAt = null;
+        let recordTimerId = null;
+        function stopRecordTimer() {
+          if (recordTimerId != null) {
+            window.clearInterval(recordTimerId);
+            recordTimerId = null;
+          }
+        }
         recordBtn.addEventListener("click", async () => {
           if (!recording) {
             try {
@@ -2276,6 +2287,7 @@
               if (e.data && e.data.size) chunks.push(e.data);
             });
             mediaRecorder.addEventListener("stop", async () => {
+              stopRecordTimer();
               stream.getTracks().forEach((tr) => tr.stop());
               const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || "audio/webm" });
               const takes = takesFor(questionId);
@@ -2294,12 +2306,18 @@
             });
             mediaRecorder.start();
             recording = true;
-            recordBtn.textContent = "⏹ Stop";
+            recordStartedAt = Date.now();
+            recordBtn.textContent = "⏹ 00:00";
             recordBtn.classList.add("recording");
             showScriptStatus(status, "Recording…");
+            stopRecordTimer();
+            recordTimerId = window.setInterval(() => {
+              recordBtn.textContent = "⏹ " + formatDurationMMSS((Date.now() - recordStartedAt) / 1000);
+            }, 250);
           } else {
             mediaRecorder.stop();
             recording = false;
+            stopRecordTimer();
             recordBtn.textContent = "🎙 Record";
             recordBtn.classList.remove("recording");
           }

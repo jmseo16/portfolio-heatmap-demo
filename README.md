@@ -85,8 +85,11 @@ plus a **"🎙 Takes ›"** button; tap it (or swipe right anywhere on the
 panel) to slide over to the second page, **Takes**: a history of every
 time you've rehearsed this question. A **"‹ Back"** button (or a
 left-swipe) slides back. **🎙 Record** captures audio (mic permission
-prompt, then Stop when you're done) and adds it as a new take; **+ Log
-without recording** adds one with no audio, for a silent run-through.
+prompt, then Stop when you're done) and adds it as a new take — while
+recording, the button itself counts up live (`⏹ 00:07`, ticking every
+quarter-second) instead of just saying "Stop", so you can see exactly how
+long the take has run without watching a clock elsewhere; **+ Log without
+recording** adds one with no audio, for a silent run-through.
 Each take gets its own row: its label ("Take #3") with a **5-star
 rating** right next to it — click a star to rate that take, click the
 same star again to clear it, purely a self-review score, nothing computed
