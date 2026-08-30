@@ -109,9 +109,10 @@ just scripts and kicks.
 
 Clicking a script beat (a "(intro)"/"(body N)"/"(closing)" node) opens the
 same kind of editor for its **kick phrases**: add one, edit one in place,
-delete one with its `×`, or reset the beat back to its original set — every
-change shows up immediately as kick-phrase nodes under that beat in the
-tree itself (not just in the panel). These edits also autosave to
+delete one with its `×`, drag its `⠿` handle to reorder it, or reset the
+beat back to its original set — every change (including a reorder) shows
+up immediately as kick-phrase nodes under that beat in the tree itself,
+in the same order, not just in the panel. These edits also autosave to
 `localStorage` and are included in the bulk export/import above: each
 question's block in the exported `.txt` carries a `[kicks]` section
 listing every one of its beats' kick phrases (tagged with that beat's own

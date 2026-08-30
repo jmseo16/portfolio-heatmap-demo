@@ -642,8 +642,22 @@
     display: inline-flex;
     align-items: center;
     gap: 2px;
-    padding: 2px 2px 2px 8px;
+    padding: 2px;
   }
+  .kick-chip-edit.kick-dragging {
+    opacity: 0.5;
+  }
+  .kick-grip {
+    cursor: grab;
+    touch-action: none;
+    padding: 2px 3px;
+    color: inherit;
+    opacity: 0.55;
+    font-size: 12px;
+    line-height: 1;
+    user-select: none;
+  }
+  .kick-grip:hover { opacity: 0.9; }
   .kick-input {
     font-family: inherit;
     font-size: inherit;
@@ -1512,11 +1526,59 @@
       renderEditor(cleaned);
     }
 
+    // drag a chip's grip handle to reorder — visually reflows the DOM live
+    // as the pointer crosses sibling chips (only for feedback; the array
+    // itself is derived fresh from final DOM order on drop), then commits
+    // through the same applyKicks() every other edit already goes through,
+    // so persistence + tree rebuild + re-render all come for free.
+    function wireChipDrag(chip) {
+      const grip = chip.querySelector(".kick-grip");
+      if (!grip) return;
+      let dragging = false;
+      function onMove(event) {
+        if (!dragging) return;
+        const target = document.elementFromPoint(event.clientX, event.clientY);
+        const targetChip = target && target.closest(".kick-chip-edit");
+        if (targetChip && targetChip !== chip && targetChip.parentElement === editor) {
+          const rect = targetChip.getBoundingClientRect();
+          const before = event.clientX < rect.left + rect.width / 2;
+          editor.insertBefore(chip, before ? targetChip : targetChip.nextSibling);
+        }
+      }
+      function onUp() {
+        if (!dragging) return;
+        dragging = false;
+        chip.classList.remove("kick-dragging");
+        document.body.style.userSelect = "";
+        window.removeEventListener("pointermove", onMove);
+        window.removeEventListener("pointerup", onUp);
+        window.removeEventListener("pointercancel", onUp);
+        const newOrder = Array.from(editor.querySelectorAll(".kick-input")).map((inp) => inp.value);
+        applyKicks(newOrder);
+        showScriptStatus(status, "Reordered.");
+      }
+      grip.addEventListener("pointerdown", (event) => {
+        dragging = true;
+        chip.classList.add("kick-dragging");
+        document.body.style.userSelect = "none";
+        event.preventDefault();
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+        window.addEventListener("pointercancel", onUp);
+      });
+    }
+
     function renderEditor(kicks) {
       editor.innerHTML = "";
       kicks.forEach((text, i) => {
         const chip = document.createElement("span");
         chip.className = "kick-chip kick-chip-edit";
+
+        const grip = document.createElement("span");
+        grip.className = "kick-grip";
+        grip.setAttribute("aria-hidden", "true");
+        grip.textContent = "⠿";
+        chip.appendChild(grip);
 
         const input = document.createElement("input");
         input.type = "text";
@@ -1555,6 +1617,7 @@
         chip.appendChild(input);
         chip.appendChild(del);
         editor.appendChild(chip);
+        wireChipDrag(chip);
       });
       if (!kicks.length) {
         const empty = document.createElement("p");
