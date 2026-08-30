@@ -732,22 +732,91 @@
     border: none;
   }
   .script-toggle:hover { opacity: 0.9; }
-  /* TEMPORARY: recording feasibility probe (see wireRecProbe) */
-  .rec-probe-btn {
+  .takes-record {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: 10px;
-    padding: 8px 14px;
-    border-radius: 8px;
+    padding: 4px 10px;
+    border-radius: 999px;
     background: var(--kick);
     color: var(--surface);
-    font-size: 13px;
+    font-size: 11.5px;
     font-weight: 600;
     border: none;
+    cursor: pointer;
   }
-  .rec-probe-btn:hover { opacity: 0.9; }
-  .rec-probe-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .takes-record:hover { opacity: 0.9; }
+  .takes-record:disabled { opacity: 0.5; cursor: not-allowed; }
+  .takes-record.recording {
+    background: #d64545;
+    animation: takes-record-pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes takes-record-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+
+  .take-row {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: var(--surface-2);
+  }
+  .take-row-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .take-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--kick);
+  }
+  .take-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .take-btn {
+    border: none;
+    background: none;
+    color: var(--paragraph);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 6px;
+    cursor: pointer;
+  }
+  .take-btn:hover { text-decoration: underline; }
+  .take-no-rec {
+    font-size: 11.5px;
+    color: var(--muted);
+    font-style: italic;
+  }
+  .take-kick-summary {
+    margin-top: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .take-kick-chips { margin-top: 6px; }
+  .take-kick-toggle {
+    border: 1px solid color-mix(in srgb, var(--kick) 30%, transparent);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .take-kick-toggle.marked {
+    background: var(--kick-soft);
+    color: var(--kick);
+  }
+  .take-audio {
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    height: 32px;
+  }
 
   .script-head, .practice-head {
     display: flex;
@@ -1053,17 +1122,14 @@
     html += `<h3>${escapeHtml(node.data.full || node.data.name)}</h3>`;
     if (t === "question") {
       html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
-      const practiceCount = getPracticeCount(node.data.id);
-      html += `<div class="practice-head"><span class="script-label">Practice count</span><div class="script-actions">`;
-      html += `<button type="button" class="practice-log" id="practiceLog">+ Log a practice</button>`;
-      html += `<button type="button" class="practice-reset" id="practiceReset"${practiceCount ? "" : " hidden"}>↺ Reset</button>`;
+      const hasTakes = getPracticeCount(node.data.id) > 0;
+      html += `<div class="practice-head"><span class="script-label">Takes</span><div class="script-actions">`;
+      html += `<button type="button" class="takes-record" id="takesRecord">🎙 Record</button>`;
+      html += `<button type="button" class="practice-log" id="takesLog">+ Log without recording</button>`;
+      html += `<button type="button" class="practice-reset" id="takesReset"${hasTakes ? "" : " hidden"}>↺ Reset all</button>`;
       html += `</div></div>`;
-      html += `<p class="practice-count-display" id="practiceCountDisplay">take#${practiceCount}</p>`;
-      html += `<div class="practice-head"><span class="script-label">Recording test (temporary)</span></div>`;
-      html += `<p class="full-text">Checking whether this artifact can record audio at all before building the real feature. Tap Record, say a sentence, tap Stop, then try Play and Download.</p>`;
-      html += `<button type="button" class="rec-probe-btn" id="recProbeBtn">🎙 Record</button>`;
-      html += `<span class="script-status" id="recProbeStatus"></span>`;
-      html += `<div id="recProbePlayback"></div>`;
+      html += `<span class="script-status" id="takesStatus"></span>`;
+      html += `<div id="takesList"></div>`;
       html += allKicksHtml(node.data);
       html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
@@ -1107,26 +1173,7 @@
         });
       }
 
-      const logBtn = readingBody.querySelector("#practiceLog");
-      const resetBtn = readingBody.querySelector("#practiceReset");
-      const display = readingBody.querySelector("#practiceCountDisplay");
-      function refreshPracticeUI(count) {
-        display.textContent = `take#${count}`;
-        resetBtn.hidden = count === 0;
-        renderTree(false); // updates the corner chip on this question's pill
-      }
-      if (logBtn) {
-        logBtn.addEventListener("click", () => {
-          refreshPracticeUI(setPracticeCount(node.id, getPracticeCount(node.id) + 1));
-        });
-      }
-      if (resetBtn) {
-        resetBtn.addEventListener("click", () => {
-          refreshPracticeUI(setPracticeCount(node.id, 0));
-        });
-      }
-
-      wireRecProbe();
+      wireTakesSection(node);
     }
     if (t === "paragraph") wireKickEditor(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
@@ -1168,30 +1215,178 @@
     return saved !== null ? saved : scriptTextFor(q);
   }
 
-  // ---- practice-count tracking: how many times a question's been
-  // rehearsed. Just a number in localStorage, keyed by question id — no
-  // pristine "original" to reset to (unlike scripts/kicks, there's no
-  // Doc/CSV source for this), so 0 both means "never logged" and "reset". ----
-  function practiceKey(questionId) {
-    return `opic-practice:${questionId}`;
+  // ---- takes: a question's practice history. Each entry is a "take" —
+  // logged with or without an actual recording — carrying a stable take
+  // number, whether audio exists for it, and which kick phrases the
+  // viewer self-marked as used in that attempt. Metadata (small, text)
+  // lives in localStorage; the audio itself (binary, potentially
+  // sizeable) lives in IndexedDB — see the recordings store further
+  // below. Take numbers are permanent once assigned (never renumbered on
+  // delete, so a deleted take just leaves a gap) both because renumbering
+  // would require migrating its IndexedDB key too, and because a visible
+  // gap ("Take #1, Take #3") is an honest record that #2 existed.
+  function takesKey(questionId) {
+    return `opic-takes:${questionId}`;
   }
 
-  function getPracticeCount(questionId) {
+  function saveTakes(questionId, takes) {
+    try {
+      if (takes.length) localStorage.setItem(takesKey(questionId), JSON.stringify(takes));
+      else localStorage.removeItem(takesKey(questionId));
+    } catch (e) {}
+  }
+
+  function takesFor(questionId) {
     let raw = null;
     try {
-      raw = localStorage.getItem(practiceKey(questionId));
+      raw = localStorage.getItem(takesKey(questionId));
     } catch (e) {}
-    const n = parseInt(raw, 10);
-    return Number.isFinite(n) && n > 0 ? n : 0;
+    if (raw !== null) {
+      try {
+        const arr = JSON.parse(raw);
+        if (Array.isArray(arr)) return arr;
+      } catch (e) {}
+    }
+    // migration: a viewer's prior session (before takes existed) may have
+    // left behind a bare integer count at the old key — synthesize that
+    // many empty takes once, so their tally isn't lost.
+    let legacyRaw = null;
+    try {
+      legacyRaw = localStorage.getItem(`opic-practice:${questionId}`);
+    } catch (e) {}
+    const legacyCount = parseInt(legacyRaw, 10);
+    if (Number.isFinite(legacyCount) && legacyCount > 0) {
+      const synthesized = [];
+      for (let i = 1; i <= legacyCount; i++) {
+        synthesized.push({ n: i, hasRecording: false, mimeType: null, kicksMarked: [] });
+      }
+      saveTakes(questionId, synthesized);
+      try {
+        localStorage.removeItem(`opic-practice:${questionId}`);
+      } catch (e) {}
+      return synthesized;
+    }
+    return [];
   }
 
+  function nextTakeNumber(takes) {
+    return takes.reduce((max, t) => Math.max(max, t.n), 0) + 1;
+  }
+
+  // the tree's take#N corner badge and the bulk-export [practice] section
+  // both just want "how many attempts total" — the highest take number
+  // ever reached, which (unlike takes.length) stays correct even after a
+  // mid-list delete.
+  function getPracticeCount(questionId) {
+    return takesFor(questionId).reduce((max, t) => Math.max(max, t.n), 0);
+  }
+
+  // used only by bulk import, to make sure at least N takes exist —
+  // deliberately never truncates (a plain count from an imported .txt
+  // has no way to say which takes to discard, and destroying real
+  // recordings via a text-file import would be a bad surprise). The
+  // explicit "Reset all" button below is the only thing that actually
+  // clears a question's takes.
   function setPracticeCount(questionId, n) {
     const clamped = Math.max(0, Math.floor(n) || 0);
-    try {
-      if (clamped > 0) localStorage.setItem(practiceKey(questionId), String(clamped));
-      else localStorage.removeItem(practiceKey(questionId));
-    } catch (e) {}
-    return clamped;
+    const takes = takesFor(questionId);
+    let highest = takes.reduce((max, t) => Math.max(max, t.n), 0);
+    while (highest < clamped) {
+      highest += 1;
+      takes.push({ n: highest, hasRecording: false, mimeType: null, kicksMarked: [] });
+    }
+    saveTakes(questionId, takes);
+    return highest;
+  }
+
+  function appendTake(questionId, opts) {
+    const takes = takesFor(questionId);
+    takes.push({
+      n: nextTakeNumber(takes),
+      hasRecording: !!(opts && opts.hasRecording),
+      mimeType: (opts && opts.mimeType) || null,
+      kicksMarked: [],
+    });
+    saveTakes(questionId, takes);
+    return takes;
+  }
+
+  // ---- recordings: the actual audio, in IndexedDB (Blobs don't belong in
+  // localStorage — small quota, and no native Blob support). One store,
+  // keyed "<questionId>:<takeNumber>". Opened lazily on first use, not at
+  // page load, so viewers who never record pay nothing for it. ----
+  const REC_DB_NAME = "opic-recordings";
+  const REC_STORE = "takes";
+  let recDbPromise = null;
+  function openRecDb() {
+    if (recDbPromise) return recDbPromise;
+    recDbPromise = new Promise((resolve) => {
+      if (!window.indexedDB) {
+        resolve(null);
+        return;
+      }
+      const req = indexedDB.open(REC_DB_NAME, 1);
+      req.onupgradeneeded = () => req.result.createObjectStore(REC_STORE);
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    });
+    return recDbPromise;
+  }
+  function recKey(questionId, takeN) {
+    return `${questionId}:${takeN}`;
+  }
+  async function putRecording(key, value) {
+    const db = await openRecDb();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      const tx = db.transaction(REC_STORE, "readwrite");
+      tx.objectStore(REC_STORE).put(value, key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  }
+  async function getRecording(key) {
+    const db = await openRecDb();
+    if (!db) return null;
+    return new Promise((resolve) => {
+      const tx = db.transaction(REC_STORE, "readonly");
+      const req = tx.objectStore(REC_STORE).get(key);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  }
+  async function deleteRecording(key) {
+    const db = await openRecDb();
+    if (!db) return false;
+    return new Promise((resolve) => {
+      const tx = db.transaction(REC_STORE, "readwrite");
+      tx.objectStore(REC_STORE).delete(key);
+      tx.oncomplete = () => resolve(true);
+      tx.onerror = () => resolve(false);
+    });
+  }
+
+  async function deleteTakeOne(questionId, n) {
+    const takes = takesFor(questionId);
+    const idx = takes.findIndex((t) => t.n === n);
+    if (idx === -1) return;
+    if (takes[idx].hasRecording) await deleteRecording(recKey(questionId, n));
+    takes.splice(idx, 1);
+    saveTakes(questionId, takes);
+  }
+
+  async function resetAllTakes(questionId) {
+    const takes = takesFor(questionId);
+    for (const t of takes) {
+      if (t.hasRecording) await deleteRecording(recKey(questionId, t.n));
+    }
+    saveTakes(questionId, []);
+  }
+
+  function mimeToExt(mimeType) {
+    if (mimeType && mimeType.includes("mp4")) return "mp4";
+    if (mimeType && mimeType.includes("ogg")) return "ogg";
+    return "webm";
   }
 
   // ---- kick-phrase editing: same localStorage-override pattern as the
@@ -1348,11 +1543,14 @@
     }
   }
 
-  // ---- TEMPORARY: minimal recording probe (step 0 of the voice-recording
-  // plan) — just prove getUserMedia + MediaRecorder actually work inside
-  // the claude.ai artifact iframe sandbox, with no takes list or kick-
-  // marking UI yet. To be replaced by the real "Takes" section once this
-  // is confirmed working on a real device. ----
+  // ---- the "Takes" section on a question panel: record (or log without
+  // recording), play back, download, or delete individual takes, and
+  // self-mark which kick phrases came out in each one. Confirmed working
+  // inside a real browser tab via the GitHub Pages copy of this page
+  // (getUserMedia is denied outright inside the claude.ai artifact
+  // sandbox — no capability governs microphone access there — so
+  // recording is a Pages-only affordance; everything else in this
+  // section works in both places). ----
   const REC_MIME_CANDIDATES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
   function pickRecMimeType() {
     if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return "";
@@ -1362,78 +1560,240 @@
     return "";
   }
 
-  function wireRecProbe() {
-    const btn = readingBody.querySelector("#recProbeBtn");
-    const status = readingBody.querySelector("#recProbeStatus");
-    const playback = readingBody.querySelector("#recProbePlayback");
-    if (!btn) return;
+  function wireTakesSection(node) {
+    const recordBtn = readingBody.querySelector("#takesRecord");
+    const logBtn = readingBody.querySelector("#takesLog");
+    const resetBtn = readingBody.querySelector("#takesReset");
+    const status = readingBody.querySelector("#takesStatus");
+    const list = readingBody.querySelector("#takesList");
+    if (!list) return;
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
-      btn.disabled = true;
-      showScriptStatus(status, "Recording isn't supported in this browser.", true);
-      return;
+    const questionId = node.id;
+
+    // every kick phrase across every beat of this question, with the id
+    // each one WOULD have right now — computed positionally
+    // ("<beatId>-k<index>"), the same scheme applyKicks() itself uses, so
+    // it's correct even for a beat whose data.children hasn't been
+    // refreshed from a localStorage override yet this session.
+    function allKicksForQuestion() {
+      const out = [];
+      (node.data.children || []).forEach((p) => {
+        effectiveKicksFor(p).forEach((text, i) => {
+          out.push({ id: `${p.id}-k${i}`, text });
+        });
+      });
+      return out;
     }
 
-    let mediaRecorder = null;
-    let chunks = [];
-    let stream = null;
-    let recording = false;
+    function renderTakes() {
+      const takes = takesFor(questionId).slice().sort((a, b) => b.n - a.n);
+      const allKicks = allKicksForQuestion();
+      if (resetBtn) resetBtn.hidden = takes.length === 0;
 
-    btn.addEventListener("click", async () => {
-      if (!recording) {
-        playback.innerHTML = "";
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (err) {
-          showScriptStatus(status, "Mic access denied/unavailable: " + ((err && err.name) || err), true);
-          return;
-        }
-        const mimeType = pickRecMimeType();
-        chunks = [];
-        try {
-          mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
-        } catch (err) {
-          showScriptStatus(status, "Couldn't start the recorder: " + err.message, true);
-          stream.getTracks().forEach((tr) => tr.stop());
-          return;
-        }
-        mediaRecorder.addEventListener("dataavailable", (e) => {
-          if (e.data && e.data.size) chunks.push(e.data);
-        });
-        mediaRecorder.addEventListener("stop", () => {
-          stream.getTracks().forEach((tr) => tr.stop());
-          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || "audio/webm" });
-          const audio = document.createElement("audio");
-          audio.controls = true;
-          audio.style.display = "block";
-          audio.style.marginTop = "8px";
-          audio.src = URL.createObjectURL(blob);
-          playback.appendChild(audio);
-
-          const dl = document.createElement("button");
-          dl.type = "button";
-          dl.className = "script-download";
-          dl.style.display = "block";
-          dl.style.marginTop = "6px";
-          dl.textContent = "⬇ Download recording";
-          dl.addEventListener("click", () => {
-            const ext = (blob.type || "").includes("mp4") ? "mp4" : "webm";
-            saveTextFile(`opic-rec-test.${ext}`, blob, status, "Saved.");
-          });
-          playback.appendChild(dl);
-
-          showScriptStatus(status, `Recorded ${blob.size} bytes (${blob.type || "unknown type"}).`);
-        });
-        mediaRecorder.start();
-        recording = true;
-        btn.textContent = "⏹ Stop";
-        showScriptStatus(status, "Recording…");
-      } else {
-        mediaRecorder.stop();
-        recording = false;
-        btn.textContent = "🎙 Record";
+      list.innerHTML = "";
+      if (!takes.length) {
+        const empty = document.createElement("p");
+        empty.className = "kick-empty";
+        empty.textContent = "No takes yet — record one, or log a practice without recording.";
+        list.appendChild(empty);
+        return;
       }
-    });
+      takes.forEach((take) => list.appendChild(renderTakeRow(take, allKicks)));
+    }
+
+    function renderTakeRow(take, allKicks) {
+      const row = document.createElement("div");
+      row.className = "take-row";
+
+      const head = document.createElement("div");
+      head.className = "take-row-head";
+      const label = document.createElement("span");
+      label.className = "take-label";
+      label.textContent = `Take #${take.n}`;
+      head.appendChild(label);
+
+      const actions = document.createElement("div");
+      actions.className = "take-actions";
+
+      if (take.hasRecording) {
+        const playBtn = document.createElement("button");
+        playBtn.type = "button";
+        playBtn.className = "take-btn take-play";
+        playBtn.textContent = "▶ Play";
+        let audioEl = null;
+        playBtn.addEventListener("click", async () => {
+          if (audioEl) {
+            if (audioEl.paused) audioEl.play();
+            else audioEl.pause();
+            return;
+          }
+          const rec = await getRecording(recKey(questionId, take.n));
+          if (!rec || !rec.blob) {
+            showScriptStatus(status, "Couldn't find that recording.", true);
+            return;
+          }
+          audioEl = document.createElement("audio");
+          audioEl.controls = true;
+          audioEl.className = "take-audio";
+          audioEl.src = URL.createObjectURL(rec.blob);
+          row.appendChild(audioEl);
+          audioEl.addEventListener("play", () => (playBtn.textContent = "⏸ Pause"));
+          audioEl.addEventListener("pause", () => (playBtn.textContent = "▶ Play"));
+          audioEl.play();
+        });
+        actions.appendChild(playBtn);
+
+        const dlBtn = document.createElement("button");
+        dlBtn.type = "button";
+        dlBtn.className = "take-btn take-download";
+        dlBtn.textContent = "⬇";
+        dlBtn.setAttribute("aria-label", `Download take ${take.n}`);
+        dlBtn.addEventListener("click", async () => {
+          const rec = await getRecording(recKey(questionId, take.n));
+          if (!rec || !rec.blob) {
+            showScriptStatus(status, "Couldn't find that recording.", true);
+            return;
+          }
+          const tag = node.data.tag || questionId;
+          saveTextFile(`opic-${tag}-take${take.n}.${mimeToExt(rec.mimeType)}`, rec.blob, status, "Saved.");
+        });
+        actions.appendChild(dlBtn);
+      } else {
+        const noRec = document.createElement("span");
+        noRec.className = "take-no-rec";
+        noRec.textContent = "(no recording)";
+        actions.appendChild(noRec);
+      }
+
+      const delBtn = document.createElement("button");
+      delBtn.type = "button";
+      delBtn.className = "take-btn take-delete";
+      delBtn.textContent = "🗑";
+      delBtn.setAttribute("aria-label", `Delete take ${take.n}`);
+      delBtn.addEventListener("click", async () => {
+        await deleteTakeOne(questionId, take.n);
+        renderTakes();
+        renderTree(false);
+        showScriptStatus(status, `Deleted take #${take.n}.`);
+      });
+      actions.appendChild(delBtn);
+
+      head.appendChild(actions);
+      row.appendChild(head);
+
+      const summary = document.createElement("div");
+      summary.className = "take-kick-summary";
+      summary.textContent = allKicks.length ? `kick check: ${take.kicksMarked.length}/${allKicks.length} marked` : "no kick phrases yet";
+      row.appendChild(summary);
+
+      if (allKicks.length) {
+        const chipWrap = document.createElement("div");
+        chipWrap.className = "reading-kicks take-kick-chips";
+        allKicks.forEach(({ id, text }) => {
+          const chip = document.createElement("button");
+          chip.type = "button";
+          const marked = take.kicksMarked.includes(id);
+          chip.className = "kick-chip take-kick-toggle" + (marked ? " marked" : "");
+          chip.textContent = (marked ? "☑ " : "☐ ") + text;
+          chip.addEventListener("click", () => {
+            const takes = takesFor(questionId);
+            const t = takes.find((x) => x.n === take.n);
+            if (!t) return;
+            const idx = t.kicksMarked.indexOf(id);
+            if (idx === -1) t.kicksMarked.push(id);
+            else t.kicksMarked.splice(idx, 1);
+            saveTakes(questionId, takes);
+            take.kicksMarked = t.kicksMarked;
+            const nowMarked = t.kicksMarked.includes(id);
+            chip.classList.toggle("marked", nowMarked);
+            chip.textContent = (nowMarked ? "☑ " : "☐ ") + text;
+            summary.textContent = `kick check: ${t.kicksMarked.length}/${allKicks.length} marked`;
+          });
+          chipWrap.appendChild(chip);
+        });
+        row.appendChild(chipWrap);
+      }
+
+      return row;
+    }
+
+    const canRecord = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+    if (recordBtn) {
+      if (!canRecord) {
+        recordBtn.disabled = true;
+        recordBtn.title = "Recording isn't supported in this view — try the GitHub Pages copy of this page.";
+      } else {
+        let mediaRecorder = null;
+        let chunks = [];
+        let stream = null;
+        let recording = false;
+        recordBtn.addEventListener("click", async () => {
+          if (!recording) {
+            try {
+              stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            } catch (err) {
+              showScriptStatus(status, "Mic access denied/unavailable: " + ((err && err.name) || err), true);
+              return;
+            }
+            const mimeType = pickRecMimeType();
+            chunks = [];
+            try {
+              mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+            } catch (err) {
+              showScriptStatus(status, "Couldn't start the recorder: " + err.message, true);
+              stream.getTracks().forEach((tr) => tr.stop());
+              return;
+            }
+            mediaRecorder.addEventListener("dataavailable", (e) => {
+              if (e.data && e.data.size) chunks.push(e.data);
+            });
+            mediaRecorder.addEventListener("stop", async () => {
+              stream.getTracks().forEach((tr) => tr.stop());
+              const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || "audio/webm" });
+              const takes = takesFor(questionId);
+              const n = nextTakeNumber(takes);
+              const ok = await putRecording(recKey(questionId, n), { blob, mimeType: blob.type, createdAt: Date.now() });
+              takes.push({ n, hasRecording: ok, mimeType: ok ? blob.type : null, kicksMarked: [] });
+              saveTakes(questionId, takes);
+              renderTakes();
+              renderTree(false);
+              showScriptStatus(status, ok ? `Saved take #${n}.` : "Recorded, but couldn't store it locally.", !ok);
+            });
+            mediaRecorder.start();
+            recording = true;
+            recordBtn.textContent = "⏹ Stop";
+            recordBtn.classList.add("recording");
+            showScriptStatus(status, "Recording…");
+          } else {
+            mediaRecorder.stop();
+            recording = false;
+            recordBtn.textContent = "🎙 Record";
+            recordBtn.classList.remove("recording");
+          }
+        });
+      }
+    }
+
+    if (logBtn) {
+      logBtn.addEventListener("click", () => {
+        appendTake(questionId, { hasRecording: false });
+        renderTakes();
+        renderTree(false);
+        showScriptStatus(status, "Logged.");
+      });
+    }
+
+    if (resetBtn) {
+      resetBtn.addEventListener("click", async () => {
+        if (!window.confirm("Delete every take (including recordings) for this question? This can't be undone.")) return;
+        await resetAllTakes(questionId);
+        renderTakes();
+        renderTree(false);
+        showScriptStatus(status, "All takes cleared.");
+      });
+    }
+
+    renderTakes();
   }
 
   function wireScriptBox(node) {
@@ -2050,16 +2410,6 @@
         setPracticeCount(e.id, practiceCount);
         practiceApplied++;
       }
-      if (state.current && state.current.data && state.current.data.id === e.id) {
-        const box = readingBody.querySelector(".script-box");
-        if (box) box.value = body;
-        const display = readingBody.querySelector("#practiceCountDisplay");
-        const resetBtn = readingBody.querySelector("#practiceReset");
-        if (display && practiceCount !== null) {
-          display.textContent = `take#${practiceCount}`;
-          if (resetBtn) resetBtn.hidden = practiceCount === 0;
-        }
-      }
 
       (kickEntries || []).forEach(({ id: pid, kicks }) => {
         const paragraphData = paragraphById[pid];
@@ -2080,10 +2430,15 @@
       roots = FOREST.map(buildRoot);
       setCurrent(null);
       renderTree(true);
-    } else if (practiceApplied) {
-      // no hierarchy change needed for a practice-count-only import — just
-      // redraw so every question's corner chip picks up its new count.
+    } else if (applied || practiceApplied) {
+      // no hierarchy change needed for a script/practice-only import —
+      // just redraw so every question's corner chip picks up its new
+      // count, and re-render the open panel (if it's a question) so its
+      // script box and takes list reflect the import too.
       renderTree(false);
+      if (state.current && state.current.data && state.current.data.type === "question") {
+        setCurrent(state.current);
+      }
     }
     return { applied, unknown, kicksApplied, practiceApplied };
   }

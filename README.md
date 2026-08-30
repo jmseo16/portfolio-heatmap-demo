@@ -55,14 +55,31 @@ click again to collapse. A search box in the top bar matches across every
 topic at once (question text, beat text, kick phrases) and jumps + expands
 the tree to the result.
 
-Clicking a question also shows its **practice count** — how many times
-you've logged rehearsing it — right under the hint text: "take#5" in the
-panel, "+ Log a practice" to bump it, "↺ Reset" to clear it back to 0. The
-same count shows on the question's node in the tree itself, as a small
-"take#N" chip on its top-left corner (once it's been logged at least
-once) — deliberately not the same spot as the tree's own branch-count
-badge, which sits centered on the pill's outward side edge, so the two
-never collide.
+Clicking a question also shows its **Takes** — a history of every time
+you've rehearsed it, right under the hint text. **🎙 Record** captures
+audio (mic permission prompt, then Stop when you're done) and adds it as
+a new take; **+ Log without recording** adds one with no audio, for a
+silent run-through. Each take gets its own row: ▶ Play it back, ⬇
+download it, or 🗑 delete just that one — and a per-take **kick-phrase
+checklist**, click-to-toggle, so after listening back you can mark which
+kicks you actually landed ("kick check: 5/9 marked"). **↺ Reset all**
+clears every take for the question (asks to confirm first, since it
+deletes recordings too). The highest take number reached shows on the
+question's node in the tree itself too, as a small "take#N" chip on its
+top-left corner — deliberately not the same spot as the tree's own
+branch-count badge, which sits centered on the pill's outward side edge,
+so the two never collide.
+
+**Recording only works outside the claude.ai Artifact sandbox** — that
+iframe has no microphone-access capability at all, so `getUserMedia` is
+denied there regardless of what this page's code does. Everything else in
+the Takes section (logging without recording, the kick checklist, play/
+download/delete for a take recorded elsewhere) works the same in both
+places; only capturing new audio needs the GitHub Pages copy of this page
+(see "Two ways to open this, and why" above). Recordings themselves live
+in this browser's IndexedDB (not `localStorage` — audio doesn't fit its
+small quota) — per-device only, same as everything else here, so use a
+take's ⬇ download if you want to keep or move a recording.
 
 Below that is a **"Kick phrases to use"** list, shown right away — every
 beat's kick phrases for that question, grouped by beat, never hidden — so
