@@ -90,6 +90,16 @@ recording, the button itself counts up live (`⏹ 00:07`, ticking every
 quarter-second) instead of just saying "Stop", so you can see exactly how
 long the take has run without watching a clock elsewhere; **+ Log without
 recording** adds one with no audio, for a silent run-through.
+
+Recording quality is tuned for a clean voice memo, not a phone call: mic
+capture explicitly turns off the browser's default echo-cancellation /
+noise-suppression / auto-gain processing (that chain is built for VoIP,
+and otherwise runs on every recording by default, making it sound thinner
+than a native recorder app), asks for mono at 48kHz, and records Opus at
+128kbps — then the eventual ⬇ download's mp3 conversion (see below) runs
+at 192kbps rather than matching that 1:1, since mp3 needs more bits than
+Opus to hold onto the same quality on that second, unavoidable transcode
+pass.
 Each take gets its own row: its label ("Take #3") with a **5-star
 rating** right next to it — click a star to rate that take, click the
 same star again to clear it, purely a self-review score, nothing computed

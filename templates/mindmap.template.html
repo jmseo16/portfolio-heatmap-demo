@@ -1648,7 +1648,11 @@
     const left16 = floatTo16BitPCM(audioBuffer.getChannelData(0));
     const right16 = channels > 1 ? floatTo16BitPCM(audioBuffer.getChannelData(1)) : null;
 
-    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 128);
+    // mp3 is a less efficient codec than Opus per bit, so matching the
+    // recording's own bitrate here isn't enough to avoid audibly
+    // compounding the loss on this second, transcode pass — 192kbps keeps
+    // it close to transparent too.
+    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 192);
     const blockSize = 1152;
     const chunks = [];
     for (let i = 0; i < left16.length; i += blockSize) {
@@ -2067,6 +2071,18 @@
       const allKicks = allKicksForQuestion();
       if (resetBtn) resetBtn.hidden = takes.length === 0;
 
+      // the "🎙 Takes · take#N" nav button (on the OTHER swiped page) was
+      // only ever set once, when this whole panel was first built — a take
+      // recorded/logged/deleted without leaving the panel in between never
+      // touched it, so it kept showing whatever count was true at that
+      // first render. Recompute it here too, since renderTakes() already
+      // runs after every action that changes the take count.
+      const navBtn = readingBody.querySelector("#takesNav");
+      if (navBtn) {
+        const count = getPracticeCount(questionId);
+        navBtn.textContent = `🎙 Takes${count > 0 ? ` · take#${count}` : ""} ›`;
+      }
+
       list.innerHTML = "";
       if (!takes.length) {
         const empty = document.createElement("p");
@@ -2290,15 +2306,35 @@
         recordBtn.addEventListener("click", async () => {
           if (!recording) {
             try {
-              stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+              // a bare `{ audio: true }` gets the browser's default WebRTC
+              // processing chain — echoCancellation/noiseSuppression/
+              // autoGainControl all default on, tuned for VoIP calls, not
+              // clean voice recording (it's the same reason a phone call
+              // sounds thinner than a voice-memo of the same voice).
+              // Explicitly turning that off is most of the gap against a
+              // native recorder app.
+              stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                  echoCancellation: false,
+                  noiseSuppression: false,
+                  autoGainControl: false,
+                  channelCount: { ideal: 1 },
+                  sampleRate: { ideal: 48000 },
+                },
+              });
             } catch (err) {
               showScriptStatus(status, "Mic access denied/unavailable: " + ((err && err.name) || err), true);
               return;
             }
             const mimeType = pickRecMimeType();
             chunks = [];
+            // the default encoder bitrate for an unconstrained recording is
+            // tuned low; 128kbps Opus is at/near transparent for a single
+            // spoken voice without ballooning file size for a short take.
+            const recorderOpts = { audioBitsPerSecond: 128000 };
+            if (mimeType) recorderOpts.mimeType = mimeType;
             try {
-              mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+              mediaRecorder = new MediaRecorder(stream, recorderOpts);
             } catch (err) {
               showScriptStatus(status, "Couldn't start the recorder: " + err.message, true);
               stream.getTracks().forEach((tr) => tr.stop());
