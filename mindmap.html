@@ -1116,6 +1116,29 @@
   const readingBody = document.getElementById("readingBody");
   const reading = document.getElementById("reading");
 
+  // ---- "resume where I left off": which topic tree, which node's panel
+  // was open, whether it was showing the Takes page, and fullscreen —
+  // saved on every change that affects any of those, restored once at the
+  // very bottom of this script (after everything it needs is defined).
+  // Matters most for a Home Screen shortcut, which always cold-starts the
+  // page fresh rather than keeping a backgrounded tab alive. ----
+  const APP_STATE_KEY = "opic-app-state";
+  function persistAppState() {
+    try {
+      const pages = document.getElementById("readingPages");
+      const appEl = document.getElementById("app");
+      localStorage.setItem(
+        APP_STATE_KEY,
+        JSON.stringify({
+          topicIndex: state.topicIndex,
+          currentNodeId: state.current ? state.current.id : null,
+          showTakes: !!(pages && pages.classList.contains("show-takes")),
+          focusMode: !!(appEl && appEl.classList.contains("focus-mode")),
+        })
+      );
+    } catch (e) {}
+  }
+
   const zoom = d3.zoom()
     .scaleExtent([0.35, 3])
     .on("zoom", (event) => g.attr("transform", event.transform));
@@ -1215,6 +1238,7 @@
     nodeLayer.selectAll("g.node").classed("current", (d) => node && d.master.id === node.id);
     if (!node) {
       readingBody.innerHTML = '<p class="reading-empty">Select any node to read its full text here — the tree only ever shows short labels.</p>';
+      persistAppState();
       return;
     }
     const t = node.data.type;
@@ -1296,6 +1320,7 @@
     }
     if (t === "paragraph") wireKickEditor(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
+    persistAppState();
   }
 
   // the editable per-question script box: defaults to that question's
@@ -1873,6 +1898,7 @@
     // viewport, the other clipped by .reading's own overflow-x:hidden.
     function showPage(which) {
       pages.classList.toggle("show-takes", which === "takes");
+      persistAppState();
     }
 
     if (navBtn) navBtn.addEventListener("click", () => showPage("takes"));
@@ -3151,6 +3177,7 @@
   function setFocusMode(on) {
     appEl.classList.toggle("focus-mode", on);
     renderTree(false);
+    persistAppState();
   }
   document.getElementById("focusToggle").addEventListener("click", () => {
     setFocusMode(!appEl.classList.contains("focus-mode"));
@@ -3283,4 +3310,38 @@
 
   renderGrove();
   renderTree(true);
+
+  // resume where the last session left off — same topic tree, same node's
+  // panel open (revealed through its collapsed ancestors, same as a search
+  // result jump), same swiped-to page, same fullscreen state. A no-op the
+  // very first time (nothing saved yet) or if the saved node no longer
+  // exists (data was re-parsed/rebuilt since).
+  (function restoreLastState() {
+    let saved = null;
+    try {
+      saved = JSON.parse(localStorage.getItem(APP_STATE_KEY) || "null");
+    } catch (e) {}
+    if (!saved || typeof saved !== "object") return;
+
+    const topicIdx = Number(saved.topicIndex);
+    if (Number.isInteger(topicIdx) && topicIdx >= 0 && topicIdx < roots.length && topicIdx !== state.topicIndex) {
+      state.topicIndex = topicIdx;
+      renderGrove();
+      renderTree(true);
+    }
+
+    if (saved.currentNodeId) {
+      const target = findAndReveal(roots[state.topicIndex], saved.currentNodeId);
+      if (target) {
+        renderTree(false);
+        focusOnNode(saved.currentNodeId);
+        if (saved.showTakes) {
+          const navBtn = readingBody.querySelector("#takesNav");
+          if (navBtn) navBtn.click();
+        }
+      }
+    }
+
+    if (saved.focusMode) setFocusMode(true);
+  })();
 </script>

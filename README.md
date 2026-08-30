@@ -15,6 +15,15 @@ Screen shortcut to the GitHub Pages copy shows the tree, not a generic
 icon. `index.html`'s redirect page carries the same icon, in case a
 shortcut gets saved from the bare Pages URL before the redirect fires.
 
+Opening the page also **resumes right where the last visit left off** —
+same topic tree, same question/beat panel open, same Takes-page-or-not,
+same fullscreen state — restored from `localStorage` the moment the page
+loads. This matters most for a Home Screen shortcut, since tapping one
+always cold-starts the page fresh rather than switching back to a
+backgrounded tab. There's nothing to turn on; every click that changes
+one of those saves it automatically, and the very first visit (nothing
+saved yet) just opens to the plain default view as before.
+
 Open **`mindmap.html`** directly in a browser — it's a single self-contained
 file (D3 + inlined data, loaded from the CDN allow-list), no build step or
 server required.
