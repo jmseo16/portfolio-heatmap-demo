@@ -553,6 +553,13 @@
     overflow-y: auto;
     padding: 20px;
   }
+  /* the swipeable pages' off-screen half must clip exactly at readingBody's
+     own edge, not .reading's outer box — clipping on .reading instead would
+     leave its own 20px padding strip see-through, showing a sliver of
+     whichever page is parked off to the side. */
+  #readingBody {
+    overflow-x: hidden;
+  }
   .reading-empty {
     color: var(--muted);
     font-size: 13.5px;
@@ -601,6 +608,51 @@
     line-height: 1.6;
     color: var(--ink);
   }
+  /* two-page swipeable reading panel: page 1 = Takes/recording, page 2 =
+     everything else. Both pages sit side by side at 200% width; a class
+     toggle slides the whole strip so only one half is ever in the
+     viewport at rest — touch-action:pan-y lets vertical scroll inside a
+     page through untouched while JS captures horizontal drag intent. */
+  .reading-pages {
+    display: flex;
+    width: 200%;
+    transform: translateX(-50%);
+    transition: transform 240ms ease;
+    touch-action: pan-y;
+  }
+  .reading-pages.show-takes { transform: translateX(0); }
+  .reading-page {
+    width: 50%;
+    flex-shrink: 0;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+  .reading-page-takes { padding-right: 14px; }
+  .reading-page-main { padding-left: 14px; }
+  .reading-page-nav {
+    display: block;
+    width: 100%;
+    text-align: left;
+    margin: 4px 0 2px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: 12.5px;
+    font-weight: 500;
+  }
+  .reading-page-back {
+    border: none;
+    background: none;
+    padding: 2px 4px;
+    margin-bottom: 6px;
+    color: var(--paragraph);
+    font-size: 11.5px;
+    font-weight: 500;
+  }
+  .reading-page-back:hover, .reading-page-nav:hover { text-decoration: underline; }
+
   .reading-kicks {
     margin-top: 0;
     display: flex;
@@ -923,9 +975,9 @@
       <button class="btn" id="expandAll" type="button">Expand tree</button>
       <button class="btn" id="collapseAll" type="button">Collapse tree</button>
       <button class="btn" id="scriptsVisibleToggle" type="button" aria-pressed="false">👁 View all scripts</button>
-      <button class="btn" id="exportAllBtn" type="button">⬇ Export all scripts</button>
-      <button class="btn" id="importAllBtn" type="button">⬆ Import all scripts</button>
-      <input type="file" id="importAllInput" accept=".txt,.csv,text/plain,text/csv" style="display:none" aria-hidden="true" tabindex="-1">
+      <button class="btn" id="exportAllBtn" type="button">⬇ Export data</button>
+      <button class="btn" id="importAllBtn" type="button">⬆ Import data</button>
+      <input type="file" id="importAllInput" accept=".json,.txt,.csv,application/json,text/plain,text/csv" style="display:none" aria-hidden="true" tabindex="-1">
     </div>
     <span class="topbar-status" id="topbarStatus"></span>
   </header>
@@ -1121,8 +1173,16 @@
     html += `<div class="reading-chip chip-${t}"><span class="dot"></span>${typeLabel(t)}</div>`;
     html += `<h3>${escapeHtml(node.data.full || node.data.name)}</h3>`;
     if (t === "question") {
-      html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
       const hasTakes = getPracticeCount(node.data.id) > 0;
+      const takeCount = getPracticeCount(node.data.id);
+      html += `<div class="reading-pages" id="readingPages">`;
+      // page 1 (off-screen at rest, DOM-first so translateX(-50%) parks it
+      // to the left, clipped by .reading's overflow-x:hidden — both pages
+      // stay flex children the whole time, never display:none, since
+      // removing one from the flex row would collapse the other to the
+      // wrong slot): the Takes/recording view, swiped in from the right.
+      html += `<div class="reading-page reading-page-takes" id="readingPageTakes">`;
+      html += `<button type="button" class="reading-page-back" id="takesBack">‹ Back</button>`;
       html += `<div class="practice-head"><span class="script-label">Takes</span><div class="script-actions">`;
       html += `<button type="button" class="takes-record" id="takesRecord">🎙 Record</button>`;
       html += `<button type="button" class="practice-log" id="takesLog">+ Log without recording</button>`;
@@ -1130,6 +1190,13 @@
       html += `</div></div>`;
       html += `<span class="script-status" id="takesStatus"></span>`;
       html += `<div id="takesList"></div>`;
+      html += `</div>`;
+      // page 2 (the default view): what the panel looked like before Takes
+      // was added — hint text, kicks-to-use, the script toggle — plus a
+      // small nav button into the Takes page above.
+      html += `<div class="reading-page reading-page-main" id="readingPageMain">`;
+      html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
+      html += `<button type="button" class="reading-page-nav" id="takesNav">🎙 Takes${hasTakes ? ` · take#${takeCount}` : ""} ›</button>`;
       html += allKicksHtml(node.data);
       html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
@@ -1141,6 +1208,8 @@
       html += `<textarea class="script-box" spellcheck="false" aria-label="Editable script for this question"></textarea>`;
       html += `<span class="script-status"></span>`;
       html += `<input type="file" class="script-file-input" accept=".txt,.csv,text/plain,text/csv" aria-hidden="true" tabindex="-1">`;
+      html += `</div>`;
+      html += `</div>`;
       html += `</div>`;
     }
     if (t === "paragraph") {
@@ -1174,6 +1243,7 @@
       }
 
       wireTakesSection(node);
+      wireSwipePages(node);
     }
     if (t === "paragraph") wireKickEditor(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
@@ -1389,6 +1459,63 @@
     return "webm";
   }
 
+  // base64 <-> Blob, for folding recording audio into the JSON "Export
+  // data" file (IndexedDB Blobs have no other portable text form).
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = String(reader.result || "");
+        const comma = result.indexOf(",");
+        resolve(comma === -1 ? result : result.slice(comma + 1));
+      };
+      reader.onerror = () => reject(reader.error);
+      reader.readAsDataURL(blob);
+    });
+  }
+  function base64ToBlob(base64, mimeType) {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mimeType || "application/octet-stream" });
+  }
+
+  // every recording in IndexedDB, base64-encoded. The cursor walk stays
+  // fully synchronous (just collecting {key, blob, ...} — an IDB
+  // transaction auto-commits the moment the event loop goes idle with no
+  // pending request, so awaiting blobToBase64 *between* cursor.continue()
+  // calls would let it close mid-walk); base64 conversion happens
+  // afterward, once the transaction is already done.
+  async function collectAllRecordings() {
+    const db = await openRecDb();
+    if (!db) return [];
+    const raw = await new Promise((resolve) => {
+      const tx = db.transaction(REC_STORE, "readonly");
+      const store = tx.objectStore(REC_STORE);
+      const out = [];
+      const req = store.openCursor();
+      req.onsuccess = () => {
+        const cursor = req.result;
+        if (!cursor) {
+          resolve(out);
+          return;
+        }
+        const { blob, mimeType, createdAt } = cursor.value || {};
+        if (blob) out.push({ key: cursor.key, blob, mimeType, createdAt });
+        cursor.continue();
+      };
+      req.onerror = () => resolve(out);
+    });
+    const converted = [];
+    for (const entry of raw) {
+      try {
+        const dataBase64 = await blobToBase64(entry.blob);
+        converted.push({ key: entry.key, mimeType: entry.mimeType, dataBase64, createdAt: entry.createdAt });
+      } catch (e) {}
+    }
+    return converted;
+  }
+
   // ---- kick-phrase editing: same localStorage-override pattern as the
   // script box, but a kick is also a real node in the tree (not just text
   // in a panel), so an edit has to update three things in step: the raw
@@ -1541,6 +1668,72 @@
       showScriptStatus(statusEl, "Couldn't save the file.", true);
       return false;
     }
+  }
+
+  // ---- the two-page swipeable reading panel: page 1 is the Takes/
+  // recording view, page 2 is everything the panel showed before Takes
+  // existed (hint text, kicks-to-use, script). A right-swipe (or the
+  // "🎙 Takes ›" button) reveals page 1; a left-swipe (or "‹ Back") returns
+  // to page 2. Rewired fresh on every render like wireTakesSection/
+  // wireKickEditor — so its pointer listeners must stay gesture-scoped
+  // (added on pointerdown, removed on pointerup/cancel) rather than bound
+  // once and left on window, or repeated question-clicks over a session
+  // would pile up stale closures on detached DOM. ----
+  function wireSwipePages(node) {
+    const pages = readingBody.querySelector("#readingPages");
+    const takesPage = readingBody.querySelector("#readingPageTakes");
+    const mainPage = readingBody.querySelector("#readingPageMain");
+    const navBtn = readingBody.querySelector("#takesNav");
+    const backBtn = readingBody.querySelector("#takesBack");
+    if (!pages || !takesPage || !mainPage) return;
+
+    // both pages stay flex children the whole time (never display:none —
+    // that would drop the sole remaining item to the wrong slot); the
+    // class toggle just slides the strip so only one half is in the
+    // viewport, the other clipped by .reading's own overflow-x:hidden.
+    function showPage(which) {
+      pages.classList.toggle("show-takes", which === "takes");
+    }
+
+    if (navBtn) navBtn.addEventListener("click", () => showPage("takes"));
+    if (backBtn) backBtn.addEventListener("click", () => showPage("main"));
+
+    let startX = null;
+    let startY = null;
+    let dragging = false;
+    let horizontal = null;
+
+    function onPointerMove(e) {
+      if (!dragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+      if (horizontal === null) {
+        if (Math.abs(dx) < 12 && Math.abs(dy) < 12) return;
+        horizontal = Math.abs(dx) > Math.abs(dy);
+      }
+      if (horizontal) e.preventDefault();
+    }
+    function endDrag(e) {
+      if (!dragging) return;
+      dragging = false;
+      window.removeEventListener("pointermove", onPointerMove);
+      window.removeEventListener("pointerup", endDrag);
+      window.removeEventListener("pointercancel", endDrag);
+      if (!horizontal) return;
+      const dx = e.clientX - startX;
+      if (dx <= -50) showPage("main");
+      else if (dx >= 50) showPage("takes");
+    }
+    pages.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      startX = e.clientX;
+      startY = e.clientY;
+      dragging = true;
+      horizontal = null;
+      window.addEventListener("pointermove", onPointerMove);
+      window.addEventListener("pointerup", endDrag);
+      window.addEventListener("pointercancel", endDrag);
+    });
   }
 
   // ---- the "Takes" section on a question panel: record (or log without
@@ -2443,15 +2636,74 @@
     return { applied, unknown, kicksApplied, practiceApplied };
   }
 
+  // ---- "Export data" / "Import data": everything above, PLUS the actual
+  // recording files. Recordings are binary, so the file is now JSON — a
+  // "scriptsText" field carrying the exact same heading-based text
+  // buildAllScriptsText() always produced (still handable to Claude as-is
+  // for the Doc-editing workflow), a "takes" map with each question's full
+  // take metadata (not just a bare count, so hasRecording/kicksMarked
+  // round-trip losslessly), and a "recordings" array of every IndexedDB
+  // entry, base64-encoded. Importing a JSON file like this REPLACES each
+  // question's takes wholesale (a real restore, not the old count-only
+  // pad-up) and restores every recording blob; importing an old plain
+  // .txt export still works too, via the same pad-up-only path as before. ----
+  const DATA_EXPORT_VERSION = 2;
+
+  async function buildDataExportPayload() {
+    const takesByQuestion = {};
+    questionIndex.forEach((e) => {
+      const t = takesFor(e.id);
+      if (t.length) takesByQuestion[e.id] = t;
+    });
+    const recordings = await collectAllRecordings();
+    return {
+      version: DATA_EXPORT_VERSION,
+      exportedAt: new Date().toISOString(),
+      scriptsText: buildAllScriptsText(),
+      takes: takesByQuestion,
+      recordings,
+    };
+  }
+
+  async function applyDataExportPayload(payload) {
+    const entries = parseAllScriptsText(String(payload.scriptsText || ""));
+    const { applied, unknown, kicksApplied } = applyImportedScripts(entries);
+    let takesRestored = 0;
+    const takesMap = payload.takes && typeof payload.takes === "object" ? payload.takes : {};
+    Object.keys(takesMap).forEach((qid) => {
+      const arr = takesMap[qid];
+      if (Array.isArray(arr)) {
+        saveTakes(qid, arr);
+        takesRestored++;
+      }
+    });
+    let recordingsRestored = 0;
+    for (const rec of payload.recordings || []) {
+      if (!rec || !rec.key || !rec.dataBase64) continue;
+      try {
+        const blob = base64ToBlob(rec.dataBase64, rec.mimeType);
+        const ok = await putRecording(rec.key, { blob, mimeType: rec.mimeType, createdAt: rec.createdAt });
+        if (ok) recordingsRestored++;
+      } catch (e) {}
+    }
+    return { applied, unknown, kicksApplied, takesRestored, recordingsRestored };
+  }
+
   const topbarStatus = document.getElementById("topbarStatus");
 
-  document.getElementById("exportAllBtn").addEventListener("click", () => {
-    saveTextFile(
-      "opic-forest-all-scripts.txt",
-      buildAllScriptsText(),
-      topbarStatus,
-      `Exported ${questionIndex.length} scripts.`
-    );
+  document.getElementById("exportAllBtn").addEventListener("click", async () => {
+    showScriptStatus(topbarStatus, "Gathering scripts, kicks, takes, and recordings…");
+    try {
+      const payload = await buildDataExportPayload();
+      await saveTextFile(
+        "opic-forest-data.json",
+        JSON.stringify(payload),
+        topbarStatus,
+        `Exported ${questionIndex.length} scripts and ${payload.recordings.length} recording${payload.recordings.length === 1 ? "" : "s"}.`
+      );
+    } catch (e) {
+      showScriptStatus(topbarStatus, "Couldn't export data.", true);
+    }
   });
 
   const importAllInput = document.getElementById("importAllInput");
@@ -2461,8 +2713,37 @@
     importAllInput.value = "";
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      const entries = parseAllScriptsText(String(reader.result || ""));
+    reader.onload = async () => {
+      const text = String(reader.result || "");
+      let payload = null;
+      try {
+        const parsed = JSON.parse(text);
+        if (parsed && typeof parsed === "object" && typeof parsed.scriptsText === "string") payload = parsed;
+      } catch (e) {}
+
+      if (payload) {
+        showScriptStatus(topbarStatus, "Restoring scripts, kicks, takes, and recordings…");
+        try {
+          const { applied, unknown, kicksApplied, takesRestored, recordingsRestored } = await applyDataExportPayload(payload);
+          renderTree(false);
+          if (state.current && state.current.data && state.current.data.type === "question") setCurrent(state.current);
+          let msg = applied ? `Imported ${applied} script${applied === 1 ? "" : "s"}` : "No matching questions found in that file.";
+          const extras = [];
+          if (kicksApplied) extras.push(`${kicksApplied} beats' kick phrases`);
+          if (takesRestored) extras.push(`${takesRestored} question${takesRestored === 1 ? "" : "s"}' takes`);
+          if (recordingsRestored) extras.push(`${recordingsRestored} recording${recordingsRestored === 1 ? "" : "s"}`);
+          msg += extras.length ? ` and ${extras.join(", ")}.` : ".";
+          if (unknown.length) msg += ` ${unknown.length} unrecognized tag${unknown.length === 1 ? "" : "s"} skipped.`;
+          showScriptStatus(topbarStatus, msg, applied === 0);
+        } catch (e) {
+          showScriptStatus(topbarStatus, "Couldn't restore that file.", true);
+        }
+        return;
+      }
+
+      // legacy plain-text export (from before recordings existed, or a
+      // hand-edited .txt) — same pad-up-only path as always.
+      const entries = parseAllScriptsText(text);
       const { applied, unknown, kicksApplied, practiceApplied } = applyImportedScripts(entries);
       let msg = applied ? `Imported ${applied} script${applied === 1 ? "" : "s"}` : "No matching questions found in that file.";
       if (applied) {

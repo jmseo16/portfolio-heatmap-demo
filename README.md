@@ -55,17 +55,21 @@ click again to collapse. A search box in the top bar matches across every
 topic at once (question text, beat text, kick phrases) and jumps + expands
 the tree to the result.
 
-Clicking a question also shows its **Takes** — a history of every time
-you've rehearsed it, right under the hint text. **🎙 Record** captures
-audio (mic permission prompt, then Stop when you're done) and adds it as
-a new take; **+ Log without recording** adds one with no audio, for a
-silent run-through. Each take gets its own row: ▶ Play it back, ⬇
-download it, or 🗑 delete just that one — and a per-take **kick-phrase
-checklist**, click-to-toggle, so after listening back you can mark which
-kicks you actually landed ("kick check: 5/9 marked"). **↺ Reset all**
-clears every take for the question (asks to confirm first, since it
-deletes recordings too). The highest take number reached shows on the
-question's node in the tree itself too, as a small "take#N" chip on its
+A question's panel is two swipeable pages, not one long scroll. The
+default page is what it always was — hint text, then the kick phrases —
+plus a **"🎙 Takes ›"** button; tap it (or swipe right anywhere on the
+panel) to slide over to the second page, **Takes**: a history of every
+time you've rehearsed this question. A **"‹ Back"** button (or a
+left-swipe) slides back. **🎙 Record** captures audio (mic permission
+prompt, then Stop when you're done) and adds it as a new take; **+ Log
+without recording** adds one with no audio, for a silent run-through.
+Each take gets its own row: ▶ Play it back, ⬇ download it, or 🗑 delete
+just that one — and a per-take **kick-phrase checklist**, click-to-toggle,
+so after listening back you can mark which kicks you actually landed
+("kick check: 5/9 marked"). **↺ Reset all** clears every take for the
+question (asks to confirm first, since it deletes recordings too). The
+highest take number reached shows both on the "🎙 Takes" button itself and
+on the question's node in the tree, as a small "take#N" chip on its
 top-left corner — deliberately not the same spot as the tree's own
 branch-count badge, which sits centered on the pill's outward side edge,
 so the two never collide.
@@ -78,8 +82,9 @@ download/delete for a take recorded elsewhere) works the same in both
 places; only capturing new audio needs the GitHub Pages copy of this page
 (see "Two ways to open this, and why" above). Recordings themselves live
 in this browser's IndexedDB (not `localStorage` — audio doesn't fit its
-small quota) — per-device only, same as everything else here, so use a
-take's ⬇ download if you want to keep or move a recording.
+small quota) — per-device only, same as everything else here. Use a
+take's ⬇ download to grab one recording, or the top bar's **Export data**
+(below) to back up every recording at once.
 
 Below that is a **"Kick phrases to use"** list, shown right away — every
 beat's kick phrases for that question, grouped by beat, never hidden — so
@@ -113,16 +118,32 @@ The details panel is resizable — on a wide-enough screen, drag the thin
 vertical handle on its left edge to change its width; on a narrow screen
 (where it's a bottom sheet instead of a side panel), drag the horizontal
 grip bar across its top edge to change its height instead. Either way,
-the size you land on is remembered for next time. And the top bar has an
-**Export all scripts** /
-**Import all scripts** pair that round-trips every question's script (not
-just one) in a single `.txt` file, each question under its own
-`===== tag | topic | question =====` heading — export it, edit as many
-answers as you like, and either load it back into the page or hand the
-whole file to Claude to fold every edit back into its source Doc at once.
-Each question's block also carries a `[practice]` section with its
-current practice count, so the bulk file round-trips take-counts too, not
-just scripts and kicks.
+the size you land on is remembered for next time.
+
+The top bar's **Export data** / **Import data** pair is a full backup of
+everything this page has ever saved about your practice — not just
+scripts. It downloads a single `opic-forest-data.json` file bundling:
+
+- Every question's script, under the same `===== tag | topic | question
+  =====` heading format this pair has always used (still perfectly
+  readable text — it's the `scriptsText` field inside the JSON — and
+  still the thing to hand back to Claude to fold an edit into its source
+  Doc; Claude just reads that field instead of the whole file being that
+  text directly).
+- Every beat's kick phrases, in order.
+- Every question's full **Takes** history — not just a count: which
+  takes have a recording, and exactly which kick phrases you marked as
+  used on each one.
+- The recordings themselves, base64-encoded inside the same file, so
+  they travel with everything else in one download.
+
+Load that file back in — on this device after clearing browser data, or
+on a different device or browser entirely — and Import restores all of
+it: scripts, kicks, every take, and every recording's actual audio, back
+into that browser's storage. An older plain-`.txt` export (from before
+recordings existed) still imports fine too, via the same fallback path as
+always; it just won't have any takes or recordings to restore, since it
+never captured them.
 
 Clicking a script beat (a "(intro)"/"(body N)"/"(closing)" node) opens the
 same kind of editor for its **kick phrases**: add one, edit one in place,
@@ -130,11 +151,11 @@ delete one with its `×`, drag its `⠿` handle to reorder it, or reset the
 beat back to its original set — every change (including a reorder) shows
 up immediately as kick-phrase nodes under that beat in the tree itself,
 in the same order, not just in the panel. These edits also autosave to
-`localStorage` and are included in the bulk export/import above: each
-question's block in the exported `.txt` carries a `[kicks]` section
-listing every one of its beats' kick phrases (tagged with that beat's own
-id, so an edit survives even if you reorder or relabel lines), so importing
-a file restores scripts *and* kick phrases together, for every topic at
+`localStorage` and are included in the "Export data" file above: each
+question's block in its `scriptsText` carries a `[kicks]` section listing
+every one of its beats' kick phrases (tagged with that beat's own id, so
+an edit survives even if you reorder or relabel lines), so importing a
+file restores scripts *and* kick phrases together, for every topic at
 once, not just whichever one happens to be on screen.
 
 ## Updating after you edit the spreadsheet
