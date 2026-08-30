@@ -815,6 +815,43 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
+  /* select-text-in-script "add as a kick" popup — position:fixed, kept on
+     <body> rather than inside the reading panel (see the JS comment by
+     ensureKickAddPopup for why). */
+  .kick-add-popup {
+    position: fixed;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-width: 240px;
+    padding: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+  }
+  .kick-add-popup-label {
+    padding: 4px 6px 6px;
+    font-size: 10.5px;
+    line-height: 1.4;
+    color: var(--muted);
+  }
+  .kick-add-popup button {
+    text-align: left;
+    border: none;
+    background: none;
+    padding: 6px 8px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-family: inherit;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .kick-add-popup button:hover,
+  .kick-add-popup button:focus-visible {
+    background: var(--surface-2);
+  }
   .btn-script {
     display: inline-flex;
     align-items: center;
@@ -1332,7 +1369,7 @@
       html += `<div class="reading-page reading-page-main" id="readingPageMain">`;
       html += `<p class="full-text">Tap this question in the tree to reveal its script beats, then tap a beat to reveal its kick phrases.</p>`;
       html += `<button type="button" class="reading-page-nav" id="takesNav">🎙 Takes${hasTakes ? ` · take#${takeCount}` : ""} ›</button>`;
-      html += allKicksHtml(node.data);
+      html += `<div id="allKicksWrap">${allKicksHtml(node.data)}</div>`;
       html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
       html += `<div class="script-head"><span class="script-label">Your script</span><div class="script-actions">`;
@@ -1878,6 +1915,136 @@
       if (ALL_NODES[i].node.id.startsWith(paragraphData.id + "-k")) ALL_NODES.splice(i, 1);
     }
     (paragraphData.children || []).forEach((k) => ALL_NODES.push({ node: k, topic: topicData }));
+  }
+
+  // finds a node anywhere in the (possibly partly collapsed) hierarchy by
+  // id, without expanding anything on the way — unlike findAndReveal
+  // (search-result jump), which deliberately does expand every ancestor.
+  // Used when a kick gets added to some *other* beat than whichever one is
+  // currently open, so the tree updates in place without snapping open a
+  // branch the viewer didn't ask to see.
+  function findNodeById(root, id) {
+    let target = null;
+    (function walk(n) {
+      if (n.id === id) {
+        target = n;
+        return true;
+      }
+      const kids = n.children || n._children;
+      if (!kids) return false;
+      for (const k of kids) {
+        if (walk(k)) return true;
+      }
+      return false;
+    })(root);
+    return target;
+  }
+
+  // adds one kick phrase to a beat by id — used by the "select text in the
+  // script, pick a beat" popup below, where the beat being edited usually
+  // isn't the one currently open (or even expanded) in the tree. Returns
+  // "added", "duplicate" (already there, case-insensitive), or "error".
+  function addKickToParagraph(paragraphId, kickText) {
+    const p = paragraphById[paragraphId];
+    const cleaned = (kickText || "").trim();
+    if (!p || !cleaned) return "error";
+    const kicks = effectiveKicksFor(p);
+    if (kicks.some((k) => k.toLowerCase() === cleaned.toLowerCase())) return "duplicate";
+    kicks.push(cleaned);
+    try {
+      localStorage.setItem(kicksKey(p.id), JSON.stringify(kicks));
+    } catch (e) {}
+    p.children = kicks.map((text, i) => ({ id: `${p.id}-k${i}`, name: text, type: "kick", full: text }));
+    reindexKicksFor(p);
+    const master = findNodeById(roots[state.topicIndex], p.id);
+    if (master) rebuildKickChildren(master, false);
+    renderTree(false);
+    return "added";
+  }
+
+  // ---- select text in "Your script", pick which beat it's a kick phrase
+  // for: a small popup near the selection listing every beat of this
+  // question by name. One popup element, reused across every question's
+  // panel (recreated content per show, not per wireScriptBox call) — kept
+  // on <body> rather than inside the reading panel because .reading-pages
+  // carries a CSS transform for the swipe animation, and a transformed
+  // ancestor becomes the containing block for position:fixed descendants,
+  // which would break the "position near the viewport click point" math. ----
+  let kickAddPopupEl = null;
+  let kickAddPopupCtx = null; // { node, text } for whatever selection is pending
+  let kickAddPopupShownAt = 0;
+  // scroll-to-close (below) has to ignore a scroll that happens right as
+  // the popup opens: focusing the textarea to select text in the first
+  // place can itself trigger the browser's own "scroll the focused
+  // element into view" behavior if the box wasn't already fully visible —
+  // that fires asynchronously, a beat after the popup is shown, and would
+  // otherwise close it before anyone actually saw it.
+  const KICK_ADD_POPUP_SCROLL_GRACE_MS = 400;
+  function hideKickAddPopup() {
+    if (kickAddPopupEl) kickAddPopupEl.hidden = true;
+    kickAddPopupCtx = null;
+  }
+  function ensureKickAddPopup() {
+    if (kickAddPopupEl) return kickAddPopupEl;
+    const el = document.createElement("div");
+    el.className = "kick-add-popup";
+    el.id = "kickAddPopup";
+    el.hidden = true;
+    document.body.appendChild(el);
+    el.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-beat-id]");
+      if (!btn || !kickAddPopupCtx) return;
+      const { node, text } = kickAddPopupCtx;
+      const result = addKickToParagraph(btn.dataset.beatId, text);
+      hideKickAddPopup();
+      // .script-status also matches the Takes page's own status line
+      // (#takesStatus) — scope to the script panel specifically, or the
+      // message lands on the wrong (currently swiped-away) page.
+      const statusEl = readingBody.querySelector(".script-panel .script-status");
+      if (result === "added") {
+        refreshAllKicksSection(node);
+        showScriptStatus(statusEl, `Added to ${btn.textContent.trim()}.`);
+      } else if (result === "duplicate") {
+        showScriptStatus(statusEl, "That kick's already there.", true);
+      } else {
+        showScriptStatus(statusEl, "Couldn't add that kick.", true);
+      }
+    });
+    document.addEventListener("pointerdown", (e) => {
+      if (!kickAddPopupEl.hidden && !kickAddPopupEl.contains(e.target)) hideKickAddPopup();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") hideKickAddPopup();
+    });
+    kickAddPopupEl = el;
+    return el;
+  }
+  function showKickAddPopup(node, text, x, y) {
+    const beats = node.data.children || [];
+    if (!beats.length) return;
+    const el = ensureKickAddPopup();
+    kickAddPopupCtx = { node, text };
+    const shortText = text.length > 48 ? text.slice(0, 48) + "…" : text;
+    el.innerHTML =
+      `<div class="kick-add-popup-label">Add “${escapeHtml(shortText)}” as a kick to:</div>` +
+      beats.map((p) => `<button type="button" data-beat-id="${escapeHtml(p.id)}">${escapeHtml(p.name)}</button>`).join("");
+    el.hidden = false;
+    kickAddPopupShownAt = Date.now();
+    el.style.left = "0px";
+    el.style.top = "0px";
+    const rect = el.getBoundingClientRect();
+    const maxX = Math.max(8, window.innerWidth - rect.width - 8);
+    const maxY = Math.max(8, window.innerHeight - rect.height - 8);
+    el.style.left = Math.min(Math.max(8, x), maxX) + "px";
+    el.style.top = Math.min(Math.max(8, y), maxY) + "px";
+  }
+
+  // rebuilds just the "Kick phrases to use" list without touching the rest
+  // of the panel — called after adding one from the script-selection
+  // popup, so the new phrase shows up immediately in that list too.
+  function refreshAllKicksSection(node) {
+    const wrap = readingBody.querySelector("#allKicksWrap");
+    if (wrap) wrap.innerHTML = allKicksHtml(node.data);
   }
 
   // grows a textarea to exactly fit its content (no internal scrollbar) —
@@ -2427,6 +2594,27 @@
         localStorage.setItem(key, box.value);
       } catch (e) {}
       autoGrowTextarea(box);
+      hideKickAddPopup();
+    });
+
+    // select a word/phrase in the script, get a small popup right there
+    // asking which beat it's a kick phrase for — this page has no way to
+    // know that on its own (the same words can show up in more than one
+    // beat, or none), so it's always a pick, never a guess. pointerup
+    // (not mouseup) so touch-drag selection on mobile triggers it too.
+    box.addEventListener("pointerup", (e) => {
+      const start = box.selectionStart;
+      const end = box.selectionEnd;
+      if (start === end) {
+        hideKickAddPopup();
+        return;
+      }
+      const text = box.value.slice(start, end).trim();
+      if (!text || text.length > 200) {
+        hideKickAddPopup();
+        return;
+      }
+      showKickAddPopup(node, text, e.clientX, e.clientY);
     });
 
     resetBtn.addEventListener("click", () => {
@@ -3557,6 +3745,16 @@
   });
 
   window.addEventListener("resize", () => renderTree(false));
+  // the kick-add popup is positioned at a fixed viewport point captured at
+  // selection time — scrolling the reading panel (or the page) invalidates
+  // that, so just close it rather than track the scroll. One listener for
+  // the app's whole lifetime, not re-added per question panel. Ignores a
+  // scroll within the grace window right after showing it (see the
+  // comment by kickAddPopupShownAt for why that one doesn't count).
+  reading.addEventListener("scroll", () => {
+    if (Date.now() - kickAddPopupShownAt < KICK_ADD_POPUP_SCROLL_GRACE_MS) return;
+    hideKickAddPopup();
+  });
 
   renderGrove();
   renderTree(true);

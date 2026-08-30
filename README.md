@@ -227,6 +227,18 @@ an edit survives even if you reorder or relabel lines), so importing a
 file restores scripts *and* kick phrases together, for every topic at
 once, not just whichever one happens to be on screen.
 
+Kick phrases can also be added straight from **"Your script"** itself:
+select a word or phrase in the script box and a small popup appears right
+there listing every beat of that question by name ("intro", "body 1",
+"body 2", …) — pick one and the selected text is added as a kick phrase
+for that beat immediately, no need to go find and open that beat's own
+editor first. The page can't guess which beat a phrase belongs to on its
+own (the same words can show up in more than one, or none), so it's
+always a pick, never an auto-detected guess. Adding a phrase that's
+already there for that beat is a no-op (a status message says so rather
+than adding a duplicate); the popup closes on picking a beat, pressing
+Esc, clicking elsewhere, or typing in the script box.
+
 ## Updating after you edit the spreadsheet
 
 The page is generated, not hand-edited — re-run the pipeline instead of
