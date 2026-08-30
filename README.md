@@ -239,6 +239,19 @@ already there for that beat is a no-op (a status message says so rather
 than adding a duplicate); the popup closes on picking a beat, pressing
 Esc, clicking elsewhere, or typing in the script box.
 
+The script box is **locked by default** — a **"✏️ Edit"** button next to
+"Load file" turns typing and text-selection on ("🔒 Done" turns it back
+off). This exists for touch: without it, dragging a finger across the
+script to select a phrase collides with the same drag gesture that swipes
+the panel over to Takes, so on a phone the swipe would win and you'd
+never get a selection. Locked, the script box gets out of the way
+entirely — a touch or drag anywhere over it passes straight through to
+the swipe gesture, exactly like dragging over the hint text or the kick
+list already does. Unlocked, it's the opposite: the box takes the drag
+for itself (typing or selecting text), and swiping the panel needs to
+start somewhere outside it until you tap "🔒 Done". Every fresh look at a
+question's panel starts locked again — it's not a saved preference.
+
 ## Updating after you edit the spreadsheet
 
 The page is generated, not hand-edited — re-run the pipeline instead of

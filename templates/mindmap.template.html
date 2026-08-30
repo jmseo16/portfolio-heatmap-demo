@@ -1050,7 +1050,7 @@
     align-items: baseline;
     gap: 10px;
   }
-  .script-reset, .script-download, .script-load {
+  .script-reset, .script-download, .script-load, .script-edit-toggle {
     border: none;
     background: none;
     padding: 2px 4px;
@@ -1059,7 +1059,11 @@
     font-weight: 500;
     cursor: pointer;
   }
-  .script-reset:hover, .script-download:hover, .script-load:hover { text-decoration: underline; }
+  .script-reset:hover, .script-download:hover, .script-load:hover, .script-edit-toggle:hover { text-decoration: underline; }
+  .script-edit-toggle[aria-pressed="true"] {
+    color: var(--kick);
+    text-decoration: underline;
+  }
   .script-file-input { display: none; }
   .script-status {
     display: block;
@@ -1085,6 +1089,17 @@
        script just reads straight down the page. */
     overflow: hidden;
     resize: none;
+  }
+  /* default state: pointer-events:none makes a touch/drag over the box
+     pass straight through to the swipe-page gesture behind it (see
+     wireSwipePages) instead of starting a native text selection that
+     would otherwise fight it — tap "✏️ Edit" first to type or select. */
+  .script-box.locked {
+    pointer-events: none;
+    opacity: 0.85;
+  }
+  .script-box:not(.locked) {
+    border-color: var(--kick);
   }
   .btn-script:hover { opacity: 0.9; }
 
@@ -1373,11 +1388,12 @@
       html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
       html += `<div class="script-head"><span class="script-label">Your script</span><div class="script-actions">`;
+      html += `<button type="button" class="script-edit-toggle" id="scriptEditToggle" aria-pressed="false">✏️ Edit</button>`;
       html += `<button type="button" class="script-load">⬆ Load file</button>`;
       html += `<button type="button" class="script-download">⬇ Save as .txt</button>`;
       html += `<button type="button" class="script-reset">↺ Reset to original</button>`;
       html += `</div></div>`;
-      html += `<textarea class="script-box" spellcheck="false" aria-label="Editable script for this question"></textarea>`;
+      html += `<textarea class="script-box locked" readonly spellcheck="false" aria-label="Editable script for this question — tap Edit above to select text or make changes"></textarea>`;
       html += `<span class="script-status"></span>`;
       html += `<input type="file" class="script-file-input" accept=".txt,.csv,text/plain,text/csv" aria-hidden="true" tabindex="-1">`;
       html += `</div>`;
@@ -2181,6 +2197,12 @@
     }
     pages.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      // an unlocked ("✏️ Edit" on) script box handles its own drag — for
+      // selecting text (the kick-add popup) or just moving the caret —
+      // so don't also start tracking a swipe over it. A locked box has
+      // pointer-events:none and is never the target here in the first
+      // place, so this only actually matters once unlocked.
+      if (e.target.closest(".script-box:not(.locked)")) return;
       startX = e.clientX;
       startY = e.clientY;
       dragging = true;
@@ -2577,7 +2599,12 @@
     const downloadBtn = readingBody.querySelector(".script-download");
     const loadBtn = readingBody.querySelector(".script-load");
     const fileInput = readingBody.querySelector(".script-file-input");
-    const status = readingBody.querySelector(".script-status");
+    // .script-status also matches the Takes page's own status line
+    // (#takesStatus, same class) which sits earlier in the DOM — scope to
+    // the script panel specifically, or every message here (Reset,
+    // Load file, Save as .txt) lands on the wrong, currently-invisible page.
+    const status = readingBody.querySelector(".script-panel .script-status");
+    const editToggleBtn = readingBody.querySelector("#scriptEditToggle");
     if (!box) return;
     const key = `opic-script:${node.id}`;
     const original = defaultScriptFor(node);
@@ -2588,6 +2615,24 @@
     } catch (e) {}
     box.value = saved !== null ? saved : original;
     autoGrowTextarea(box);
+
+    // locked by default (pointer-events:none — see the .script-box.locked
+    // CSS comment) so a touch/drag over the script area always falls
+    // through to the swipe-page gesture instead of fighting it for a text
+    // selection; tapping "✏️ Edit" unlocks typing and text-selection (for
+    // the kick-add popup) at the cost of swiping now needing to start
+    // somewhere outside the box. Starts locked every time this panel
+    // opens, not remembered across questions.
+    if (editToggleBtn) {
+      function setEditMode(on) {
+        box.classList.toggle("locked", !on);
+        box.readOnly = !on;
+        editToggleBtn.textContent = on ? "🔒 Done" : "✏️ Edit";
+        editToggleBtn.setAttribute("aria-pressed", String(on));
+        if (!on) hideKickAddPopup();
+      }
+      editToggleBtn.addEventListener("click", () => setEditMode(box.classList.contains("locked")));
+    }
 
     box.addEventListener("input", () => {
       try {
