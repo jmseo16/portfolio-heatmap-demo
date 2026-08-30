@@ -718,6 +718,22 @@
     border: none;
   }
   .script-toggle:hover { opacity: 0.9; }
+  /* TEMPORARY: recording feasibility probe (see wireRecProbe) */
+  .rec-probe-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: var(--kick);
+    color: var(--surface);
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+  }
+  .rec-probe-btn:hover { opacity: 0.9; }
+  .rec-probe-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
   .script-head, .practice-head {
     display: flex;
@@ -1029,6 +1045,11 @@
       html += `<button type="button" class="practice-reset" id="practiceReset"${practiceCount ? "" : " hidden"}>↺ Reset</button>`;
       html += `</div></div>`;
       html += `<p class="practice-count-display" id="practiceCountDisplay">take#${practiceCount}</p>`;
+      html += `<div class="practice-head"><span class="script-label">Recording test (temporary)</span></div>`;
+      html += `<p class="full-text">Checking whether this artifact can record audio at all before building the real feature. Tap Record, say a sentence, tap Stop, then try Play and Download.</p>`;
+      html += `<button type="button" class="rec-probe-btn" id="recProbeBtn">🎙 Record</button>`;
+      html += `<span class="script-status" id="recProbeStatus"></span>`;
+      html += `<div id="recProbePlayback"></div>`;
       html += allKicksHtml(node.data);
       html += `<button type="button" class="script-toggle" id="scriptToggle" aria-expanded="${state.scriptsVisible}">${state.scriptsVisible ? "▾ Hide script" : "▸ Show script"}</button>`;
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
@@ -1090,6 +1111,8 @@
           refreshPracticeUI(setPracticeCount(node.id, 0));
         });
       }
+
+      wireRecProbe();
     }
     if (t === "paragraph") wireKickEditor(node);
     if (window.matchMedia("(max-width: 900px)").matches) reading.classList.add("open");
@@ -1290,6 +1313,94 @@
       }
       return false;
     }
+  }
+
+  // ---- TEMPORARY: minimal recording probe (step 0 of the voice-recording
+  // plan) — just prove getUserMedia + MediaRecorder actually work inside
+  // the claude.ai artifact iframe sandbox, with no takes list or kick-
+  // marking UI yet. To be replaced by the real "Takes" section once this
+  // is confirmed working on a real device. ----
+  const REC_MIME_CANDIDATES = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"];
+  function pickRecMimeType() {
+    if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) return "";
+    for (const m of REC_MIME_CANDIDATES) {
+      if (MediaRecorder.isTypeSupported(m)) return m;
+    }
+    return "";
+  }
+
+  function wireRecProbe() {
+    const btn = readingBody.querySelector("#recProbeBtn");
+    const status = readingBody.querySelector("#recProbeStatus");
+    const playback = readingBody.querySelector("#recProbePlayback");
+    if (!btn) return;
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) {
+      btn.disabled = true;
+      showScriptStatus(status, "Recording isn't supported in this browser.", true);
+      return;
+    }
+
+    let mediaRecorder = null;
+    let chunks = [];
+    let stream = null;
+    let recording = false;
+
+    btn.addEventListener("click", async () => {
+      if (!recording) {
+        playback.innerHTML = "";
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (err) {
+          showScriptStatus(status, "Mic access denied/unavailable: " + ((err && err.name) || err), true);
+          return;
+        }
+        const mimeType = pickRecMimeType();
+        chunks = [];
+        try {
+          mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+        } catch (err) {
+          showScriptStatus(status, "Couldn't start the recorder: " + err.message, true);
+          stream.getTracks().forEach((tr) => tr.stop());
+          return;
+        }
+        mediaRecorder.addEventListener("dataavailable", (e) => {
+          if (e.data && e.data.size) chunks.push(e.data);
+        });
+        mediaRecorder.addEventListener("stop", () => {
+          stream.getTracks().forEach((tr) => tr.stop());
+          const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || "audio/webm" });
+          const audio = document.createElement("audio");
+          audio.controls = true;
+          audio.style.display = "block";
+          audio.style.marginTop = "8px";
+          audio.src = URL.createObjectURL(blob);
+          playback.appendChild(audio);
+
+          const dl = document.createElement("button");
+          dl.type = "button";
+          dl.className = "script-download";
+          dl.style.display = "block";
+          dl.style.marginTop = "6px";
+          dl.textContent = "⬇ Download recording";
+          dl.addEventListener("click", () => {
+            const ext = (blob.type || "").includes("mp4") ? "mp4" : "webm";
+            saveTextFile(`opic-rec-test.${ext}`, blob, status, "Saved.");
+          });
+          playback.appendChild(dl);
+
+          showScriptStatus(status, `Recorded ${blob.size} bytes (${blob.type || "unknown type"}).`);
+        });
+        mediaRecorder.start();
+        recording = true;
+        btn.textContent = "⏹ Stop";
+        showScriptStatus(status, "Recording…");
+      } else {
+        mediaRecorder.stop();
+        recording = false;
+        btn.textContent = "🎙 Record";
+      }
+    });
   }
 
   function wireScriptBox(node) {
