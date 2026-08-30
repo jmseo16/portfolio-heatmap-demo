@@ -69,9 +69,12 @@ Handing a downloaded `.txt` back to Claude is the intended way to get an
 edited practice script folded back into the *original* Google Doc — Claude
 can read the file and apply the edit there directly.
 
-The details panel on the right is resizable — drag the thin vertical
-handle on its left edge (desktop only); the width you land on is
-remembered for next time. And the top bar has an **Export all scripts** /
+The details panel is resizable — on a wide-enough screen, drag the thin
+vertical handle on its left edge to change its width; on a narrow screen
+(where it's a bottom sheet instead of a side panel), drag the horizontal
+grip bar across its top edge to change its height instead. Either way,
+the size you land on is remembered for next time. And the top bar has an
+**Export all scripts** /
 **Import all scripts** pair that round-trips every question's script (not
 just one) in a single `.txt` file, each question under its own
 `===== tag | topic | question =====` heading — export it, edit as many

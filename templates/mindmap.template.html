@@ -289,6 +289,11 @@
   .reading-resize:hover::before, .reading-resize.dragging::before {
     background: var(--muted);
   }
+  /* mobile-only drag handle for the bottom-sheet panel's height — a
+     horizontal counterpart to .reading-resize, which only makes sense as
+     a side-panel width drag above the 900px breakpoint */
+  .reading-resize-v { display: none; }
+
   @media (max-width: 900px) {
     .layout { grid-template-columns: 180px 1fr; }
     .reading-resize { display: none; }
@@ -297,9 +302,9 @@
       display: block;
       position: fixed;
       inset: auto 0 0 0;
-      max-height: 40vh;
-      max-height: 40dvh;
-      padding: 14px 16px;
+      max-height: var(--reading-h, 40vh);
+      max-height: var(--reading-h, 40dvh);
+      padding: 22px 16px 14px;
       z-index: 40;
       border-top: 1px solid var(--line);
       border-left: none;
@@ -309,6 +314,31 @@
     .reading.open .full-text { font-size: 12.5px; }
     .reading.open .reading-crumb { font-size: 10px; }
     .reading.open .script-box { min-height: 120px; font-size: 12.5px; }
+
+    .reading-resize-v {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 16px;
+      cursor: row-resize;
+      touch-action: none;
+    }
+    .reading-resize-v::before {
+      content: "";
+      position: absolute;
+      top: 6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--line);
+    }
+    .reading-resize-v:hover::before, .reading-resize-v.dragging::before {
+      background: var(--muted);
+    }
   }
 
   /* ---------- Focus mode: a button hides the top bar + grove rail ---------- */
@@ -829,6 +859,7 @@
     <div class="reading-resize" id="readingResize" role="separator" aria-orientation="vertical" aria-label="Resize the details panel"></div>
 
     <aside class="reading" id="reading">
+      <div class="reading-resize-v" id="readingResizeV" role="separator" aria-orientation="horizontal" aria-label="Resize the details panel height"></div>
       <button class="reading-close" id="readingClose" aria-label="Close">&times;</button>
       <div id="readingBody">
         <p class="reading-empty">Select any node to read its full text here — the tree only ever shows short labels.</p>
@@ -1953,6 +1984,66 @@
     window.addEventListener("resize", () => {
       const current = parseInt(getComputedStyle(root).getPropertyValue("--reading-w"), 10);
       if (current) root.style.setProperty("--reading-w", clamp(current) + "px");
+    });
+  })();
+
+  // ---- drag the horizontal handle at the top of the mobile bottom-sheet
+  // panel to resize its height — the same idea as setupReadingResize
+  // above, just vertical, and only relevant under the <=900px breakpoint
+  // where .reading becomes a fixed bottom sheet instead of a side column.
+  // Same window-bound listener pattern from the start (see the comment in
+  // setupReadingResize about why: pointer capture alone isn't reliable
+  // enough on touch to hang a drag off of). ----
+  (function setupReadingResizeHeight() {
+    const handle = document.getElementById("readingResizeV");
+    if (!handle) return;
+    const root = document.documentElement;
+    const MIN_H = 120;
+    const maxHeight = () => Math.max(MIN_H, Math.min(window.innerHeight * 0.85, window.innerHeight - 100));
+    const clamp = (h) => Math.min(Math.max(h, MIN_H), maxHeight());
+
+    let saved = null;
+    try {
+      saved = localStorage.getItem("opic-reading-height");
+    } catch (e) {}
+    if (saved) root.style.setProperty("--reading-h", clamp(parseInt(saved, 10) || 0) + "px");
+
+    let dragging = false;
+    let startY = 0;
+    let startH = 0;
+    handle.addEventListener("pointerdown", (event) => {
+      dragging = true;
+      startY = event.clientY;
+      startH = reading.getBoundingClientRect().height;
+      try {
+        handle.setPointerCapture(event.pointerId);
+      } catch (e) {}
+      handle.classList.add("dragging");
+      document.body.style.userSelect = "none";
+      event.preventDefault();
+    });
+    window.addEventListener("pointermove", (event) => {
+      if (!dragging) return;
+      // dragging the handle up (clientY decreases) should grow the sheet
+      const dy = startY - event.clientY;
+      root.style.setProperty("--reading-h", clamp(startH + dy) + "px");
+    });
+    function stopDrag() {
+      if (!dragging) return;
+      dragging = false;
+      handle.classList.remove("dragging");
+      document.body.style.userSelect = "";
+      try {
+        const current = parseInt(getComputedStyle(root).getPropertyValue("--reading-h"), 10);
+        if (current) localStorage.setItem("opic-reading-height", String(current));
+      } catch (e) {}
+    }
+    window.addEventListener("pointerup", stopDrag);
+    window.addEventListener("pointercancel", stopDrag);
+
+    window.addEventListener("resize", () => {
+      const current = parseInt(getComputedStyle(root).getPropertyValue("--reading-h"), 10);
+      if (current) root.style.setProperty("--reading-h", clamp(current) + "px");
     });
   })();
 
