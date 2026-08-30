@@ -9,6 +9,12 @@ bare topic name down to the exact phrase you rehearsed.
 Use the **Fullscreen** button (top-left of the canvas) to hide the top bar
 and topic list; press it again (or Esc) to bring them back.
 
+On a phone, a question's detail panel opens as a bottom sheet that can
+cover most of the screen. Tapping the empty canvas above it (anywhere
+that isn't a node) minimizes it back down — the same as the panel's own
+✕ button, just without needing to reach it — while tapping a node or
+panning/dragging the canvas leaves it open as usual.
+
 The page carries its own tree favicon (🌲, baked in as a generated PNG, no
 external file) — including as an `apple-touch-icon`, so saving a Home
 Screen shortcut to the GitHub Pages copy shows the tree, not a generic
@@ -65,8 +71,14 @@ more paragraph of that answer.
 | Answer | script beat (one row = one paragraph) | hidden until its question is clicked |
 | Kick | kick phrase (comma-split into one node each) | hidden until its beat is clicked |
 
-Click a question to reveal its beats; click a beat to reveal its kicks;
-click again to collapse. A search box in the top bar matches across every
+Click a question and its beats *and* their kick phrases all unfold at
+once, and the view auto-zooms/pans to fit that question's whole subtree
+on screen — no separate click-per-beat, and no manual re-centering after.
+Clicking a different question folds the previous one's beats back down
+first, so only one question's kicks are ever expanded (and on screen) at
+a time; every question pill in the topic stays visible regardless.
+Clicking a single beat still just toggles that one beat's own kicks,
+independent of the rest. A search box in the top bar matches across every
 topic at once (question text, beat text, kick phrases) and jumps + expands
 the tree to the result.
 

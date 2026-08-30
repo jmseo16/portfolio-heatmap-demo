@@ -2889,6 +2889,34 @@
     renderTree(false);
   }
 
+  // clicking a question folds every *other* question's beats back down and
+  // fully unfolds this one's own beats and their kick phrases — so the
+  // view is always "just this question's whole subtree" without manually
+  // folding the last one and drilling into every beat again first. The
+  // existing per-render auto-fit in renderTree (below) does the rest: with
+  // only this question's branch expanded, fitting the bounds of every
+  // visible node naturally zooms to fill the screen with it.
+  function expandQuestionFully(questionMaster) {
+    const topic = questionMaster.parent;
+    (topic.children || []).forEach((q) => {
+      if (q !== questionMaster && q.children) {
+        q._children = q.children;
+        q.children = null;
+      }
+    });
+    if (questionMaster._children) {
+      questionMaster.children = questionMaster._children;
+      questionMaster._children = null;
+    }
+    (questionMaster.children || []).forEach((p) => {
+      if (p._children) {
+        p.children = p._children;
+        p._children = null;
+      }
+    });
+    renderTree(false);
+  }
+
   // wraps a master (state-tracking) hierarchy node in a plain object so a
   // fresh, self-contained d3.hierarchy can be built for layout purposes
   // without disturbing the master's own .parent chain
@@ -3101,13 +3129,15 @@
       .on("click", (event, d) => {
         event.stopPropagation();
         setCurrent(d.master);
-        toggle(d.master);
+        if (d.master.data.type === "question") expandQuestionFully(d.master);
+        else toggle(d.master);
       })
       .on("keydown", (event, d) => {
         if (event.key === "Enter" || event.key === " ") {
           event.preventDefault();
           setCurrent(d.master);
-          toggle(d.master);
+          if (d.master.data.type === "question") expandQuestionFully(d.master);
+          else toggle(d.master);
         }
       });
 
@@ -3550,6 +3580,31 @@
   document.getElementById("zoomReset").addEventListener("click", () => renderTree(true));
 
   document.getElementById("readingClose").addEventListener("click", () => reading.classList.remove("open"));
+
+  // tapping empty canvas (not a node) also minimizes the mobile bottom
+  // sheet — a second way to get it out of the way besides the × button,
+  // for whenever the sheet is covering most of the screen. Native
+  // pointerdown/pointerup (not "click"): d3-zoom's own touch handling on
+  // this same svg can suppress the browser's synthesized click on a tap,
+  // the same reason focus-mode uses a dedicated button rather than a
+  // tap-canvas gesture — tracking the raw pointer events ourselves sidesteps
+  // that instead of depending on a click that might never fire.
+  (function setupCanvasTapToClose() {
+    let downX = null;
+    let downY = null;
+    const svgEl = svg.node();
+    svgEl.addEventListener("pointerdown", (e) => {
+      downX = e.clientX;
+      downY = e.clientY;
+    });
+    svgEl.addEventListener("pointerup", (e) => {
+      if (downX === null) return;
+      const moved = Math.abs(e.clientX - downX) > 8 || Math.abs(e.clientY - downY) > 8;
+      downX = null;
+      if (moved || e.target.closest(".node")) return;
+      if (window.matchMedia("(max-width: 900px)").matches) reading.classList.remove("open");
+    });
+  })();
 
   // ---- focus mode: a button hides the top bar + grove rail ----
   // (deliberately a button, not a tap-empty-canvas gesture: d3-zoom's touch
