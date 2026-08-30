@@ -211,6 +211,60 @@
   }
   .sr-snippet { font-size: 13px; line-height: 1.35; }
   .sr-empty { padding: 12px; font-size: 13px; color: var(--muted); }
+  .sr-section-label {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    padding: 8px 12px 4px;
+    background: var(--surface-2);
+  }
+  .sr-rec-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--line-soft);
+    flex-wrap: wrap;
+  }
+  .sr-rec-item:last-child { border-bottom: none; }
+  .sr-rec-title {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11.5px;
+    color: var(--ink);
+    flex: 1 1 160px;
+    min-width: 0;
+    overflow-wrap: break-word;
+  }
+  .sr-rec-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .sr-rec-btn {
+    border: none;
+    background: none;
+    color: var(--paragraph);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 2px 6px;
+    cursor: pointer;
+  }
+  .sr-rec-btn:hover { text-decoration: underline; }
+  .sr-rec-status {
+    flex: 1 1 100%;
+    font-size: 10.5px;
+    color: var(--muted);
+  }
+  .sr-rec-audio {
+    display: block;
+    width: 100%;
+    flex: 1 1 100%;
+    height: 30px;
+  }
   mark {
     background: var(--kick-soft);
     color: var(--ink);
@@ -3202,6 +3256,26 @@
   }
   const ALL_NODES = FOREST.flatMap((t) => flattenAll(t));
 
+  // every recording across every question, freshly walked (not cached like
+  // ALL_NODES — takes change far more often than the tree itself) so the
+  // search box can match on a take's own title/filename (name, date,
+  // length). questionIndex entries carry the raw FOREST question object
+  // under .node (not a d3-hierarchy node), so it's wrapped in a minimal
+  // {id, data} shape here — the same shape takeDisplayTitle/
+  // takeDownloadFilename already expect from the Takes panel.
+  function allRecordingsIndex() {
+    const out = [];
+    questionIndex.forEach((e) => {
+      const takes = takesFor(e.id).filter((t) => t.hasRecording);
+      if (!takes.length) return;
+      const nodeLike = { id: e.id, data: e.node };
+      takes.forEach((take) => {
+        out.push({ questionId: e.id, topicName: e.topic, nodeLike, take, title: takeDisplayTitle(nodeLike, take) });
+      });
+    });
+    return out;
+  }
+
   function highlight(text, q) {
     const idx = text.toLowerCase().indexOf(q.toLowerCase());
     if (idx === -1) return escapeHtml(text);
@@ -3228,16 +3302,97 @@
 
     hits.forEach(({ node }) => matchSet.add(node.id));
 
-    searchResults.innerHTML = hits.length
+    // recordings match on their own title (name, tag, take#, date, length)
+    // — "260830" finds every take recorded that day, across every topic.
+    const recHits = allRecordingsIndex()
+      .filter((r) => r.title.toLowerCase().includes(ql))
+      .slice(0, 24);
+
+    const contentHtml = hits.length
       ? hits.map(({ node, topic }) => `
           <button class="sr-item" data-topic="${topic.id}" data-node="${node.id}">
             <span class="sr-topic">${escapeHtml(topic.name)} · ${typeLabel(node.type)}</span>
             <span class="sr-snippet">${highlight(node.full || node.name, q)}</span>
           </button>`).join("")
-      : `<p class="sr-empty">No matches across any topic.</p>`;
+      : "";
+    const recHtml = recHits.length
+      ? `<div class="sr-section-label">Recordings</div>` +
+        recHits.map(({ questionId, take, title }) => `
+          <div class="sr-rec-item" data-question="${escapeHtml(questionId)}" data-take="${take.n}">
+            <span class="sr-rec-title">${highlight(title, q)}</span>
+            <div class="sr-rec-actions">
+              <button type="button" class="sr-rec-btn sr-rec-play">▶ Play</button>
+              <button type="button" class="sr-rec-btn sr-rec-dl">⬇ Download</button>
+            </div>
+          </div>`).join("")
+      : "";
+
+    searchResults.innerHTML = contentHtml || recHtml ? contentHtml + recHtml : `<p class="sr-empty">No matches across any topic.</p>`;
     searchResults.classList.add("open");
 
     renderTree(false);
+  });
+
+  // Play/Download on a recording search result — deliberately its own
+  // handler (not routed through the .sr-item one below), since it must
+  // NOT close the results dropdown or blur the search box: downloading
+  // several matching takes in a row means clicking ⬇ repeatedly without
+  // the list disappearing out from under you.
+  searchResults.addEventListener("click", async (e) => {
+    const row = e.target.closest(".sr-rec-item");
+    if (!row) return;
+    const questionId = row.dataset.question;
+    const takeN = Number(row.dataset.take);
+    const rec = allRecordingsIndex().find((r) => r.questionId === questionId && r.take.n === takeN);
+    if (!rec) return;
+
+    function rowStatus(msg) {
+      let el = row.querySelector(".sr-rec-status");
+      if (!el) {
+        el = document.createElement("span");
+        el.className = "sr-rec-status";
+        row.appendChild(el);
+      }
+      el.textContent = msg;
+    }
+
+    if (e.target.closest(".sr-rec-play")) {
+      const playBtn = e.target.closest(".sr-rec-play");
+      let audioEl = row.querySelector(".sr-rec-audio");
+      if (audioEl) {
+        if (audioEl.paused) audioEl.play();
+        else audioEl.pause();
+        return;
+      }
+      const data = await getRecording(recKey(questionId, takeN));
+      if (!data || !data.blob) {
+        rowStatus("Couldn't find that recording.");
+        return;
+      }
+      audioEl = document.createElement("audio");
+      audioEl.controls = true;
+      audioEl.className = "sr-rec-audio";
+      audioEl.src = URL.createObjectURL(data.blob);
+      row.appendChild(audioEl);
+      audioEl.addEventListener("play", () => (playBtn.textContent = "⏸ Pause"));
+      audioEl.addEventListener("pause", () => (playBtn.textContent = "▶ Play"));
+      audioEl.play();
+    } else if (e.target.closest(".sr-rec-dl")) {
+      const data = await getRecording(recKey(questionId, takeN));
+      if (!data || !data.blob) {
+        rowStatus("Couldn't find that recording.");
+        return;
+      }
+      rowStatus("Converting to mp3…");
+      try {
+        const mp3Blob = await blobToMp3(data.blob);
+        await saveTextFile(takeDownloadFilename(rec.nodeLike, rec.take, "mp3"), mp3Blob, null);
+        rowStatus("Saved as mp3.");
+      } catch (err) {
+        await saveTextFile(takeDownloadFilename(rec.nodeLike, rec.take, mimeToExt(data.mimeType)), data.blob, null);
+        rowStatus("Couldn't convert to mp3 — saved the original recording instead.");
+      }
+    }
   });
 
   // finds a node anywhere in the hierarchy (visible or collapsed) and expands

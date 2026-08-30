@@ -70,6 +70,15 @@ click again to collapse. A search box in the top bar matches across every
 topic at once (question text, beat text, kick phrases) and jumps + expands
 the tree to the result.
 
+The same search box also matches recordings, by their own title (see the
+Takes section below) — so typing a date like `260830` lists every take
+recorded that day, across every topic, in a **Recordings** section under
+the results. Each one gets its own ▶ Play (plays inline, right there in
+the dropdown) and ⬇ Download — and clicking either never closes the
+dropdown or clears what you typed, unlike a normal search result, so
+downloading several matching recordings in a row is just downloading,
+downloading, downloading without having to re-search between each one.
+
 A question's panel is two swipeable pages, not one long scroll. The
 default page is what it always was — hint text, then the kick phrases —
 plus a **"🎙 Takes ›"** button; tap it (or swipe right anywhere on the
