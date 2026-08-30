@@ -831,6 +831,26 @@
     display: flex;
     align-items: center;
     gap: 4px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .take-filename {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    color: var(--muted);
+    flex: 1 1 140px;
+    min-width: 0;
+    line-height: 1.4;
+    /* the underscores in the filename itself are the natural break
+       points — wrap there instead of truncating, so the full name (what
+       actually gets downloaded) is always readable, not cut off */
+    overflow-wrap: break-word;
+  }
+  .take-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
   }
   .take-btn {
     border: none;
@@ -1376,6 +1396,7 @@
       hasRecording: !!(opts && opts.hasRecording),
       mimeType: (opts && opts.mimeType) || null,
       kicksMarked: [],
+      createdAt: (opts && opts.createdAt) || Date.now(),
     });
     saveTakes(questionId, takes);
     return takes;
@@ -1457,6 +1478,89 @@
     if (mimeType && mimeType.includes("mp4")) return "mp4";
     if (mimeType && mimeType.includes("ogg")) return "ogg";
     return "webm";
+  }
+
+  // ---- downloading a take as .mp3: browsers only ever *record* webm/opus
+  // (Chrome, Firefox, Android) or mp4/AAC (Safari) — never mp3 — so a real
+  // .mp3 file needs an actual conversion, not just a renamed extension
+  // (which would silently produce a file that fails to open in whatever
+  // it's shared to). Converts client-side: decode the recorded blob to PCM
+  // via the Web Audio API, then encode that PCM with lamejs, a pure-JS MP3
+  // encoder loaded lazily (only once a download is actually requested) from
+  // the same CDN allow-list every other script on this page uses. ----
+  let lamejsPromise = null;
+  function loadLamejs() {
+    if (window.lamejs) return Promise.resolve(window.lamejs);
+    if (lamejsPromise) return lamejsPromise;
+    lamejsPromise = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js";
+      script.onload = () => (window.lamejs ? resolve(window.lamejs) : reject(new Error("mp3 encoder didn't load")));
+      script.onerror = () => reject(new Error("mp3 encoder didn't load"));
+      document.head.appendChild(script);
+    });
+    return lamejsPromise;
+  }
+
+  function floatTo16BitPCM(input) {
+    const out = new Int16Array(input.length);
+    for (let i = 0; i < input.length; i++) {
+      const s = Math.max(-1, Math.min(1, input[i]));
+      out[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    }
+    return out;
+  }
+
+  async function blobToMp3(blob) {
+    const lamejs = await loadLamejs();
+    const arrayBuf = await blob.arrayBuffer();
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const audioCtx = new AudioCtx();
+    let audioBuffer;
+    try {
+      audioBuffer = await audioCtx.decodeAudioData(arrayBuf);
+    } finally {
+      audioCtx.close();
+    }
+    const channels = Math.min(audioBuffer.numberOfChannels, 2);
+    const left16 = floatTo16BitPCM(audioBuffer.getChannelData(0));
+    const right16 = channels > 1 ? floatTo16BitPCM(audioBuffer.getChannelData(1)) : null;
+
+    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 128);
+    const blockSize = 1152;
+    const chunks = [];
+    for (let i = 0; i < left16.length; i += blockSize) {
+      const leftChunk = left16.subarray(i, i + blockSize);
+      const buf = right16
+        ? encoder.encodeBuffer(leftChunk, right16.subarray(i, i + blockSize))
+        : encoder.encodeBuffer(leftChunk);
+      if (buf.length > 0) chunks.push(buf);
+    }
+    const tail = encoder.flush();
+    if (tail.length > 0) chunks.push(tail);
+    return new Blob(chunks, { type: "audio/mpeg" });
+  }
+
+  // "<node name>_Take#<n>_<date>.mp3" — the date comes from the take's own
+  // createdAt (set when it was logged/recorded), the same value the
+  // filename label next to ▶ Play uses, so what's shown on screen always
+  // matches what actually downloads. Older takes logged before this field
+  // existed just omit the date segment rather than showing a wrong one.
+  function sanitizeFilePart(s) {
+    const cleaned = String(s)
+      .trim()
+      .replace(/[\\/:*?"<>|]/g, "")
+      .replace(/\s+/g, "_")
+      .replace(/_{2,}/g, "_")
+      .replace(/^[._]+|[._]+$/g, "");
+    return cleaned || "recording";
+  }
+  function takeDownloadFilename(node, take, ext) {
+    const tag = node.data.tag;
+    const name = node.data.name || node.id;
+    const parts = [sanitizeFilePart(tag ? `${tag} ${name}` : name), `Take#${take.n}`];
+    if (take.createdAt) parts.push(new Date(take.createdAt).toISOString().slice(0, 10));
+    return `${parts.join("_")}.${ext}`;
   }
 
   // base64 <-> Blob, for folding recording audio into the JSON "Export
@@ -1807,8 +1911,20 @@
 
       const actions = document.createElement("div");
       actions.className = "take-actions";
+      // buttons stay grouped in their own inner flex box so they wrap as
+      // one unit onto their own line under a long filename, rather than
+      // each icon breaking individually.
+      const btnGroup = document.createElement("div");
+      btnGroup.className = "take-btn-group";
 
       if (take.hasRecording) {
+        const filenameLabel = document.createElement("span");
+        filenameLabel.className = "take-filename";
+        const fname = takeDownloadFilename(node, take, "mp3");
+        filenameLabel.textContent = fname;
+        filenameLabel.title = fname;
+        actions.appendChild(filenameLabel);
+
         const playBtn = document.createElement("button");
         playBtn.type = "button";
         playBtn.className = "take-btn take-play";
@@ -1834,7 +1950,7 @@
           audioEl.addEventListener("pause", () => (playBtn.textContent = "▶ Play"));
           audioEl.play();
         });
-        actions.appendChild(playBtn);
+        btnGroup.appendChild(playBtn);
 
         const dlBtn = document.createElement("button");
         dlBtn.type = "button";
@@ -1847,10 +1963,16 @@
             showScriptStatus(status, "Couldn't find that recording.", true);
             return;
           }
-          const tag = node.data.tag || questionId;
-          saveTextFile(`opic-${tag}-take${take.n}.${mimeToExt(rec.mimeType)}`, rec.blob, status, "Saved.");
+          showScriptStatus(status, "Converting to mp3…");
+          try {
+            const mp3Blob = await blobToMp3(rec.blob);
+            await saveTextFile(takeDownloadFilename(node, take, "mp3"), mp3Blob, status, "Saved as mp3.");
+          } catch (err) {
+            const saved = await saveTextFile(takeDownloadFilename(node, take, mimeToExt(rec.mimeType)), rec.blob, status);
+            showScriptStatus(status, saved ? "Couldn't convert to mp3 — saved the original recording instead." : "Couldn't save the file.", true);
+          }
         });
-        actions.appendChild(dlBtn);
+        btnGroup.appendChild(dlBtn);
       } else {
         const noRec = document.createElement("span");
         noRec.className = "take-no-rec";
@@ -1869,7 +1991,8 @@
         renderTree(false);
         showScriptStatus(status, `Deleted take #${take.n}.`);
       });
-      actions.appendChild(delBtn);
+      btnGroup.appendChild(delBtn);
+      actions.appendChild(btnGroup);
 
       head.appendChild(actions);
       row.appendChild(head);
@@ -1945,8 +2068,9 @@
               const blob = new Blob(chunks, { type: mediaRecorder.mimeType || mimeType || "audio/webm" });
               const takes = takesFor(questionId);
               const n = nextTakeNumber(takes);
-              const ok = await putRecording(recKey(questionId, n), { blob, mimeType: blob.type, createdAt: Date.now() });
-              takes.push({ n, hasRecording: ok, mimeType: ok ? blob.type : null, kicksMarked: [] });
+              const createdAt = Date.now();
+              const ok = await putRecording(recKey(questionId, n), { blob, mimeType: blob.type, createdAt });
+              takes.push({ n, hasRecording: ok, mimeType: ok ? blob.type : null, kicksMarked: [], createdAt });
               saveTakes(questionId, takes);
               renderTakes();
               renderTree(false);
