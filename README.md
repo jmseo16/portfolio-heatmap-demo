@@ -153,7 +153,12 @@ per-beat text. Unlike the kick list, the script itself stays collapsed
 behind a "▸ Show script" button by default (so it doesn't spoil the
 practice) — click it to reveal the box, or flip the top bar's **"👁 View
 all scripts"** toggle to make every question's script open automatically
-from then on (that preference is remembered too). Edits autosave to the
+from then on (that preference is remembered too). The box itself grows
+to fit however long the script is — no scrollbar of its own — so the
+whole thing reads straight down as you scroll the panel, rather than
+being stuck scrolling inside a small fixed-height box; it re-measures on
+every keystroke and on any width change too (dragging the panel wider
+re-wraps the text, so it re-fits then as well). Edits autosave to the
 browser (`localStorage`), but since that's a per-browser convenience
 rather than a durable save, the box also has:
 

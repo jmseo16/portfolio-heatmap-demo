@@ -1042,7 +1042,12 @@
     font-family: "Work Sans", sans-serif;
     font-size: 13.5px;
     line-height: 1.6;
-    resize: vertical;
+    /* height is set in JS to exactly fit the text (see autoGrowTextarea) —
+       no internal scrollbar of its own, no manual resize handle to fight
+       with that; the whole reading panel scrolls instead, so a long
+       script just reads straight down the page. */
+    overflow: hidden;
+    resize: none;
   }
   .btn-script:hover { opacity: 0.9; }
 
@@ -1369,6 +1374,10 @@
           panel.hidden = nowHidden;
           toggleBtn.textContent = nowHidden ? "▸ Show script" : "▾ Hide script";
           toggleBtn.setAttribute("aria-expanded", String(!nowHidden));
+          // was sized while hidden (offsetParent null, scrollHeight 0) if
+          // "View all scripts" wasn't on — measure for real now that it's
+          // actually visible.
+          if (!nowHidden) autoGrowTextarea(panel.querySelector(".script-box"));
         });
       }
 
@@ -1867,6 +1876,18 @@
     (paragraphData.children || []).forEach((k) => ALL_NODES.push({ node: k, topic: topicData }));
   }
 
+  // grows a textarea to exactly fit its content (no internal scrollbar) —
+  // the reading panel scrolls instead. offsetParent is null while an
+  // ancestor is display:none (the script panel collapsed behind "Show
+  // script", or a swiped-away page), and scrollHeight reads 0 then, which
+  // would wrongly collapse the box — skip in that case, and size it for
+  // real once whatever's hiding it reveals it instead.
+  function autoGrowTextarea(el) {
+    if (!el || el.offsetParent === null) return;
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
+  }
+
   function scriptFilename(node) {
     const tag = node.data.tag || node.id;
     const slug = (node.data.name || "question").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
@@ -2363,11 +2384,13 @@
       saved = localStorage.getItem(key);
     } catch (e) {}
     box.value = saved !== null ? saved : original;
+    autoGrowTextarea(box);
 
     box.addEventListener("input", () => {
       try {
         localStorage.setItem(key, box.value);
       } catch (e) {}
+      autoGrowTextarea(box);
     });
 
     resetBtn.addEventListener("click", () => {
@@ -2376,8 +2399,25 @@
         localStorage.removeItem(key);
       } catch (e) {}
       box.focus();
+      autoGrowTextarea(box);
       showScriptStatus(status, "Reset to the original script.");
     });
+
+    // the box's needed height depends on its width too (longer lines wrap
+    // less) — a desktop panel-width drag or a mobile orientation change
+    // changes that without ever touching box.value, so re-measure on any
+    // width change, not just on content edits. Guarded against the height
+    // change autoGrowTextarea itself causes, which would otherwise retrigger
+    // this on every keystroke.
+    let lastBoxWidth = box.getBoundingClientRect().width;
+    const boxResizeObserver = new ResizeObserver(() => {
+      const w = box.getBoundingClientRect().width;
+      if (Math.abs(w - lastBoxWidth) > 1) {
+        lastBoxWidth = w;
+        autoGrowTextarea(box);
+      }
+    });
+    boxResizeObserver.observe(box);
 
     if (downloadBtn) {
       downloadBtn.addEventListener("click", () => saveTextFile(scriptFilename(node), box.value, status));
@@ -2395,6 +2435,7 @@
           try {
             localStorage.setItem(key, box.value);
           } catch (e) {}
+          autoGrowTextarea(box);
           showScriptStatus(status, `Loaded ${file.name}.`);
         };
         reader.onerror = () => showScriptStatus(status, "Couldn't read that file.", true);
