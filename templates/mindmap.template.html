@@ -3445,10 +3445,19 @@
   const DATA_EXPORT_VERSION = 2;
 
   async function buildDataExportPayload() {
+    // every question, including ones with zero takes right now — not
+    // just the ones that have any. Omitting an empty question here would
+    // make "I deleted every take for this question" indistinguishable
+    // from "nothing to report" to whoever applies this payload: they'd
+    // just keep whatever takes (and take#N badge) they already had for
+    // it, since applyDataExportPayload only clears a question's takes
+    // when it actually gets a (possibly empty) array back for that id.
+    // Real bug this fixed: deleting a question's last take(s) on one
+    // device, then syncing, silently left its old take#N badge standing
+    // on every other device.
     const takesByQuestion = {};
     questionIndex.forEach((e) => {
-      const t = takesFor(e.id);
-      if (t.length) takesByQuestion[e.id] = t;
+      takesByQuestion[e.id] = takesFor(e.id);
     });
     const recordings = await collectAllRecordings();
     return {
@@ -3467,10 +3476,15 @@
     const takesMap = payload.takes && typeof payload.takes === "object" ? payload.takes : {};
     Object.keys(takesMap).forEach((qid) => {
       const arr = takesMap[qid];
-      if (Array.isArray(arr)) {
-        saveTakes(qid, arr);
-        takesRestored++;
-      }
+      if (!Array.isArray(arr)) return;
+      // always apply — including an empty array, which is what actually
+      // clears a question that's had every take deleted elsewhere (see
+      // buildDataExportPayload) — but only count the ones that really
+      // restored something, so the status message ("N questions' takes
+      // restored") stays meaningful instead of counting every question
+      // in the forest on every single sync.
+      saveTakes(qid, arr);
+      if (arr.length) takesRestored++;
     });
     let recordingsRestored = 0;
     for (const rec of payload.recordings || []) {
