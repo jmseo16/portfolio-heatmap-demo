@@ -853,6 +853,12 @@
   .kick-add-popup button:focus-visible {
     background: var(--surface-2);
   }
+  .kick-add-popup button.kick-add-popup-cancel {
+    margin-top: 2px;
+    border-top: 1px solid var(--line);
+    border-radius: 0;
+    color: var(--muted);
+  }
   .btn-script {
     display: inline-flex;
     align-items: center;
@@ -1101,6 +1107,36 @@
   }
   .script-box:not(.locked) {
     border-color: var(--kick);
+  }
+  /* the "Add to kick" tap-picker: same box chrome as the textarea it
+     replaces while active, but plain text + tappable word spans instead
+     of an editable field. Deliberately NOT drag-selectable — see the
+     comment on .word-pick below for why: a native text selection here is
+     exactly what used to break this feature on mobile. */
+  .script-picker {
+    border-color: var(--kick);
+    white-space: pre-wrap;
+    cursor: default;
+  }
+  .word-pick {
+    cursor: pointer;
+    border-radius: 3px;
+    padding: 1px 0;
+    /* user-select:none + touch-callout:none keep this a plain sequence of
+       tappable spans, never a native text selection — a real drag-select
+       here is what triggered the phone's own "Copy / Select all" popup
+       racing against this page's own kick-add popup, leaving the kick
+       popup unresponsive once both were open. Tapping a word never starts
+       a selection gesture, so that native UI never has a reason to appear. */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .word-pick:hover { background: var(--surface); }
+  .word-pick.selected {
+    background: var(--kick-soft);
+    color: var(--kick);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--kick) 40%, transparent);
   }
   .btn-script:hover { opacity: 0.9; }
 
@@ -1398,7 +1434,8 @@
       html += `<button type="button" class="script-download">⬇ Save as .txt</button>`;
       html += `<button type="button" class="script-reset">↺ Reset to original</button>`;
       html += `</div></div>`;
-      html += `<textarea class="script-box locked" readonly spellcheck="false" aria-label="Script for this question — tap Edit above to type, or Add to kick to drag-select a phrase"></textarea>`;
+      html += `<textarea class="script-box locked" readonly spellcheck="false" aria-label="Script for this question — tap Edit above to type, or Add to kick to pick a phrase"></textarea>`;
+      html += `<div class="script-box script-picker" hidden aria-label="Tap the first word, then the last word, of a phrase to add as a kick"></div>`;
       html += `<span class="script-status"></span>`;
       html += `<input type="file" class="script-file-input" accept=".txt,.csv,text/plain,text/csv" aria-hidden="true" tabindex="-1">`;
       html += `</div>`;
@@ -2244,6 +2281,7 @@
   let kickAddPopupEl = null;
   let kickAddPopupCtx = null; // { node, text } for whatever selection is pending
   let kickAddPopupShownAt = 0;
+  let kickAddPopupOnHide = null; // optional cleanup set by whoever most recently showed it (e.g. clear the word-picker's highlight)
   // scroll-to-close (below) has to ignore a scroll that happens right as
   // the popup opens: focusing the textarea to select text in the first
   // place can itself trigger the browser's own "scroll the focused
@@ -2254,6 +2292,11 @@
   function hideKickAddPopup() {
     if (kickAddPopupEl) kickAddPopupEl.hidden = true;
     kickAddPopupCtx = null;
+    if (kickAddPopupOnHide) {
+      const cb = kickAddPopupOnHide;
+      kickAddPopupOnHide = null;
+      cb();
+    }
   }
   function ensureKickAddPopup() {
     if (kickAddPopupEl) return kickAddPopupEl;
@@ -2271,6 +2314,10 @@
     // respond to taps" even though nothing is actually broken — pointerup
     // still fires on the real touch release either way.
     el.addEventListener("pointerup", (e) => {
+      if (e.target.closest(".kick-add-popup-cancel")) {
+        hideKickAddPopup();
+        return;
+      }
       const btn = e.target.closest("button[data-beat-id]");
       if (!btn || !kickAddPopupCtx) return;
       const { node, text } = kickAddPopupCtx;
@@ -2298,15 +2345,17 @@
     kickAddPopupEl = el;
     return el;
   }
-  function showKickAddPopup(node, text, x, y) {
+  function showKickAddPopup(node, text, x, y, onHide) {
     const beats = node.data.children || [];
     if (!beats.length) return;
     const el = ensureKickAddPopup();
     kickAddPopupCtx = { node, text };
+    kickAddPopupOnHide = onHide || null;
     const shortText = text.length > 48 ? text.slice(0, 48) + "…" : text;
     el.innerHTML =
       `<div class="kick-add-popup-label">Add “${escapeHtml(shortText)}” as a kick to:</div>` +
-      beats.map((p) => `<button type="button" data-beat-id="${escapeHtml(p.id)}">${escapeHtml(p.name)}</button>`).join("");
+      beats.map((p) => `<button type="button" data-beat-id="${escapeHtml(p.id)}">${escapeHtml(p.name)}</button>`).join("") +
+      `<button type="button" class="kick-add-popup-cancel">Cancel</button>`;
     el.hidden = false;
     kickAddPopupShownAt = Date.now();
     el.style.left = "0px";
@@ -2879,8 +2928,18 @@
     renderTakes();
   }
 
+  // splits script text into alternating word/whitespace tokens for the
+  // "Add to kick" tap-picker (see wireScriptBox) — every character of the
+  // original text is preserved across some token, so joining any
+  // contiguous slice of tokens back together reproduces that exact
+  // substring (punctuation stays attached to its word, e.g. "Fold?").
+  function tokenizeWords(text) {
+    return text.split(/(\s+)/).filter((s) => s !== "").map((s) => ({ text: s, isWord: !/^\s/.test(s) }));
+  }
+
   function wireScriptBox(node) {
     const box = readingBody.querySelector(".script-box");
+    const picker = readingBody.querySelector(".script-picker");
     const resetBtn = readingBody.querySelector(".script-reset");
     const downloadBtn = readingBody.querySelector(".script-download");
     const loadBtn = readingBody.querySelector(".script-load");
@@ -2907,16 +2966,18 @@
     // CSS comment) so a touch/drag over the script area always falls
     // through to the swipe-page gesture instead of fighting it for a text
     // selection. Two separate unlocked modes, never both at once:
-    //   "edit" (✏️ Edit) — a real editable textarea (readOnly=false), a
-    //     typing cursor, the works. Dragging here is plain text selection
-    //     for editing/copy-paste — it does NOT open the kick-add popup,
-    //     since a drag mid-edit is not necessarily "pick a kick phrase".
-    //   "kick" (🏷️ Add to kick) — stays readOnly (no cursor, no on-screen
-    //     keyboard popping up), unlocked only for drag-selecting a phrase;
-    //     releasing the drag opens the kick-add popup. This used to be
-    //     fused into edit mode, which meant the moment you tapped Edit a
-    //     text cursor took over and a drag just moved the caret instead of
-    //     selecting — splitting the two restores real drag-to-select.
+    //   "edit" (✏️ Edit) — the real editable textarea (readOnly=false), a
+    //     typing cursor, the works.
+    //   "kick" (🏷️ Add to kick) — swaps to the tap-picker div (below):
+    //     plain text rendered as tappable word spans, no editable field
+    //     and no native text selection at all. This used to be a drag-
+    //     select inside the same textarea, which on mobile raced the
+    //     phone's own native "Copy / Select all" selection popup against
+    //     this page's kick-add popup — whichever showed second ended up
+    //     unresponsive, since both were now competing for the same tap.
+    //     Tapping discrete word spans (user-select:none — see the
+    //     .word-pick CSS comment) never starts a native selection in the
+    //     first place, so there's only ever one popup to interact with.
     // Starts locked every time this panel opens, not remembered across
     // questions.
     let mode = "locked";
@@ -2924,6 +2985,7 @@
       mode = next;
       box.classList.toggle("locked", mode === "locked");
       box.readOnly = mode !== "edit";
+      box.hidden = mode === "kick";
       if (editToggleBtn) {
         editToggleBtn.textContent = mode === "edit" ? "🔒 Done" : "✏️ Edit";
         editToggleBtn.setAttribute("aria-pressed", String(mode === "edit"));
@@ -2931,6 +2993,15 @@
       if (kickModeBtn) {
         kickModeBtn.textContent = mode === "kick" ? "🔒 Done" : "🏷️ Add to kick";
         kickModeBtn.setAttribute("aria-pressed", String(mode === "kick"));
+      }
+      if (picker) {
+        picker.hidden = mode !== "kick";
+        if (mode === "kick") {
+          // rebuild from the box's current text every time kick mode is
+          // (re-)entered, so an edit made earlier in Edit mode is reflected
+          clearPickerSelection();
+          renderPicker(tokenizeWords(box.value));
+        }
       }
       if (mode !== "kick") hideKickAddPopup();
     }
@@ -2949,33 +3020,56 @@
       autoGrowTextarea(box);
     });
 
-    // select a word/phrase in the script (only while in "kick" mode), get
-    // a small popup right there asking which beat it's a kick phrase for
-    // — this page has no way to know that on its own (the same words can
-    // show up in more than one beat, or none), so it's always a pick,
-    // never a guess. pointerup (not mouseup) so touch-drag selection on
-    // mobile triggers it too.
-    box.addEventListener("pointerup", (e) => {
-      if (mode !== "kick") return;
-      const start = box.selectionStart;
-      const end = box.selectionEnd;
-      if (start === end) {
-        hideKickAddPopup();
-        return;
-      }
-      const text = box.value.slice(start, end).trim();
-      if (!text || text.length > 200) {
-        hideKickAddPopup();
-        return;
-      }
-      showKickAddPopup(node, text, e.clientX, e.clientY);
-      // collapse the actual text selection right after capturing it — a
-      // lingering active selection is exactly what makes the browser
-      // swallow the next tap's click (see the popup's own pointerup
-      // comment); collapsing it here means the very next tap, on a popup
-      // button or anywhere else, is a normal, live one.
-      box.setSelectionRange(end, end);
-    });
+    // ---- "Add to kick" tap-picker: tap a word to start a phrase, tap
+    // another to extend the selection to it (in either direction) — the
+    // popup shows after the very first tap already (a single word is a
+    // valid kick on its own) and updates live as the range grows. This
+    // page has no way to know on its own which beat a phrase belongs to
+    // (the same words can show up in more than one, or none), so it's
+    // always a pick, never a guess. ----
+    let pickerTokens = [];
+    let pickerAnchorIdx = null;
+    function renderPicker(tokens) {
+      pickerTokens = tokens;
+      picker.innerHTML = "";
+      tokens.forEach((t, i) => {
+        if (t.isWord) {
+          const span = document.createElement("span");
+          span.className = "word-pick";
+          span.dataset.idx = String(i);
+          span.textContent = t.text;
+          picker.appendChild(span);
+        } else {
+          picker.appendChild(document.createTextNode(t.text));
+        }
+      });
+    }
+    function clearPickerSelection() {
+      pickerAnchorIdx = null;
+      if (picker) picker.querySelectorAll(".word-pick.selected").forEach((el) => el.classList.remove("selected"));
+    }
+    function phraseForRange(fromIdx, toIdx) {
+      const lo = Math.min(fromIdx, toIdx);
+      const hi = Math.max(fromIdx, toIdx);
+      return pickerTokens.slice(lo, hi + 1).map((t) => t.text).join("").trim();
+    }
+    if (picker) {
+      picker.addEventListener("pointerup", (e) => {
+        const span = e.target.closest(".word-pick");
+        if (!span) return;
+        const idx = Number(span.dataset.idx);
+        if (pickerAnchorIdx === null) pickerAnchorIdx = idx;
+        const lo = Math.min(pickerAnchorIdx, idx);
+        const hi = Math.max(pickerAnchorIdx, idx);
+        picker.querySelectorAll(".word-pick").forEach((el) => {
+          const i = Number(el.dataset.idx);
+          el.classList.toggle("selected", i >= lo && i <= hi);
+        });
+        const text = phraseForRange(pickerAnchorIdx, idx);
+        if (!text || text.length > 200) return;
+        showKickAddPopup(node, text, e.clientX, e.clientY, () => clearPickerSelection());
+      });
+    }
 
     resetBtn.addEventListener("click", () => {
       box.value = original;
