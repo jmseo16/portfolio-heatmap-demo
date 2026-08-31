@@ -89,6 +89,9 @@ QUESTION_LABELS = {
     "8-1": "favorite park",
     "8-2": "park problems",
     "8-3": "kids vs. adults at the park",
+    "10-1": "park invite call",
+    "10-2": "park closed, plan B",
+    "10-3": "sick day reschedule",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
@@ -168,6 +171,7 @@ TOPIC_SCRIPT_URLS = {
     "Workplace": "https://docs.google.com/document/d/1BhvIr78GekPdqhoJsyEdy3FZD3nXfOdWGJRBmggH4zI/edit",
     "Technology": "https://docs.google.com/document/d/1QiMFGqbfunsrDgxqrJnJWs1Ofph6imUmsr56VPoO7As/edit",
     "Park": "https://docs.google.com/document/d/1VFxUeG0e9lyxTiqjhI-J9GyTjcpAaf_CwMHPuShoyc0/edit",
+    "Role Play": "https://docs.google.com/document/d/1nFeGRJD9rPP34TyhMftwgs88PFSxxjQ-dGqeDYPxigc/edit",
 }
 
 
