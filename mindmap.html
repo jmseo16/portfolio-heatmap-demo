@@ -1211,13 +1211,14 @@
     });
   });
 
-  // whether a question's script panel starts open. Off by default (open it
-  // per-question with its own "Show script" button) — persisted so a
-  // viewer who flips the topbar's "View all scripts" on gets that as the
+  // whether a question's script panel starts open. On by default (the
+  // script is the main thing you came here to read) — persisted so a
+  // viewer who flips the topbar's "View all scripts" off gets that as the
   // default again next visit too.
-  let initialScriptsVisible = false;
+  let initialScriptsVisible = true;
   try {
-    initialScriptsVisible = localStorage.getItem("opic-scripts-visible") === "1";
+    const saved = localStorage.getItem("opic-scripts-visible");
+    if (saved !== null) initialScriptsVisible = saved === "1";
   } catch (e) {}
 
   const state = { topicIndex: 0, current: null, scriptsVisible: initialScriptsVisible };
@@ -2895,8 +2896,17 @@
   // folding the last one and drilling into every beat again first. The
   // existing per-render auto-fit in renderTree (below) does the rest: with
   // only this question's branch expanded, fitting the bounds of every
-  // visible node naturally zooms to fill the screen with it.
+  // visible node naturally zooms to fill the screen with it. Clicking an
+  // already-fully-expanded question again folds it back down instead —
+  // the same "click again to collapse" every other expandable node in
+  // this tree already gets from toggle().
   function expandQuestionFully(questionMaster) {
+    if (questionMaster.children) {
+      questionMaster._children = questionMaster.children;
+      questionMaster.children = null;
+      renderTree(false);
+      return;
+    }
     const topic = questionMaster.parent;
     (topic.children || []).forEach((q) => {
       if (q !== questionMaster && q.children) {
@@ -2935,29 +2945,72 @@
     return d3.hierarchy({ children: questionNodes.map(mirrorVisible) });
   }
 
-  // lays out one side's hierarchy as a tidy tree at the given row spacing,
-  // converting each node's row into a screen Y recentered around this
-  // side's own vertical middle so left and right can have different
-  // extents. Screen X is filled in later, once every visible pill has been
-  // measured (see fitColumns). Safe to call twice on the same wrapper:
-  // d3.tree() re-lays-out the very same node objects in place, so calling
-  // this again with the real row gap (once pill heights are known) just
-  // updates .screenY on the exact objects the first, placeholder-gap call
-  // already attached pill measurements to.
-  function layoutSideRows(wrapper, side, rowGap) {
+  // shifts a node and its whole subtree down (or up) by the same amount,
+  // so moving a node to resolve a collision can't introduce a new one
+  // among its own already-correctly-spaced descendants.
+  function shiftSubtree(node, delta) {
+    node.screenY += delta;
+    if (node.children) node.children.forEach((c) => shiftSubtree(c, delta));
+  }
+
+  // packs one side's hierarchy as tightly as the actual pill heights
+  // allow, then recenters it around this side's own vertical middle so
+  // left and right can have different extents. Screen X is filled in
+  // later, once every visible pill has been measured (see fitColumns).
+  //
+  // This isn't a uniform-row d3.tree() layout on purpose: giving every
+  // row the same height (sized off whichever pill anywhere in the view
+  // happens to be tallest — often a long wrapped script-beat sentence)
+  // used to space a beat's own single-line kick phrases just as far
+  // apart as that unrelated tall pill needed, so a beat's kicks read as
+  // scattered rather than as one cluster. Instead: walk the hierarchy
+  // bottom-up (d3's own .eachAfter, post-order — every node's children
+  // are placed before the node itself). A leaf (a kick, or a beat with
+  // no kicks currently shown) is stacked directly under the previous
+  // leaf by their own measured pillH + ROW_BUFFER — a little extra
+  // breathing room where the previous leaf's immediate parent differs
+  // from this one's, so one beat's kicks still read as a visible
+  // cluster rather than blending into the next beat's. A parent (a
+  // beat, a question) then sits at the mean of its own children, same
+  // as a normal tidy tree — but first, its children are checked
+  // pairwise and pushed apart (dragging each one's whole subtree along,
+  // via shiftSubtree) whenever they'd sit closer than their own pill
+  // heights allow, so a beat that happens to have few or no kicks can
+  // never end up overlapping the beat next to it.
+  //
+  // Safe to call twice on the same wrapper — this mutates the very same
+  // node objects in place (same as the old d3.tree() approach did), so
+  // calling again once pill heights are known just updates .screenY on
+  // the exact objects the first, pre-measurement call already attached
+  // pill measurements to.
+  function layoutSideRows(wrapper, side) {
     if (!wrapper) return [];
-    d3.tree()
-      .nodeSize([rowGap, 1])
-      .separation((a, b) => (a.parent === b.parent ? 1 : 1.7))(wrapper);
+    const heightOf = (d) => d.pillH || 30; // placeholder before pills are measured (see caller)
+    let prevLeaf = null;
+    wrapper.eachAfter((d) => {
+      if (!d.children || !d.children.length) {
+        const gap = prevLeaf ? ROW_BUFFER * (prevLeaf.parent === d.parent ? 1 : 2) : 0;
+        d.screenY = prevLeaf ? prevLeaf.screenY + heightOf(prevLeaf) / 2 + gap + heightOf(d) / 2 : 0;
+        prevLeaf = d;
+        return;
+      }
+      for (let i = 1; i < d.children.length; i++) {
+        const prev = d.children[i - 1];
+        const cur = d.children[i];
+        const minGap = heightOf(prev) / 2 + heightOf(cur) / 2 + ROW_BUFFER;
+        if (cur.screenY - prev.screenY < minGap) shiftSubtree(cur, minGap - (cur.screenY - prev.screenY));
+      }
+      d.screenY = d.children.reduce((sum, c) => sum + c.screenY, 0) / d.children.length;
+    });
 
     const rows = wrapper.descendants().filter((d) => d.depth > 0);
     if (!rows.length) return [];
-    const extent = d3.extent(rows, (d) => d.x);
+    const extent = d3.extent(rows, (d) => d.screenY);
     const mid = (extent[0] + extent[1]) / 2;
     rows.forEach((d) => {
       d.master = d.data.master;
       d.side = side;
-      d.screenY = d.x - mid;
+      d.screenY -= mid;
     });
     return rows;
   }
@@ -2989,11 +3042,12 @@
     const rightWrapper = buildSideHierarchy(rightQuestions);
     const leftWrapper = buildSideHierarchy(leftQuestions);
 
-    // pass 0: lay out rows at a placeholder gap just to get stable node
-    // identities to attach measurements to — the real gap depends on pill
-    // heights, which aren't known until those pills exist and are measured
-    const rightRows = layoutSideRows(rightWrapper, 1, 40);
-    const leftRows = layoutSideRows(leftWrapper, -1, 40);
+    // pass 0: lay out rows with placeholder pill heights, just to get
+    // stable node identities to attach real measurements to — the real
+    // spacing depends on pill heights, which aren't known until those
+    // pills exist and are measured
+    const rightRows = layoutSideRows(rightWrapper, 1);
+    const leftRows = layoutSideRows(leftWrapper, -1);
     const nodes = [rootPseudo, ...rightRows, ...leftRows];
 
     const nodeSel = nodeLayer.selectAll("g.node").data(nodes, (d) => d.master.id);
@@ -3049,15 +3103,13 @@
         .attr("rx", d.pillH / 2);
     });
 
-    // pass 2: now that every pill's size is known, re-lay-out each side at
-    // the real row gap (tall enough to clear the tallest pill anywhere in
-    // this view — a script beat's full text can wrap to several lines) and
-    // size each depth's column, then place every node (root at the origin).
-    // layoutSideRows mutates the same node objects nodes[] already holds,
-    // so this updates their .screenY in place — no need to rebuild nodes[].
-    const rowGap = Math.max(...nodes.map((d) => d.pillH)) + ROW_BUFFER;
-    layoutSideRows(rightWrapper, 1, rowGap);
-    layoutSideRows(leftWrapper, -1, rowGap);
+    // pass 2: now that every pill's real size is known, re-pack each side
+    // (see layoutSideRows) and size each depth's column, then place every
+    // node (root at the origin). layoutSideRows mutates the same node
+    // objects nodes[] already holds, so this updates their .screenY in
+    // place — no need to rebuild nodes[].
+    layoutSideRows(rightWrapper, 1);
+    layoutSideRows(leftWrapper, -1);
 
     const DEPTH_X = fitColumns(nodes);
     nodes.forEach((d) => {

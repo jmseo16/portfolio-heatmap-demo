@@ -77,10 +77,17 @@ on screen — no separate click-per-beat, and no manual re-centering after.
 Clicking a different question folds the previous one's beats back down
 first, so only one question's kicks are ever expanded (and on screen) at
 a time; every question pill in the topic stays visible regardless.
-Clicking a single beat still just toggles that one beat's own kicks,
-independent of the rest. A search box in the top bar matches across every
-topic at once (question text, beat text, kick phrases) and jumps + expands
-the tree to the result.
+Clicking an already-expanded question again folds it back down, same as
+any other expandable node here. Clicking a single beat still just toggles
+that one beat's own kicks, independent of the rest. A beat's siblings
+(the other beats of the same question) pack together as tightly as their
+own pill heights allow, rather than every row getting the same height —
+so a run of short beats reads as one compact column instead of getting
+stretched out to whatever the tallest pill anywhere in the view happens
+to need (typically a long, wrapped script-beat sentence); nothing ever
+overlaps, a beat or a kick pill included. A search box in the top bar
+matches across every topic at once (question text, beat text, kick
+phrases) and jumps + expands the tree to the result.
 
 The same search box also matches recordings, by their own title (see the
 Takes section below) — so typing a date like `260830` lists every take
@@ -171,11 +178,13 @@ Below that sits **"Your script"**: an editable text box seeded with that
 question's full, polished answer, copied verbatim from the topic's own
 Google Doc (the same doc the topic node's "Show script" button links to)
 and matched by question tag — not a stitching of the sheet's short
-per-beat text. Unlike the kick list, the script itself stays collapsed
-behind a "▸ Show script" button by default (so it doesn't spoil the
-practice) — click it to reveal the box, or flip the top bar's **"👁 View
-all scripts"** toggle to make every question's script open automatically
-from then on (that preference is remembered too). The box itself grows
+per-beat text. It's open by default right alongside the kick list; a
+"▾ Hide script" button collapses it for that one question only (if you'd
+rather rehearse from just the kick phrases without the full answer as a
+spoiler), and the top bar's **"👁 View all scripts"** toggle instead sets
+the default itself — turn it off and every question starts with its
+script collapsed instead (that preference is remembered, same as the
+per-question button always was). The box itself grows
 to fit however long the script is — no scrollbar of its own — so the
 whole thing reads straight down as you scroll the panel, rather than
 being stuck scrolling inside a small fixed-height box; it re-measures on
