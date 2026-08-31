@@ -111,23 +111,31 @@ Drive `drive.file`-scope access token via Google Identity Services
 (the library only ever gets to see/touch files this app itself
 created, never your whole Drive) — the first sign-in on a device needs
 one click (often zero typing, if that browser's already signed into
-Google), and every visit after that on the *same* device re-authenticates
-silently in the background, no click needed, for as long as that
-browser's own Google session stays active. It's really the exact same
-JSON payload the manual **"⬇ Export data"**/**"⬆ Import data"**
-buttons already produce and read, aimed at one fixed file
-(`opic-forest-sync.json`) in your Drive instead of a downloaded file:
-every edit — a script tweak, a kick added or reordered, a take
-recorded, a rating or kick-check toggled — marks the page "dirty," and
-a background timer pushes an update at most every two minutes while
-there's something new, plus right away whenever the tab is about to go
-to the background. On load (and on every sync after that), whichever
-side — this device or the Drive file — has the newer `exportedAt`
-timestamp wins outright and gets applied to the other; this is a
-straight last-write-wins on the *whole* payload, not a field-by-field
-merge, which is a reasonable trade for one person's own practice data
-but means editing the *same* thing on two devices within the same
-sync window will let the later save clobber the earlier one.
+Google). Google's own token popup briefly flashes open and closes
+itself on that first click — a Google Identity Services characteristic
+this page's code can't suppress, since it's a separate top-level
+browser window, not anything in this page's own DOM. What this page
+*does* do is minimize how often that flash happens: the granted access
+token (good for about an hour) is cached in `sessionStorage`, so every
+reload within that hour reuses it directly with no Google interaction
+at all, and only once it's actually about to expire does a fresh
+silent re-authentication (with one more flash) happen automatically in
+the background — no click needed, for as long as that browser's own
+Google session stays active. It's really the exact same JSON payload
+the manual **"⬇ Export data"**/**"⬆ Import data"** buttons already
+produce and read, aimed at one fixed file (`opic-forest-sync.json`) in
+your Drive instead of a downloaded file: every edit — a script tweak,
+a kick added or reordered, a take recorded, a rating or kick-check
+toggled — marks the page "dirty," and a background timer pushes an
+update at most once a minute while there's something new, plus right
+away whenever the tab is about to go to the background. On load (and
+on every sync after that), whichever side — this device or the Drive
+file — has the newer `exportedAt` timestamp wins outright and gets
+applied to the other; this is a straight last-write-wins on the
+*whole* payload, not a field-by-field merge, which is a reasonable
+trade for one person's own practice data but means editing the *same*
+thing on two devices within the same sync window will let the later
+save clobber the earlier one.
 
 Recordings sync too, embedded as base64 right inside that JSON — the
 simplest approach, and fine for normal use, but it does mean every sync

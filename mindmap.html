@@ -3582,7 +3582,8 @@
   const GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.file";
   const DRIVE_SYNC_FILENAME = "opic-forest-sync.json";
   const DRIVE_SYNC_REMEMBER_KEY = "opic-drive-sync-enabled";
-  const DRIVE_SYNC_INTERVAL_MS = 120000; // sync at most this often while there's something new to send
+  const DRIVE_SYNC_TOKEN_CACHE_KEY = "opic-drive-access-token"; // sessionStorage — see loadCachedToken() below
+  const DRIVE_SYNC_INTERVAL_MS = 60000; // sync at most this often while there's something new to send
 
   (function setupGoogleDriveSync() {
     const inArtifactSandbox = window.claude && typeof window.claude.use === "function";
@@ -3627,6 +3628,37 @@
       return gisLoadPromise;
     }
 
+    // requestAccessToken() always briefly opens (and, if it succeeds
+    // silently, auto-closes) a real popup window to accounts.google.com —
+    // even with prompt:'' for an already-consented session. That's a
+    // Google Identity Services characteristic this page's own code can't
+    // suppress; the popup is a separate top-level window, not something
+    // in this page's DOM. What *is* avoidable is triggering that popup on
+    // every single page load: an access token is normally good for about
+    // an hour, so caching it (with its own expiry) in sessionStorage
+    // means every reload within that hour reuses the same token with NO
+    // Google interaction at all — only once the cached token is actually
+    // about to expire does a fresh (flashing) silent reauth happen again.
+    function cacheToken(token, expiresInSec) {
+      try {
+        sessionStorage.setItem(DRIVE_SYNC_TOKEN_CACHE_KEY, JSON.stringify({ token, expiresAt: Date.now() + (expiresInSec || 3600) * 1000 }));
+      } catch (e) {}
+    }
+    function loadCachedToken() {
+      let raw = null;
+      try {
+        raw = sessionStorage.getItem(DRIVE_SYNC_TOKEN_CACHE_KEY);
+      } catch (e) {}
+      if (!raw) return null;
+      try {
+        const parsed = JSON.parse(raw);
+        // a couple minutes' safety margin, so a sync mid-flight doesn't
+        // start against a token that expires before it finishes
+        if (parsed && parsed.token && parsed.expiresAt > Date.now() + 120000) return parsed.token;
+      } catch (e) {}
+      return null;
+    }
+
     function ensureTokenClient() {
       if (tokenClient) return Promise.resolve(tokenClient);
       return loadGoogleIdentityServices().then(() => {
@@ -3636,6 +3668,7 @@
           callback: (resp) => {
             if (resp && resp.access_token) {
               accessToken = resp.access_token;
+              cacheToken(resp.access_token, resp.expires_in);
               onSignedIn();
             } else {
               setStatus("Sign-in didn't complete.", true);
@@ -3783,9 +3816,16 @@
     }
 
     btn.addEventListener("click", () => {
+      // already signed in with a good token (typically the case — this
+      // button reads "Sync now" once that's true) — just sync directly,
+      // no need to round-trip through Google again for that.
+      if (accessToken) {
+        syncNow();
+        return;
+      }
       setStatus("Opening Google sign-in…");
       ensureTokenClient()
-        .then((client) => client.requestAccessToken({ prompt: accessToken ? "" : "consent" }))
+        .then((client) => client.requestAccessToken({ prompt: "consent" }))
         .catch(() => setStatus("Couldn't load Google sign-in.", true));
     });
 
@@ -3795,15 +3835,23 @@
       if (document.hidden && accessToken && driveSyncDirty) syncNow();
     });
 
-    // a device that's signed in before tries a SILENT re-auth on load —
-    // no popup, no click, as long as this browser's Google session is
-    // still active — this is what makes it not need signing in by hand
-    // on every single visit, only the very first time on a given device.
+    // a device that's signed in before either reuses its still-good
+    // cached token (sessionStorage — no Google interaction at all, so no
+    // popup flash) or, once that's actually expired, tries a SILENT
+    // re-auth instead — no popup, no click, as long as this browser's
+    // Google session is still active. Either way, this is what makes it
+    // not need signing in by hand on every single visit, only the very
+    // first time on a given device (and again roughly once an hour after
+    // that, when the cached token runs out).
     let remembered = false;
     try {
       remembered = localStorage.getItem(DRIVE_SYNC_REMEMBER_KEY) === "1";
     } catch (e) {}
-    if (remembered) {
+    const cached = remembered ? loadCachedToken() : null;
+    if (cached) {
+      accessToken = cached;
+      onSignedIn();
+    } else if (remembered) {
       setStatus("Reconnecting…");
       ensureTokenClient()
         .then((client) => client.requestAccessToken({ prompt: "" }))
