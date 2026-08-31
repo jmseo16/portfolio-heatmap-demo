@@ -124,18 +124,26 @@ the background — no click needed, for as long as that browser's own
 Google session stays active. It's really the exact same JSON payload
 the manual **"⬇ Export data"**/**"⬆ Import data"** buttons already
 produce and read, aimed at one fixed file (`opic-forest-sync.json`) in
-your Drive instead of a downloaded file: every edit — a script tweak,
-a kick added or reordered, a take recorded, a rating or kick-check
-toggled — marks the page "dirty," and a background timer pushes an
-update at most once a minute while there's something new, plus right
-away whenever the tab is about to go to the background. On load (and
-on every sync after that), whichever side — this device or the Drive
-file — has the newer `exportedAt` timestamp wins outright and gets
-applied to the other; this is a straight last-write-wins on the
-*whole* payload, not a field-by-field merge, which is a reasonable
-trade for one person's own practice data but means editing the *same*
-thing on two devices within the same sync window will let the later
-save clobber the earlier one.
+your Drive instead of a downloaded file: a background timer checks in
+every 10 minutes on every signed-in device — not just the one that
+made an edit — since a device with nothing new of its own to send
+still needs to keep asking whether *another* device has pushed
+something it doesn't have yet; the actual (more expensive) upload half
+only runs when there's really something new to send. On top of that
+timer, every edit — a script tweak, a kick added or reordered, a take
+recorded, a rating or kick-check toggled — pushes right away as soon
+as the tab is about to go to the background, and coming back to the
+foreground always checks in immediately too, rather than waiting out
+whatever's left of the 10 minutes — mobile browsers throttle (or fully
+suspend) a backgrounded tab's timers, so the real gap since the last
+check-in is often a lot longer than 10 minutes actually implies once
+the screen's been off for a while. On every check-in, whichever side —
+this device or the Drive file — has the newer `exportedAt` timestamp
+wins outright and gets applied to the other; this is a straight
+last-write-wins on the *whole* payload, not a field-by-field merge,
+which is a reasonable trade for one person's own practice data but
+means editing the *same* thing on two devices within the same sync
+window will let the later save clobber the earlier one.
 
 Recordings sync too, embedded as base64 right inside that JSON — the
 simplest approach, and fine for normal use, but it does mean every sync

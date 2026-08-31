@@ -3583,7 +3583,7 @@
   const DRIVE_SYNC_FILENAME = "opic-forest-sync.json";
   const DRIVE_SYNC_REMEMBER_KEY = "opic-drive-sync-enabled";
   const DRIVE_SYNC_TOKEN_CACHE_KEY = "opic-drive-access-token"; // sessionStorage — see loadCachedToken() below
-  const DRIVE_SYNC_INTERVAL_MS = 60000; // sync at most this often while there's something new to send
+  const DRIVE_SYNC_INTERVAL_MS = 600000; // background sync tick — 10 minutes
 
   (function setupGoogleDriveSync() {
     const inArtifactSandbox = window.claude && typeof window.claude.use === "function";
@@ -3798,10 +3798,18 @@
       }
     }
 
+    // gating this on driveSyncDirty would only ever let a device PUSH its
+    // own edits on a timer — it would never notice another device's
+    // edits on its own, since pulling only happens as a side effect of
+    // syncNow() actually running. A device with nothing new to say still
+    // needs to keep periodically asking "does Drive have something new
+    // for ME" — so this runs every tick regardless of dirty state;
+    // syncNow() itself is what skips the (more expensive) upload half
+    // when there's nothing dirty to send.
     function scheduleSyncLoop() {
       if (syncTimer) return;
       syncTimer = window.setInterval(() => {
-        if (accessToken && driveSyncDirty) syncNow();
+        if (accessToken) syncNow();
       }, DRIVE_SYNC_INTERVAL_MS);
     }
 
@@ -3830,9 +3838,20 @@
     });
 
     // about to go to the background with unsynced changes — don't just
-    // sit on them until the next timer tick
+    // sit on them until the next timer tick. And the other direction:
+    // coming back to the foreground syncs right away too, rather than
+    // waiting out whatever's left of the interval — mobile browsers
+    // throttle (or fully suspend) a backgrounded tab's setInterval, so
+    // the time since the last tick can be a lot longer than
+    // DRIVE_SYNC_INTERVAL_MS actually implies after the screen's been
+    // off or another app's been in front for a while.
     document.addEventListener("visibilitychange", () => {
-      if (document.hidden && accessToken && driveSyncDirty) syncNow();
+      if (!accessToken) return;
+      if (document.hidden) {
+        if (driveSyncDirty) syncNow();
+      } else {
+        syncNow();
+      }
     });
 
     // a device that's signed in before either reuses its still-good
