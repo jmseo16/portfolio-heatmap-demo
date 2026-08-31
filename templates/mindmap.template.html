@@ -3655,19 +3655,36 @@
       return Object.assign({ Authorization: `Bearer ${accessToken}` }, extra || {});
     }
 
+    // Google's own error responses are JSON like {"error":{"code":403,
+    // "message":"Google Drive API has not been used in project ... before
+    // or it is disabled ..."}} — surfacing that real message (instead of
+    // just "403") is the difference between a status bar someone can
+    // actually act on and one that just says "something went wrong."
+    async function driveErrorMessage(res) {
+      let body = "";
+      try {
+        body = await res.text();
+      } catch (e) {}
+      try {
+        const parsed = JSON.parse(body);
+        if (parsed && parsed.error && parsed.error.message) return `${res.status}: ${parsed.error.message}`;
+      } catch (e) {}
+      return `${res.status}${body ? ": " + body.slice(0, 200) : ""}`;
+    }
+
     async function driveFindFile() {
       const q = encodeURIComponent(`name='${DRIVE_SYNC_FILENAME}' and trashed=false`);
       const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&spaces=drive&fields=files(id)`, {
         headers: driveHeaders(),
       });
-      if (!res.ok) throw new Error(`drive list failed: ${res.status}`);
+      if (!res.ok) throw new Error(`Couldn't look up the sync file (${await driveErrorMessage(res)})`);
       const data = await res.json();
       return data.files && data.files[0] ? data.files[0].id : null;
     }
 
     async function driveDownload(id) {
       const res = await fetch(`https://www.googleapis.com/drive/v3/files/${id}?alt=media`, { headers: driveHeaders() });
-      if (!res.ok) throw new Error(`drive download failed: ${res.status}`);
+      if (!res.ok) throw new Error(`Couldn't download the sync file (${await driveErrorMessage(res)})`);
       return res.json();
     }
 
@@ -3690,7 +3707,7 @@
         headers: driveHeaders({ "Content-Type": `multipart/related; boundary=${boundary}` }),
         body,
       });
-      if (!res.ok) throw new Error(`drive upload failed: ${res.status}`);
+      if (!res.ok) throw new Error(`Couldn't upload the sync file (${await driveErrorMessage(res)})`);
       const data = await res.json();
       return data.id;
     }
@@ -3737,7 +3754,12 @@
 
         setStatus(`Synced ${new Date().toLocaleTimeString()}`);
       } catch (e) {
-        setStatus("Sync failed — will retry.", true);
+        // show the real reason (e.g. "403: Google Drive API has not been
+        // used in project ... or it is disabled") rather than a generic
+        // "something went wrong" — this is usually a one-time setup
+        // problem (API not enabled, scope not granted) the viewer can
+        // actually act on, not a transient network hiccup.
+        setStatus(`Sync failed: ${(e && e.message) || "unknown error"} — will retry.`, true);
       } finally {
         syncInFlight = false;
       }
