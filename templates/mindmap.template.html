@@ -1694,8 +1694,11 @@
     return out;
   }
 
-  async function blobToMp3(blob) {
-    const lamejs = await loadLamejs();
+  // Decode a recorded blob down to raw PCM — split out from blobToMp3 so
+  // the noise-reduction path (below) can get at the samples too, without
+  // going through mp3 first (that would bake in a lossy encode before
+  // denoising ever sees the audio).
+  async function decodePCM(blob) {
     const arrayBuf = await blob.arrayBuffer();
     const AudioCtx = window.AudioContext || window.webkitAudioContext;
     const audioCtx = new AudioCtx();
@@ -1706,14 +1709,27 @@
       audioCtx.close();
     }
     const channels = Math.min(audioBuffer.numberOfChannels, 2);
-    const left16 = floatTo16BitPCM(audioBuffer.getChannelData(0));
-    const right16 = channels > 1 ? floatTo16BitPCM(audioBuffer.getChannelData(1)) : null;
+    const channelData = [];
+    for (let c = 0; c < channels; c++) {
+      // slice() copies the data out of the AudioBuffer's own storage,
+      // which some browsers reuse/invalidate once the (already-closed)
+      // AudioContext that produced it is garbage collected.
+      channelData.push(audioBuffer.getChannelData(c).slice());
+    }
+    return { sampleRate: audioBuffer.sampleRate, channelData };
+  }
+
+  async function pcmToMp3({ sampleRate, channelData }) {
+    const lamejs = await loadLamejs();
+    const channels = channelData.length;
+    const left16 = floatTo16BitPCM(channelData[0]);
+    const right16 = channels > 1 ? floatTo16BitPCM(channelData[1]) : null;
 
     // mp3 is a less efficient codec than Opus per bit, so matching the
     // recording's own bitrate here isn't enough to avoid audibly
     // compounding the loss on this second, transcode pass — 192kbps keeps
     // it close to transparent too.
-    const encoder = new lamejs.Mp3Encoder(channels, audioBuffer.sampleRate, 192);
+    const encoder = new lamejs.Mp3Encoder(channels, sampleRate, 192);
     const blockSize = 1152;
     const chunks = [];
     for (let i = 0; i < left16.length; i += blockSize) {
@@ -1726,6 +1742,203 @@
     const tail = encoder.flush();
     if (tail.length > 0) chunks.push(tail);
     return new Blob(chunks, { type: "audio/mpeg" });
+  }
+
+  async function blobToMp3(blob) {
+    return pcmToMp3(await decodePCM(blob));
+  }
+
+  // ---- noise reduction ("🧹 Denoise" button on a take): classic
+  // spectral-subtraction denoising, the same idea Audacity's "Noise
+  // Reduction" effect is built on — profile what the noise floor looks
+  // like, then subtract that profile out of every frame's spectrum.
+  // Implemented from scratch (a small radix-2 FFT + STFT/overlap-add)
+  // rather than pulling in a library: there's no noise-reduction script
+  // on this page's CDN allow-list, and a WASM denoiser (e.g. RNNoise)
+  // would need its binary fetched at runtime, which the CSP this page
+  // also has to run under (when published as a Claude Artifact) blocks
+  // for anything but a script tag from an allow-listed host. ----
+  const DENOISE_FRAME = 1024;
+  const DENOISE_HOP = DENOISE_FRAME / 4; // 75% overlap — matches the Hann window's constant-overlap-add property
+
+  // Iterative in-place radix-2 Cooley-Tukey FFT. re/im are same-length
+  // Float64Arrays (length a power of two); inverse=true also normalizes
+  // by 1/n. Used both forward (analysis) and inverse (resynthesis) below.
+  function fft(re, im, inverse) {
+    const n = re.length;
+    for (let i = 1, j = 0; i < n; i++) {
+      let bit = n >> 1;
+      for (; j & bit; bit >>= 1) j ^= bit;
+      j ^= bit;
+      if (i < j) {
+        let t = re[i]; re[i] = re[j]; re[j] = t;
+        t = im[i]; im[i] = im[j]; im[j] = t;
+      }
+    }
+    for (let len = 2; len <= n; len <<= 1) {
+      const ang = ((inverse ? 1 : -1) * 2 * Math.PI) / len;
+      const wRe = Math.cos(ang), wIm = Math.sin(ang);
+      for (let i = 0; i < n; i += len) {
+        let curRe = 1, curIm = 0;
+        const half = len / 2;
+        for (let k = 0; k < half; k++) {
+          const uRe = re[i + k], uIm = im[i + k];
+          const vRe = re[i + k + half] * curRe - im[i + k + half] * curIm;
+          const vIm = re[i + k + half] * curIm + im[i + k + half] * curRe;
+          re[i + k] = uRe + vRe;
+          im[i + k] = uIm + vIm;
+          re[i + k + half] = uRe - vRe;
+          im[i + k + half] = uIm - vIm;
+          const nextRe = curRe * wRe - curIm * wIm;
+          const nextIm = curRe * wIm + curIm * wRe;
+          curRe = nextRe; curIm = nextIm;
+        }
+      }
+    }
+    if (inverse) {
+      for (let i = 0; i < n; i++) { re[i] /= n; im[i] /= n; }
+    }
+  }
+
+  function hannWindow(size) {
+    const w = new Float64Array(size);
+    for (let i = 0; i < size; i++) w[i] = 0.5 - 0.5 * Math.cos((2 * Math.PI * i) / (size - 1));
+    return w;
+  }
+
+  // Denoises one channel's samples. Automatically profiles the noise
+  // floor from the quietest ~20% of frames (rather than asking the user
+  // to manually select a "noise sample" region like Audacity does), then
+  // subtracts that profile from every frame with a small residual floor
+  // left in — zeroing bins completely is what produces "musical noise",
+  // the metallic warble you get from over-aggressive spectral
+  // subtraction. Processes frame-by-frame rather than holding every
+  // frame's spectrum in memory at once (that scales with recording
+  // length × FFT size and gets big fast), and yields periodically so a
+  // long take doesn't freeze the tab.
+  async function spectralDenoise(samples, onProgress) {
+    const frame = DENOISE_FRAME;
+    const hop = DENOISE_HOP;
+    if (samples.length < frame * 2) return samples; // too short to profile usefully — leave as-is
+    const window = hannWindow(frame);
+    const numFrames = Math.max(1, Math.floor((samples.length - frame) / hop) + 1);
+    const bins = frame / 2 + 1;
+    const re = new Float64Array(frame);
+    const im = new Float64Array(frame);
+
+    // pass 1 (time-domain, cheap): each frame's windowed energy, just to
+    // rank frames from quietest to loudest — no FFT needed yet.
+    const energies = new Float64Array(numFrames);
+    for (let f = 0; f < numFrames; f++) {
+      const start = f * hop;
+      let e = 0;
+      for (let i = 0; i < frame; i++) {
+        const s = (samples[start + i] || 0) * window[i];
+        e += s * s;
+      }
+      energies[f] = e;
+    }
+    const sortedIdx = Array.from({ length: numFrames }, (_, i) => i).sort((a, b) => energies[a] - energies[b]);
+    const noiseFrameCount = Math.max(1, Math.round(numFrames * 0.2));
+    const noiseFrameSet = new Set(sortedIdx.slice(0, noiseFrameCount));
+
+    // pass 2: FFT only the quiet frames, average their magnitude spectrum
+    // into the noise profile.
+    const noiseProfile = new Float64Array(bins);
+    for (const f of noiseFrameSet) {
+      const start = f * hop;
+      for (let i = 0; i < frame; i++) {
+        re[i] = (samples[start + i] || 0) * window[i];
+        im[i] = 0;
+      }
+      fft(re, im, false);
+      for (let b = 0; b < bins; b++) noiseProfile[b] += Math.hypot(re[b], im[b]) / noiseFrameCount;
+    }
+
+    // pass 3: FFT every frame, subtract the noise profile out of its
+    // magnitude (keeping phase untouched), inverse-FFT, and overlap-add
+    // straight into the output.
+    const oversubtract = 1.8;
+    const floorRatio = 0.06; // never fully zero a bin — floor at 6% of its original magnitude
+    const out = new Float64Array(samples.length);
+    const norm = new Float64Array(samples.length);
+    for (let f = 0; f < numFrames; f++) {
+      const start = f * hop;
+      for (let i = 0; i < frame; i++) {
+        re[i] = (samples[start + i] || 0) * window[i];
+        im[i] = 0;
+      }
+      fft(re, im, false);
+      for (let b = 0; b < bins; b++) {
+        const mag = Math.hypot(re[b], im[b]);
+        const phase = Math.atan2(im[b], re[b]);
+        const cleaned = Math.max(mag - oversubtract * noiseProfile[b], mag * floorRatio);
+        const rb = cleaned * Math.cos(phase);
+        const ib = cleaned * Math.sin(phase);
+        re[b] = rb;
+        im[b] = ib;
+        if (b > 0 && b < frame - b) {
+          re[frame - b] = rb;
+          im[frame - b] = -ib;
+        }
+      }
+      fft(re, im, true);
+      for (let i = 0; i < frame; i++) {
+        out[start + i] += re[i] * window[i];
+        norm[start + i] += window[i] * window[i];
+      }
+      if (f % 200 === 0) {
+        if (onProgress) onProgress(f / numFrames);
+        await new Promise((r) => setTimeout(r));
+      }
+    }
+    const result = new Float32Array(samples.length);
+    for (let i = 0; i < samples.length; i++) {
+      result[i] = norm[i] > 1e-6 ? out[i] / norm[i] : 0;
+    }
+    return result;
+  }
+
+  // Full "🧹 Denoise" flow for one take: load its stored recording,
+  // denoise every channel, re-encode to mp3, and overwrite the take's
+  // stored recording in place (same take number/kicks/rating — only the
+  // audio itself changes). Returns true on success.
+  async function denoiseRecordingTake(questionId, take, status) {
+    const rec = await getRecording(recKey(questionId, take.n));
+    if (!rec || !rec.blob) {
+      showScriptStatus(status, "Couldn't find that recording.", true);
+      return false;
+    }
+    try {
+      showScriptStatus(status, "Removing noise…");
+      const pcm = await decodePCM(rec.blob);
+      const cleanedChannels = [];
+      for (const ch of pcm.channelData) {
+        cleanedChannels.push(
+          await spectralDenoise(ch, (frac) => showScriptStatus(status, `Removing noise… ${Math.round(frac * 100)}%`))
+        );
+      }
+      const mp3Blob = await pcmToMp3({ sampleRate: pcm.sampleRate, channelData: cleanedChannels });
+      const ok = await putRecording(recKey(questionId, take.n), { blob: mp3Blob, mimeType: mp3Blob.type, createdAt: rec.createdAt });
+      if (!ok) {
+        showScriptStatus(status, "Couldn't save the cleaned recording.", true);
+        return false;
+      }
+      const takes = takesFor(questionId);
+      const t = takes.find((x) => x.n === take.n);
+      if (t) {
+        t.mimeType = mp3Blob.type;
+        try {
+          t.durationSec = await getAudioDurationSec(mp3Blob);
+        } catch (e) {}
+        saveTakes(questionId, takes);
+      }
+      showScriptStatus(status, `Removed noise from take #${take.n}.`);
+      return true;
+    } catch (err) {
+      showScriptStatus(status, "Couldn't remove noise: " + ((err && err.message) || err), true);
+      return false;
+    }
   }
 
   // recording length, decoded the same way blobToMp3 decodes for
@@ -2434,6 +2647,28 @@
           audioEl.play();
         });
         btnGroup.appendChild(playBtn);
+
+        const denoiseBtn = document.createElement("button");
+        denoiseBtn.type = "button";
+        denoiseBtn.className = "take-btn take-denoise";
+        denoiseBtn.textContent = "🧹 Denoise";
+        denoiseBtn.setAttribute("aria-label", `Remove background noise from take ${take.n}`);
+        denoiseBtn.addEventListener("click", async () => {
+          denoiseBtn.disabled = true;
+          const prevLabel = denoiseBtn.textContent;
+          const ok = await denoiseRecordingTake(questionId, take, status);
+          if (ok) {
+            // the stored recording changed underneath any open <audio>
+            // element pointed at the old blob — simplest correct fix is
+            // to rebuild the row from scratch, same as the delete button.
+            renderTakes();
+            renderTree(false);
+          } else {
+            denoiseBtn.disabled = false;
+            denoiseBtn.textContent = prevLabel;
+          }
+        });
+        btnGroup.appendChild(denoiseBtn);
 
         const dlBtn = document.createElement("button");
         dlBtn.type = "button";
