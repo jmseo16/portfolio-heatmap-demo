@@ -57,6 +57,87 @@ between the artifact's downloads capability and a plain `<a download>`
 Blob link accordingly — so every download button works in both places
 without any manual switching.
 
+## Cross-device sync (GitHub Pages only)
+
+Everything here — scripts, kick phrases, takes, ratings, kick-checks,
+and the recordings themselves — lives in this browser's own
+`localStorage`/IndexedDB, so by default it's per-device: a phone and a
+laptop each keep their own separate progress. A **"🔐 Sign in to
+sync"** button in the top bar (GitHub Pages copy only — see below)
+turns that into one shared history: sign in with Google once on each
+device, and everything after that flows through a single JSON file in
+your own Google Drive, kept up to date automatically in the background.
+
+**This only runs on the GitHub Pages copy.** The Claude Artifact's
+iframe sandbox blocks any request to Google's own domains outright —
+the same hard platform limit that already keeps microphone recording
+GitHub-Pages-only (see above) — so the sync button stays hidden there
+entirely rather than showing something that can't work.
+
+**One-time setup, before this works at all** — a backend-less static
+page can't get real Google sign-in working any other way, so this step
+is unavoidable, but it's free and takes about 5–10 minutes:
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/),
+   signed in as whichever Google account should own this (the same one
+   the OPIc Speaking Log Drive folder is under, most likely).
+2. Create a new project (top project-switcher dropdown → **New
+   Project**) — any name, e.g. "OPIc Forest".
+3. **APIs & Services → Library** → search **Google Drive API** →
+   **Enable**.
+4. **APIs & Services → OAuth consent screen** → User type **External**
+   (a personal Gmail account has no "Internal" option) → fill in just
+   the required fields (app name, your email) → save. Leave the
+   publishing status as **Testing** — this app is for your own use
+   only, so it never needs Google's review — and under **Test users**,
+   add your own Google account's email.
+5. **APIs & Services → Credentials → + Create Credentials → OAuth
+   client ID** → Application type **Web application** → any name →
+   under **Authorized JavaScript origins**, add exactly the origin
+   this page is served from, e.g. `https://<owner>.github.io` (scheme
+   + host, no path, no trailing slash) → leave **Authorized redirect
+   URIs** empty (this uses Google's token-client flow, which doesn't
+   need one) → **Create**.
+6. Copy the resulting **Client ID** (ends in
+   `.apps.googleusercontent.com`) and paste it in as
+   `GOOGLE_DRIVE_CLIENT_ID` near the top of `setupGoogleDriveSync` in
+   `templates/mindmap.template.html`, replacing the
+   `"YOUR_CLIENT_ID...."` placeholder — then rebuild
+   (`python3 scripts/build.py`). The sync button stays hidden until
+   this placeholder is replaced with a real client ID.
+
+**How it actually works, once configured:** the button requests a
+Drive `drive.file`-scope access token via Google Identity Services
+(the library only ever gets to see/touch files this app itself
+created, never your whole Drive) — the first sign-in on a device needs
+one click (often zero typing, if that browser's already signed into
+Google), and every visit after that on the *same* device re-authenticates
+silently in the background, no click needed, for as long as that
+browser's own Google session stays active. It's really the exact same
+JSON payload the manual **"⬇ Export data"**/**"⬆ Import data"**
+buttons already produce and read, aimed at one fixed file
+(`opic-forest-sync.json`) in your Drive instead of a downloaded file:
+every edit — a script tweak, a kick added or reordered, a take
+recorded, a rating or kick-check toggled — marks the page "dirty," and
+a background timer pushes an update at most every two minutes while
+there's something new, plus right away whenever the tab is about to go
+to the background. On load (and on every sync after that), whichever
+side — this device or the Drive file — has the newer `exportedAt`
+timestamp wins outright and gets applied to the other; this is a
+straight last-write-wins on the *whole* payload, not a field-by-field
+merge, which is a reasonable trade for one person's own practice data
+but means editing the *same* thing on two devices within the same
+sync window will let the later save clobber the earlier one.
+
+Recordings sync too, embedded as base64 right inside that JSON — the
+simplest approach, and fine for normal use, but it does mean every sync
+re-sends the *entire* history of recordings, not just what's new, so
+sync time (and Drive storage) will grow with how many takes accumulate
+over time. If that ever becomes noticeably slow, storing each
+recording as its own separate Drive file (referenced from a much
+smaller sync JSON) would be the natural next step — not something this
+version does.
+
 ## How the tree maps to the source
 
 The source is the "(1급) Mind map" Google Sheet (`OPIc Speaking Log` folder),
