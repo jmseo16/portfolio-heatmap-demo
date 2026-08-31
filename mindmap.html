@@ -848,6 +848,9 @@
     font-family: inherit;
     color: var(--ink);
     cursor: pointer;
+    /* see .word-pick's touch-action comment — same reasoning applies to
+       every tappable target in this popup. */
+    touch-action: manipulation;
   }
   .kick-add-popup button:hover,
   .kick-add-popup button:focus-visible {
@@ -1117,11 +1120,24 @@
     border-color: var(--kick);
     white-space: pre-wrap;
     cursor: default;
+    /* manipulation: no double-tap-to-zoom, no ~300ms tap delay, and —
+       the important part on a real phone — the browser stops trying to
+       decide "is this the start of a scroll?" on every tap, which is
+       what a plain tap can get misread as the instant a finger wobbles
+       even a couple pixels (a mouse click never does this; a fingertip
+       basically always does). */
+    touch-action: manipulation;
   }
   .word-pick {
     cursor: pointer;
-    border-radius: 3px;
-    padding: 1px 0;
+    border-radius: 4px;
+    /* generous hit target — a real fingertip is ~40-48px, and a short
+       word ("a", "to", "I'm") with only 1px of padding is an easy miss
+       that lands the tap on the picker's own background instead. */
+    padding: 4px 3px;
+    margin: 0 1px;
+    display: inline-block;
+    touch-action: manipulation;
     /* user-select:none + touch-callout:none keep this a plain sequence of
        tappable spans, never a native text selection — a real drag-select
        here is what triggered the phone's own "Copy / Select all" popup
@@ -2361,10 +2377,20 @@
     el.style.left = "0px";
     el.style.top = "0px";
     const rect = el.getBoundingClientRect();
-    const maxX = Math.max(8, window.innerWidth - rect.width - 8);
-    const maxY = Math.max(8, window.innerHeight - rect.height - 8);
-    el.style.left = Math.min(Math.max(8, x), maxX) + "px";
-    el.style.top = Math.min(Math.max(8, y), maxY) + "px";
+    // visualViewport, where available, reflects what's actually
+    // interactive right now (it shrinks when a mobile browser's address
+    // bar is showing or the on-screen keyboard is up) — window.innerWidth/
+    // Height can lag a beat behind that during a scroll, which risks
+    // placing this fixed-position popup somewhere that LOOKS fine but
+    // sits under browser chrome the very next tap can't actually reach.
+    const vv = window.visualViewport;
+    const viewportW = vv ? vv.width : window.innerWidth;
+    const viewportH = vv ? vv.height : window.innerHeight;
+    const margin = 16;
+    const maxX = Math.max(margin, viewportW - rect.width - margin);
+    const maxY = Math.max(margin, viewportH - rect.height - margin);
+    el.style.left = Math.min(Math.max(margin, x), maxX) + "px";
+    el.style.top = Math.min(Math.max(margin, y), maxY) + "px";
   }
 
   // rebuilds just the "Kick phrases to use" list without touching the rest
