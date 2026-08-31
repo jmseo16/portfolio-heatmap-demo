@@ -1,0 +1,53 @@
+0-a1 <Tell me about one industry in your country that is well-known, Can you tell me about one promising or famous company in the particular industry? Tell me how the company started and all the things that have happened that made it become so-well known.>
+
+Oh Eva, the most famous industry in my country? That's a no-brainer — it's semiconductors. It has been the backbone of our economy for decades, and these days, with the AI boom, it's in the spotlight more than ever. So let me tell you about Samsung Electronics.
+
+Actually, I work at Samsung as a semiconductor engineer, so I can tell you firsthand. As I see in the news, tons of job seekers are dying to get into my company these days. Samsung is a comprehensive electronics company — the DS division handles chips, while the DX division covers smartphones and home appliances. And the biggest money-maker is the memory business inside DS, which is exactly where I belong. Because of the aggressive investment in AI infrastructure in America these days, the demand for memory has literally skyrocketing, so business is now better than ever.
+
+But here's the interesting part. Samsung didn't start as a chip maker at all. Back in 1930's, the founder opened a small trading store in Daegu, and later expanded into electronics like radios and televisions. The true turning point came after his business trip to Japan, when he made up his mind to go all in on semiconductors. And it paid off — Samsung developed the 64K DRAM, the third in the world. There's a legendary story from those days: the engineers went on a 64-kilometer march on foot to demonstrate their unwavering commitment. That tiny chip is what grew into today's world number one memory business.
+
+So yeah, I take great pride in working there, and I really grew a lot with the company. If you're curious about Samsung, why don't you look it up, Eva?
+
+
+0-a2 <Tell me about a time that a product didn't meet the expectation of public. .. or a new smartphone or a software program had problems when it was first released. Tell me all about what happened in detail and describe the reactions of the public and the industry to that issue>
+
+Wow Eva, that's such a tough question, so let me think about it for a second. Well, one case just popped up in my head — the Galaxy Note 7 battery explosion. That incident sent shockwaves throughout society at that time.
+
+It was back in 2016. The Note 7 launched with record preorders, and everyone said it was the best phone Samsung had ever made. But within just a few weeks, reports started coming in that the phones were overheating and even catching fire while charging. I couldn't believe my eyes when I saw those burnt devices all over the news. And what's worse, airlines around the world banned the phone! For those who actually owned it, it felt quite embarrassing to use in public. People were making jokes and memes about it everywhere, and the company was in crisis.
+
+But looking back, I think my company handled it the right way. It recalled around three million devices worldwide and eventually killed the product for good. The head of the mobile business bowed in front of hundreds of reporters and apologized in person. After that, the engineers in Samsung tested over hundred of thousands devices to find the root cause, and they came up with a brand-new safety check process.
+
+Thanks to that, the next model, the Galaxy S8, was a huge hit, and the company managed to rebuild its reputation. It was a painful lesson, but it made us much stronger. That's it, Eva!
+
+
+0-a3 <What are some of the companies that young people want to work for these days? Why do young people want to work for these companies?>
+
+Oh Eva, that's an interesting question. Well, these days young people in Korea are crazy about big tech companies — Samsung and SK Hynix in semiconductors, and IT companies like Naver or Kakao. And in my opinion, it all narrows down to two things: the culture and the benefits.
+
+First of all, they want a company where they can grow together with the company itself. Nobody wants to be just another cog in the machine — they want a place where they can spread their wings and make their dreams come true. And what really matters to them is a horizontal atmosphere, where even a rookie's opinion is respected instead of being ignored just because of age or position. Not to mention, they put a lot of emphasis on work-life balance. They want to take a vacation without feeling self-conscious about their boss, and they prefer flexible working hours so they can design their own schedule.
+
+On top of that, benefits and location make a huge difference. Actually, there's a funny expression here in Korea — the "southern limit line." It originally comes from the DMZ, but young job seekers use it to mean the psychological line they refuse to go below. For engineers, that line is Pyeongtaek, so if a company is located any further south, they simply don't apply, no matter how good the offer is. And the small things count too — a nice cafeteria with free meals, a shuttle bus running from Seoul, and a generous allowance for team dinners.
+
+So all in all, young people today are looking for much more than just a high salary. That's it, Eva!
+
+
+0-b1 <What are some issues people talk about regarding the internet? What are their concerns and why are those concerns a problem? Are security problems on the internet a problem? If so, talk about that issue>
+
+Oh Eva, that's a serious topic. As people spend more and more time online, two issues keep coming up. It's a security problem, and internet addiction. There are some good examples that occurred recently this year.
+
+Regarding the security problem, actually, it happened to me. Not long ago, one of the biggest shopping platforms in Korea, Coupang, had a massive data leak. Someone stole the personal information of over thirty million users, including names, phone numbers, and home addresses. And my account was one of them. Ever since then, I keep getting calls from voice fishing scammers, and it makes me shudder every time when an unknown number pops up on my screen. You know, I've heard that the latest frontier AI models, the ones from OpenAI or Anthropic, are getting incredibly good at hacking. So I'm pretty sure security problems will get bigger and bigger from now on.
+
+The other issue is addiction, and there was huge news about it just a few days ago. Meta agreed to pay around billions of dollars to settle a lawsuit that said Instragram was intentionally made to get teens addicted. This tells you how serious the problem is. Many kids these days can't concentrate on their studies at all, they just scroll through Reels all day long. Meta promised to set a daily limit of two hours for teens. I really hope it works out.
+
+So all in all, the internet is a double-edged sword, and it's our responsibility to use it wisely. That's it, Eva!
+
+
+0-b2 <How is internet usage different among generations? What do younger people commonly do online, and what do older people do online?>
+
+Oh Eva, that's an interesting question, and yes, there's a huge gap between generations. Simply put, older people use the internet in a pretty limited way while younger people do almost everything online.
+
+Well, it's already been over three decades since the internet first launched. Since then, the government has provided a lot of free education programs for senior citizens, so these days even older people are comfortable with simple web searching and watching YouTube. My parents are a perfect example. Honestly, they watch YouTube all day long. Well, it's a bit worrying, to be honest.
+
+Young people, in contrast, don't stop at YouTube. They're crazy about short-form content like Reels, they trade stocks online, they order food delivery, and you name it. And with AI booming these days, they're trying all kinds of new things like creating funny images, or even producing short films. Actually, I'm one of them. I'm totally hooked on so-called "vibe coding" these days. I built my own app using Claude, an app that really helps me with my studies, and I'm more than satisfied with it.
+
+So all in all, the older generation mainly consumes what the internet gives them, while the younger generation actually creates something with it. That's the biggest difference, Eva!

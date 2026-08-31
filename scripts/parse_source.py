@@ -92,6 +92,19 @@ QUESTION_LABELS = {
     "10-1": "park invite call",
     "10-2": "park closed, plan B",
     "10-3": "sick day reschedule",
+    "10-4": "furniture inquiry call",
+    "10-5": "wrong furniture delivered",
+    "10-6": "phone unavailable",
+    "10-7": "broken new phone",
+    "10-8": "MP3 player inquiry",
+    "10-9": "broke friend's MP3 player",
+    "10-10": "planning a farewell party",
+    "10-11": "party venue change",
+    "0-a1": "famous industry & company",
+    "0-a2": "product that let down the public",
+    "0-a3": "companies young people want",
+    "0-b1": "internet security & addiction",
+    "0-b2": "internet across generations",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
@@ -172,6 +185,7 @@ TOPIC_SCRIPT_URLS = {
     "Technology": "https://docs.google.com/document/d/1QiMFGqbfunsrDgxqrJnJWs1Ofph6imUmsr56VPoO7As/edit",
     "Park": "https://docs.google.com/document/d/1VFxUeG0e9lyxTiqjhI-J9GyTjcpAaf_CwMHPuShoyc0/edit",
     "Role Play": "https://docs.google.com/document/d/1nFeGRJD9rPP34TyhMftwgs88PFSxxjQ-dGqeDYPxigc/edit",
+    "Impromptu": "https://docs.google.com/document/d/17VUFDsH5q20jvEgE5eii4WC1_-GncxQFAkTRP1z5-EM/edit",
 }
 
 
@@ -188,7 +202,7 @@ def to_forest(topics, doc_scripts=None):
             "children": [],
         }
         for qi, q in enumerate(t["questions"]):
-            m = re.match(r"^(\d+-\d+)\.\s*(.*)$", q["text"])
+            m = re.match(r"^(\d+-[a-z]?\d+)\.\s*(.*)$", q["text"])
             tag = m.group(1) if m else f"Q{qi + 1}"
             qtext = (m.group(2) if m else q["text"]).strip()
             q_label = QUESTION_LABELS.get(tag, tag)
