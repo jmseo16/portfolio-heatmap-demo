@@ -1736,6 +1736,23 @@
     }
   }
 
+  // Chrome (and other Chromium browsers) can't read a real duration out
+  // of a MediaRecorder-produced blob's container up front — a fresh
+  // <audio> pointed at a blob: URL for one of these recordings reports
+  // .duration as Infinity/NaN, which breaks the native controls' time
+  // display: it shows "0:00 / 0:00" the whole way through playback
+  // instead of counting up, even though the seek bar itself still moves.
+  // A well-known workaround for this specific Chromium bug: seek far
+  // past the end once metadata loads, which forces Chrome to scan the
+  // file and fix up its cached duration, then seek back to the start.
+  function fixBlobAudioDuration(audioEl) {
+    audioEl.addEventListener("loadedmetadata", () => {
+      if (audioEl.duration !== Infinity && !isNaN(audioEl.duration)) return;
+      audioEl.currentTime = 1e101;
+      audioEl.addEventListener("timeupdate", () => (audioEl.currentTime = 0), { once: true });
+    });
+  }
+
   // "<node name>_Take#<n>_<date>_<duration>" — the date comes from the
   // take's own createdAt and the duration from its own durationSec (both
   // set when it was logged/recorded), so the on-screen title next to
@@ -2386,6 +2403,7 @@
           audioEl = document.createElement("audio");
           audioEl.controls = true;
           audioEl.className = "take-audio";
+          fixBlobAudioDuration(audioEl);
           audioEl.src = URL.createObjectURL(rec.blob);
           row.appendChild(audioEl);
           audioEl.addEventListener("play", () => (playBtn.textContent = "⏸ Pause"));
@@ -3807,6 +3825,7 @@
       audioEl = document.createElement("audio");
       audioEl.controls = true;
       audioEl.className = "sr-rec-audio";
+      fixBlobAudioDuration(audioEl);
       audioEl.src = URL.createObjectURL(data.blob);
       row.appendChild(audioEl);
       audioEl.addEventListener("play", () => (playBtn.textContent = "⏸ Pause"));
