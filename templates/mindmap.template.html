@@ -1051,7 +1051,7 @@
     align-items: baseline;
     gap: 10px;
   }
-  .script-reset, .script-download, .script-load, .script-edit-toggle {
+  .script-reset, .script-download, .script-load, .script-edit-toggle, .script-kick-mode-toggle {
     border: none;
     background: none;
     padding: 2px 4px;
@@ -1060,8 +1060,8 @@
     font-weight: 500;
     cursor: pointer;
   }
-  .script-reset:hover, .script-download:hover, .script-load:hover, .script-edit-toggle:hover { text-decoration: underline; }
-  .script-edit-toggle[aria-pressed="true"] {
+  .script-reset:hover, .script-download:hover, .script-load:hover, .script-edit-toggle:hover, .script-kick-mode-toggle:hover { text-decoration: underline; }
+  .script-edit-toggle[aria-pressed="true"], .script-kick-mode-toggle[aria-pressed="true"] {
     color: var(--kick);
     text-decoration: underline;
   }
@@ -1393,11 +1393,12 @@
       html += `<div class="script-panel" id="scriptPanel"${state.scriptsVisible ? "" : " hidden"}>`;
       html += `<div class="script-head"><span class="script-label">Your script</span><div class="script-actions">`;
       html += `<button type="button" class="script-edit-toggle" id="scriptEditToggle" aria-pressed="false">✏️ Edit</button>`;
+      html += `<button type="button" class="script-kick-mode-toggle" id="scriptKickModeToggle" aria-pressed="false">🏷️ Add to kick</button>`;
       html += `<button type="button" class="script-load">⬆ Load file</button>`;
       html += `<button type="button" class="script-download">⬇ Save as .txt</button>`;
       html += `<button type="button" class="script-reset">↺ Reset to original</button>`;
       html += `</div></div>`;
-      html += `<textarea class="script-box locked" readonly spellcheck="false" aria-label="Editable script for this question — tap Edit above to select text or make changes"></textarea>`;
+      html += `<textarea class="script-box locked" readonly spellcheck="false" aria-label="Script for this question — tap Edit above to type, or Add to kick to drag-select a phrase"></textarea>`;
       html += `<span class="script-status"></span>`;
       html += `<input type="file" class="script-file-input" accept=".txt,.csv,text/plain,text/csv" aria-hidden="true" tabindex="-1">`;
       html += `</div>`;
@@ -2882,6 +2883,7 @@
     // Load file, Save as .txt) lands on the wrong, currently-invisible page.
     const status = readingBody.querySelector(".script-panel .script-status");
     const editToggleBtn = readingBody.querySelector("#scriptEditToggle");
+    const kickModeBtn = readingBody.querySelector("#scriptKickModeToggle");
     if (!box) return;
     const key = `opic-script:${node.id}`;
     const original = defaultScriptFor(node);
@@ -2896,19 +2898,39 @@
     // locked by default (pointer-events:none — see the .script-box.locked
     // CSS comment) so a touch/drag over the script area always falls
     // through to the swipe-page gesture instead of fighting it for a text
-    // selection; tapping "✏️ Edit" unlocks typing and text-selection (for
-    // the kick-add popup) at the cost of swiping now needing to start
-    // somewhere outside the box. Starts locked every time this panel
-    // opens, not remembered across questions.
-    if (editToggleBtn) {
-      function setEditMode(on) {
-        box.classList.toggle("locked", !on);
-        box.readOnly = !on;
-        editToggleBtn.textContent = on ? "🔒 Done" : "✏️ Edit";
-        editToggleBtn.setAttribute("aria-pressed", String(on));
-        if (!on) hideKickAddPopup();
+    // selection. Two separate unlocked modes, never both at once:
+    //   "edit" (✏️ Edit) — a real editable textarea (readOnly=false), a
+    //     typing cursor, the works. Dragging here is plain text selection
+    //     for editing/copy-paste — it does NOT open the kick-add popup,
+    //     since a drag mid-edit is not necessarily "pick a kick phrase".
+    //   "kick" (🏷️ Add to kick) — stays readOnly (no cursor, no on-screen
+    //     keyboard popping up), unlocked only for drag-selecting a phrase;
+    //     releasing the drag opens the kick-add popup. This used to be
+    //     fused into edit mode, which meant the moment you tapped Edit a
+    //     text cursor took over and a drag just moved the caret instead of
+    //     selecting — splitting the two restores real drag-to-select.
+    // Starts locked every time this panel opens, not remembered across
+    // questions.
+    let mode = "locked";
+    function setMode(next) {
+      mode = next;
+      box.classList.toggle("locked", mode === "locked");
+      box.readOnly = mode !== "edit";
+      if (editToggleBtn) {
+        editToggleBtn.textContent = mode === "edit" ? "🔒 Done" : "✏️ Edit";
+        editToggleBtn.setAttribute("aria-pressed", String(mode === "edit"));
       }
-      editToggleBtn.addEventListener("click", () => setEditMode(box.classList.contains("locked")));
+      if (kickModeBtn) {
+        kickModeBtn.textContent = mode === "kick" ? "🔒 Done" : "🏷️ Add to kick";
+        kickModeBtn.setAttribute("aria-pressed", String(mode === "kick"));
+      }
+      if (mode !== "kick") hideKickAddPopup();
+    }
+    if (editToggleBtn) {
+      editToggleBtn.addEventListener("click", () => setMode(mode === "edit" ? "locked" : "edit"));
+    }
+    if (kickModeBtn) {
+      kickModeBtn.addEventListener("click", () => setMode(mode === "kick" ? "locked" : "kick"));
     }
 
     box.addEventListener("input", () => {
@@ -2917,15 +2939,16 @@
       } catch (e) {}
       markDriveSyncDirty();
       autoGrowTextarea(box);
-      hideKickAddPopup();
     });
 
-    // select a word/phrase in the script, get a small popup right there
-    // asking which beat it's a kick phrase for — this page has no way to
-    // know that on its own (the same words can show up in more than one
-    // beat, or none), so it's always a pick, never a guess. pointerup
-    // (not mouseup) so touch-drag selection on mobile triggers it too.
+    // select a word/phrase in the script (only while in "kick" mode), get
+    // a small popup right there asking which beat it's a kick phrase for
+    // — this page has no way to know that on its own (the same words can
+    // show up in more than one beat, or none), so it's always a pick,
+    // never a guess. pointerup (not mouseup) so touch-drag selection on
+    // mobile triggers it too.
     box.addEventListener("pointerup", (e) => {
+      if (mode !== "kick") return;
       const start = box.selectionStart;
       const end = box.selectionEnd;
       if (start === end) {
@@ -3650,9 +3673,30 @@
     // FOREST data rather than trying to patch hierarchy nodes scattered
     // across roots we may not have visited yet.
     if (kicksApplied) {
+      const prevCurrentId = state.current ? state.current.id : null;
       roots = FOREST.map(buildRoot);
+      // rebuilding from scratch makes a fresh set of d3 hierarchy node
+      // objects — the old state.current reference now belongs to a
+      // discarded tree, so it's cleared here rather than risk operating
+      // on a stale node. This used to be where it ended: whoever was mid-
+      // read got silently dumped back to the empty "Select any node"
+      // screen the moment ANY sync/import touched kick phrases (which is
+      // nearly every one — periodic Drive sync included), since the
+      // callers below only re-open state.current if it's still truthy,
+      // and it never was by the time they checked. Re-find the same
+      // question by id in the freshly-built tree instead (the same trick
+      // restoreLastState uses on page load) and reopen it, so a sync
+      // landing mid-session doesn't feel like the page reset itself.
       setCurrent(null);
       renderTree(true);
+      if (prevCurrentId) {
+        const target = findAndReveal(roots[state.topicIndex], prevCurrentId);
+        if (target) {
+          renderTree(false);
+          setCurrent(target);
+          focusOnNode(prevCurrentId);
+        }
+      }
     } else if (applied || practiceApplied) {
       // no hierarchy change needed for a script/practice-only import —
       // just redraw so every question's corner chip picks up its new
