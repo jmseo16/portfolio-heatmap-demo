@@ -100,18 +100,23 @@ QUESTION_LABELS = {
     "10-9": "broke friend's MP3 player",
     "10-10": "planning a farewell party",
     "10-11": "party venue change",
-    "0-a1": "famous industry & company",
-    "0-a2": "product that let down the public",
-    "0-a3": "companies young people want",
-    "0-b1": "internet security & addiction",
-    "0-b2": "internet across generations",
-    "0-c1": "weather in your country",
-    "0-c2": "memorable strange weather",
-    "0-d1": "first hotel stay",
-    "0-d2": "hotel pool experience",
-    "0-e1": "health-conscious menus",
-    "0-e2": "favorite restaurant",
-    "0-f1": "food contamination incident",
+    "10-12": "missing class after an accident",
+    "10-13": "lost finding the academy",
+    "10-14": "class too advanced, slow down",
+    "10-15": "questions before enrolling",
+    "10-16": "class is already full",
+    "Industry-1": "famous industry & company",
+    "Industry-2": "product that let down the public",
+    "Industry-3": "companies young people want",
+    "Internet-1": "internet security & addiction",
+    "Internet-2": "internet across generations",
+    "Weather-1": "weather in your country",
+    "Weather-2": "memorable strange weather",
+    "Hotel-1": "first hotel stay",
+    "Hotel-2": "hotel pool experience",
+    "Restaurant-1": "health-conscious menus",
+    "Restaurant-2": "favorite restaurant",
+    "Food-1": "food contamination incident",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
@@ -209,7 +214,7 @@ def to_forest(topics, doc_scripts=None):
             "children": [],
         }
         for qi, q in enumerate(t["questions"]):
-            m = re.match(r"^(\d+-[a-z]?\d+)\.\s*(.*)$", q["text"])
+            m = re.match(r"^([A-Za-z0-9]+-\d+)\.\s*(.*)$", q["text"])
             tag = m.group(1) if m else f"Q{qi + 1}"
             qtext = (m.group(2) if m else q["text"]).strip()
             q_label = QUESTION_LABELS.get(tag, tag)

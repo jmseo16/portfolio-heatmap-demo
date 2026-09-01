@@ -1,4 +1,4 @@
-0-a1 <Tell me about one industry in your country that is well-known, Can you tell me about one promising or famous company in the particular industry? Tell me how the company started and all the things that have happened that made it become so-well known.>
+Industry-1 <Tell me about one industry in your country that is well-known, Can you tell me about one promising or famous company in the particular industry? Tell me how the company started and all the things that have happened that made it become so-well known.>
 
 Oh Eva, the most famous industry in my country? That's a no-brainer — it's semiconductors. It has been the backbone of our economy for decades, and these days, with the AI boom, it's in the spotlight more than ever. So let me tell you about Samsung Electronics.
 
@@ -9,7 +9,7 @@ But here's the interesting part. Samsung didn't start as a chip maker at all. Ba
 So yeah, I take great pride in working there, and I really grew a lot with the company. If you're curious about Samsung, why don't you look it up, Eva?
 
 
-0-a2 <Tell me about a time that a product didn't meet the expectation of public. .. or a new smartphone or a software program had problems when it was first released. Tell me all about what happened in detail and describe the reactions of the public and the industry to that issue>
+Industry-2 <Tell me about a time that a product didn't meet the expectation of public. .. or a new smartphone or a software program had problems when it was first released. Tell me all about what happened in detail and describe the reactions of the public and the industry to that issue>
 
 Wow Eva, that's such a tough question, so let me think about it for a second. Well, one case just popped up in my head — the Galaxy Note 7 battery explosion. That incident sent shockwaves throughout society at that time.
 
@@ -20,7 +20,7 @@ But looking back, I think my company handled it the right way. It recalled aroun
 Thanks to that, the next model, the Galaxy S8, was a huge hit, and the company managed to rebuild its reputation. It was a painful lesson, but it made us much stronger. That's it, Eva!
 
 
-0-a3 <What are some of the companies that young people want to work for these days? Why do young people want to work for these companies?>
+Industry-3 <What are some of the companies that young people want to work for these days? Why do young people want to work for these companies?>
 
 Oh Eva, that's an interesting question. Well, these days young people in Korea are crazy about big tech companies — Samsung and SK Hynix in semiconductors, and IT companies like Naver or Kakao. And in my opinion, it all narrows down to two things: the culture and the benefits.
 
@@ -31,7 +31,7 @@ On top of that, benefits and location make a huge difference. Actually, there's 
 So all in all, young people today are looking for much more than just a high salary. That's it, Eva!
 
 
-0-b1 <What are some issues people talk about regarding the internet? What are their concerns and why are those concerns a problem? Are security problems on the internet a problem? If so, talk about that issue>
+Internet-1 <What are some issues people talk about regarding the internet? What are their concerns and why are those concerns a problem? Are security problems on the internet a problem? If so, talk about that issue>
 
 Oh Eva, that's a serious topic. As people spend more and more time online, two issues keep coming up. It's a security problem, and internet addiction. There are some good examples that occurred recently this year.
 
@@ -42,7 +42,7 @@ The other issue is addiction, and there was huge news about it just a few days a
 So all in all, the internet is a double-edged sword, and it's our responsibility to use it wisely. That's it, Eva!
 
 
-0-b2 <How is internet usage different among generations? What do younger people commonly do online, and what do older people do online?>
+Internet-2 <How is internet usage different among generations? What do younger people commonly do online, and what do older people do online?>
 
 Oh Eva, that's an interesting question, and yes, there's a huge gap between generations. Simply put, older people use the internet in a pretty limited way while younger people do almost everything online.
 
@@ -53,7 +53,7 @@ Young people, in contrast, don't stop at YouTube. They're crazy about short-form
 So all in all, the older generation mainly consumes what the internet gives them, while the younger generation actually creates something with it. That's the biggest difference, Eva!
 
 
-0-c1 <Tell me about the weather conditions in your country>
+Weather-1 <Tell me about the weather conditions in your country>
 
 Oh Eva, that's an interesting question. Korea actually has four distinct seasons – spring, summer, fall and winter. But these days, due to global warming, summers are getting hotter and winters are getting colder, so spring and fall have almost disappeared in recent years. even there anymore. As a spring-lover, it's too sad, but let me focus on summer and winter, since those are the two seasons that really define my country.
 
@@ -64,7 +64,7 @@ Now I'd like to describe what winter is like in Korea. From early December, the 
 All in all, though I do miss the gentle days of spring and fall, I've come to appreciate the extremes of summer and winter also, from cooling off at the beach to carving down a snowy slope. That's it, Eva
 
 
-0-c2 <Have you ever had a memorable or and unexpected experience because of strange or unusual weather conditions? How was the weather condition on that day? When was it? What happened? Tell me about it in as much detail as possible>
+Weather-2 <Have you ever had a memorable or and unexpected experience because of strange or unusual weather conditions? How was the weather condition on that day? When was it? What happened? Tell me about it in as much detail as possible>
 
 Wow Eva, that reminds me of my terrible memory. I did have a shivering experience that happened to me at Jeju airport last summer.
 
@@ -75,7 +75,7 @@ In the end, our flight was delayed for five hours, and we had no choice but to w
 After going through that incident, I try to avoid traveling to Jeju in summer. It's also too hot anyway, so I'd rather go in spring or fall. Eva, have you ever run into a similar travel headache?
 
 
-0-d1 <Tell me about the first hotel that you have ever stayed in. When did you stay, and who did you go with? What kind of services did you enjoy? Please describe everything in detail>
+Hotel-1 <Tell me about the first hotel that you have ever stayed in. When did you stay, and who did you go with? What kind of services did you enjoy? Please describe everything in detail>
 
 Oh Eva, let me tell you about my hotel stay. It was about five years ago, and I stayed at the Shilla Hotel. As you know, the Shilla is by far the most famous, traditional, and historic hotel in Korea. It has many facilities in it, there are restaurants, bars, and even an arcade where you can shop for luxury collections!
 
@@ -86,7 +86,7 @@ The room itself was spacious and clean, and since we stayed on the 27th floor, w
 Ah, that reminds me of how badly I need a vacation! Eva, do you enjoy traveling too?
 
 
-0-d2 <Let me ask you more about the hotel's facilities. Was there a pool in the hotel? If so, did you ever go there during your stay? How was it? Please tell me everything in detail>
+Hotel-2 <Let me ask you more about the hotel's facilities. Was there a pool in the hotel? If so, did you ever go there during your stay? How was it? Please tell me everything in detail>
 
 All right, I like this question, because the Shilla Hotel I mentioned earlier actually has a legendary pool called "Urban Island." Let me tell you all about it.
 
@@ -97,7 +97,7 @@ It was my first time at a pool party, and it was absolutely mind-blowing. The st
 This is everything I remember about my experience at the pool. It was so amazing that it's been lingering in my mind ever since. I can't wait for a chance to get there someday.
 
 
-0-e1 <Many restaurants are changing their menus to suit customers who are more health-conscious. Talk about the changes you notice about a restaurant in your country related to this trend.>
+Restaurant-1 <Many restaurants are changing their menus to suit customers who are more health-conscious. Talk about the changes you notice about a restaurant in your country related to this trend.>
 
 Oh Eva, that's a great question, because I've noticed this shift happening in my country these days.
 
@@ -108,7 +108,7 @@ This actually reminds me of a personal experience. Years ago, when I visited Haw
 Overall, I think this shift toward healthier menus is a great trend. How's your appetite, Eva?
 
 
-0-e2 <Please tell me about your favorite restaurant. Where is it located and why do you like to go there? Also which menu item do you usually choose when you go there? Tell me its taste in as much detail as possible>
+Restaurant-2 <Please tell me about your favorite restaurant. Where is it located and why do you like to go there? Also which menu item do you usually choose when you go there? Tell me its taste in as much detail as possible>
 
 Oh, my favorite restaurant! This takes me back about ten years, to a deep-dish pizzeria I visited on a business trip to Chicago. I can't recall the exact name, but it was the kind of local hotspot that's always packed with people.
 
@@ -119,7 +119,7 @@ When I took the first bite of the pizza, I was blown away. The rich gooey cheese
 Anyway, this talk is making me crave a slice right now. Eva, have you ever been to Chicago?
 
 
-0-f1 <Food can get contaminated because of bacteria. It can go bad or become toxic. Tell me about an incident you heard on the news regarding this issue. What was the problem? How was it dealt with?>
+Food-1 <Food can get contaminated because of bacteria. It can go bad or become toxic. Tell me about an incident you heard on the news regarding this issue. What was the problem? How was it dealt with?>
 
 Wow Eva, that's such a tough question, so let me think about it for a second. Well, one case that comes to mind is a mass food poisoning outbreak at a famous seafood restaurant that I saw on the news.
 

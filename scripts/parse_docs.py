@@ -29,10 +29,10 @@ Doc format quirks handled here:
     (topic-relative position), followed by the actual "<question>" line on
     the next line. Handled by _parse_workplace() with a fixed positional
     tag mapping.
-  - The Impromptu ("0. 돌발") doc groups its questions into lettered
-    sub-sets instead of a flat running number, so its tags look like
-    "0-a1"/"0-b2" rather than "N-M." - HEADER_RE accepts an optional
-    single letter before the trailing digit(s) to cover this too.
+  - The Impromptu ("0. 돌발") doc groups its questions by named category
+    instead of a flat running number, so its tags look like
+    "Weather-1"/"Hotel-2" rather than "N-M." - HEADER_RE accepts any
+    letters/digits before the trailing "-M" to cover this too.
 
 Usage (as a library):
     from parse_docs import load_doc_scripts
@@ -49,7 +49,7 @@ DOCS_DIR = ROOT / "data" / "docs"
 # this is only actually consulted for Workplace's positional headers.
 WORKPLACE_TAGS = ["6-1", "6-2", "6-3"]
 
-HEADER_RE = re.compile(r"^(\d+-[a-z]?\d+)\.?\s*<", re.MULTILINE)
+HEADER_RE = re.compile(r"^([A-Za-z0-9]+-\d+)\.?\s*<", re.MULTILINE)
 STRAY_LIST_LINE_RE = re.compile(r"^\d+\.\s{2,}\S")
 ARROW_NOTE_RE = re.compile(r"^→")
 KOREAN_RE = re.compile(r"[가-힣]")
@@ -145,7 +145,12 @@ def load_doc_scripts(docs_dir: Path = DOCS_DIR) -> dict:
 def main():
     scripts = load_doc_scripts()
     print(f"parsed {len(scripts)} question scripts from {DOCS_DIR}:")
-    for tag in sorted(scripts, key=lambda t: tuple(map(int, t.split("-")))):
+
+    def sort_key(t):
+        prefix, _, num = t.rpartition("-")
+        return (prefix, int(num) if num.isdigit() else num)
+
+    for tag in sorted(scripts, key=sort_key):
         preview = scripts[tag][:60].replace("\n", " ")
         print(f"  {tag}: {len(scripts[tag])} chars — {preview}...")
 
