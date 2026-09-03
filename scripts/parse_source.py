@@ -117,6 +117,14 @@ QUESTION_LABELS = {
     "Restaurant-1": "health-conscious menus",
     "Restaurant-2": "favorite restaurant",
     "Food-1": "food contamination incident",
+    "9-1": "latest fashion trends",
+    "9-2": "favorite website",
+    "9-3": "first time online",
+    "9-4": "recycling pattern",
+    "9-5": "recycling then vs. now",
+    "9-6": "recycling tools",
+    "9-7": "a recycling difficulty",
+    "9-8": "geographic features",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
@@ -198,6 +206,7 @@ TOPIC_SCRIPT_URLS = {
     "Park": "https://docs.google.com/document/d/1VFxUeG0e9lyxTiqjhI-J9GyTjcpAaf_CwMHPuShoyc0/edit",
     "Role Play": "https://docs.google.com/document/d/1nFeGRJD9rPP34TyhMftwgs88PFSxxjQ-dGqeDYPxigc/edit",
     "Impromptu": "https://docs.google.com/document/d/17VUFDsH5q20jvEgE5eii4WC1_-GncxQFAkTRP1z5-EM/edit",
+    "Fashion/Internet/Recycling/Geography": "https://docs.google.com/document/d/1ovk7LyvaiHfmCMKcl3h3fqPHWp8QdBMEAR7M32OUBfA/edit",
 }
 
 
