@@ -4011,6 +4011,7 @@
   const DRIVE_SYNC_REMEMBER_KEY = "opic-drive-sync-enabled";
   const DRIVE_SYNC_TOKEN_CACHE_KEY = "opic-drive-access-token"; // sessionStorage — see loadCachedToken() below
   const DRIVE_SYNC_INTERVAL_MS = 600000; // background sync tick — 10 minutes
+  const DRIVE_SYNC_LAST_SYNCED_KEY = "opic-drive-last-synced-at"; // see lastSyncedAt below
 
   (function setupGoogleDriveSync() {
     const inArtifactSandbox = window.claude && typeof window.claude.use === "function";
@@ -4026,9 +4027,42 @@
     let gisLoadPromise = null;
     let accessToken = null;
     let fileId = null; // this account's Drive file id, once found or created
-    let lastSyncedAt = null; // exportedAt of whatever we last successfully synced, either direction
+    // exportedAt of whatever we last successfully synced, either direction —
+    // persisted (not just an in-memory variable) because a page reload used
+    // to reset this to null, which made syncNow() treat Drive's existing
+    // file as unconditionally "newer" on every single reload and pull it
+    // down over local state. That's harmless when the reload happens right
+    // after a successful upload (the pulled copy just matches what's
+    // already local), but if a recording was made and saved locally right
+    // before the tab got backgrounded/reloaded — extremely common on
+    // mobile, where a backgrounded tab is often silently killed and
+    // reloaded — and the flush-on-hide sync (see the visibilitychange
+    // listener below) didn't get to finish uploading it first, the reload's
+    // very first sync would pull the still-stale remote snapshot and
+    // overwrite that take's local metadata right back out from under it:
+    // the recording's audio blob was never deleted from IndexedDB, but with
+    // its take entry gone it just silently stopped showing up anywhere —
+    // exactly the "recordings disappear at some point" bug report this
+    // fixed. Persisting the watermark means a stale remote (upload never
+    // completed) is correctly recognized as NOT newer after a reload, so
+    // it's left alone instead of clobbering the fresher local copy.
+    let lastSyncedAt = loadLastSyncedAt();
     let syncTimer = null;
     let syncInFlight = false;
+
+    function loadLastSyncedAt() {
+      try {
+        return localStorage.getItem(DRIVE_SYNC_LAST_SYNCED_KEY) || null;
+      } catch (e) {
+        return null;
+      }
+    }
+    function saveLastSyncedAt(exportedAt) {
+      lastSyncedAt = exportedAt;
+      try {
+        localStorage.setItem(DRIVE_SYNC_LAST_SYNCED_KEY, exportedAt);
+      } catch (e) {}
+    }
 
     function setStatus(msg, isError) {
       statusEl.textContent = msg;
@@ -4196,7 +4230,7 @@
           } finally {
             applyingRemoteSyncPayload = false;
           }
-          lastSyncedAt = remote.exportedAt;
+          saveLastSyncedAt(remote.exportedAt);
           driveSyncDirty = false;
         }
 
@@ -4208,7 +4242,7 @@
           const payload = await buildDataExportPayload();
           const newId = await driveUpload(fileId, payload);
           fileId = fileId || newId;
-          lastSyncedAt = payload.exportedAt;
+          saveLastSyncedAt(payload.exportedAt);
           driveSyncDirty = false;
         }
 
