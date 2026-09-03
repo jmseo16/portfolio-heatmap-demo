@@ -3824,11 +3824,16 @@
       setCurrent(null);
       renderTree(true);
       if (prevCurrentId) {
-        const target = findAndReveal(roots[state.topicIndex], prevCurrentId);
+        // the exact node (often a kick phrase — the leaves that just got
+        // rebuilt wholesale above) may itself be gone if this same sync
+        // deleted/reordered it; findAndRevealNearest falls back to the
+        // nearest still-existing ancestor instead of leaving the reader
+        // dumped on the empty screen.
+        const target = findAndRevealNearest(roots[state.topicIndex], prevCurrentId);
         if (target) {
           renderTree(false);
           setCurrent(target);
-          focusOnNode(prevCurrentId);
+          focusOnNode(target.id);
         }
       }
     } else if (applied || practiceApplied) {
@@ -4688,6 +4693,28 @@
     return target;
   }
 
+  // like findAndReveal, but falls back to the nearest still-existing
+  // ancestor when the exact id is gone — e.g. a kick phrase the viewer was
+  // reading got deleted/reordered by a concurrent edit that just synced
+  // in, so its old positional id ("...-k2") no longer matches anything
+  // after that beat's kicks were rebuilt. IDs are "t{n}-q{n}-p{n}-k{n}",
+  // one hyphen-joined segment per level, so repeatedly trimming the last
+  // "-segment" walks straight up the ancestor chain (kick -> paragraph ->
+  // question -> topic); the topic itself is never removed by a sync, so
+  // this is guaranteed to land on *something* rather than coming up empty
+  // and leaving the reading panel on the empty "Select any node" screen.
+  function findAndRevealNearest(root, id) {
+    let candidate = id;
+    while (candidate) {
+      const target = findAndReveal(root, candidate);
+      if (target) return target;
+      const lastDash = candidate.lastIndexOf("-");
+      if (lastDash === -1) break;
+      candidate = candidate.slice(0, lastDash);
+    }
+    return null;
+  }
+
   function focusOnNode(id) {
     const root = roots[state.topicIndex];
     let target = null;
@@ -4764,10 +4791,15 @@
     }
 
     if (saved.currentNodeId) {
-      const target = findAndReveal(roots[state.topicIndex], saved.currentNodeId);
+      // the exact saved node (often a kick phrase) may be gone by the time
+      // this session reopens — its own kicks were re-edited, or a sync
+      // pulled someone else's edit to that same beat — so fall back to the
+      // nearest still-existing ancestor rather than silently landing on
+      // the empty "Select any node" screen with no explanation.
+      const target = findAndRevealNearest(roots[state.topicIndex], saved.currentNodeId);
       if (target) {
         renderTree(false);
-        focusOnNode(saved.currentNodeId);
+        focusOnNode(target.id);
         if (saved.showTakes) {
           const navBtn = readingBody.querySelector("#takesNav");
           if (navBtn) navBtn.click();
