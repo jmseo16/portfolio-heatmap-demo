@@ -1,4 +1,4 @@
-10-1. <I will give you a situation and ask you to act it out. Yo want to go to park with your friend. Make a call to your friend and ask several questions about going to park together> 
+﻿10-1. <I will give you a situation and ask you to act it out. Yo want to go to park with your friend. Make a call to your friend and ask several questions about going to park together> 
 
 
 Hey bro, what’s up? It’s me, Jungmin. I’m planning to go to the park tomorrow, and I’m calling you to join me. I remembered you telling me that you wanna hit the Han River Park sometime. How’s that sound? oh ya? You’re coming? Great! 

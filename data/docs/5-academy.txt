@@ -1,4 +1,4 @@
-5-1. <Tell me about your English Academy. Where is it located and how are their conditions ? Why are you taking a course there? Please tell me everything about your English Academy in as much detail as possible> 
+﻿5-1. <Tell me about your English Academy. Where is it located and how are their conditions ? Why are you taking a course there? Please tell me everything about your English Academy in as much detail as possible> 
 
 
 Okay, I take an English speaking course at “Hackers academy”, which’s located in the heart of Gangnam where everyone all over the world knows. It has recently moved to a newly built building, so facilities are clean and new. Also, each classroom is well equipped with the latest technology to maximize students’ potential. There are several study rooms that are spacious enough for seven students. 

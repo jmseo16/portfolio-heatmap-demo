@@ -1,4 +1,4 @@
-무직시 
+﻿무직시 
 1 웍플레이스 - 사무실 묘사 . 건물에서 타고 들어가는것 처럼 해도 됨. 
 <Describe your office in detail. What does it look like? What kind of furniture and equipment are there?> 
 
