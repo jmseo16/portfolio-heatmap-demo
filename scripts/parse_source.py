@@ -196,17 +196,17 @@ def parse_csv(path: Path):
 # "Show script" button links to. Add an entry here whenever a new topic
 # gets its own script doc.
 TOPIC_SCRIPT_URLS = {
-    "Movie": "https://docs.google.com/document/d/1WluGZYRTxFM7hv4Pnlk6EZT109onSSZTaZbMoL9mQlE/edit",
-    "Concert": "https://docs.google.com/document/d/1BnG3r7CoET4cR8CaS4vyRPIR8--OiDZmJSprWvz1kOI/edit",
-    "Household": "https://docs.google.com/document/d/19B4yCg203uv4W8XwnEmmOePxiSwpeQE45BRqak_7d1I/edit",
-    "Trip": "https://docs.google.com/document/d/1V_8saPLmYYukbMmN6q1JK32SYemw-O_dKyIaxaKTJyg/edit",
-    "Academy": "https://docs.google.com/document/d/1QY5SjUoTOrKaEmOfgulH1USn8w19cvQhBA8gVuqXWXs/edit",
-    "Workplace": "https://docs.google.com/document/d/1BhvIr78GekPdqhoJsyEdy3FZD3nXfOdWGJRBmggH4zI/edit",
-    "Technology": "https://docs.google.com/document/d/1QiMFGqbfunsrDgxqrJnJWs1Ofph6imUmsr56VPoO7As/edit",
-    "Park": "https://docs.google.com/document/d/1VFxUeG0e9lyxTiqjhI-J9GyTjcpAaf_CwMHPuShoyc0/edit",
-    "Role Play": "https://docs.google.com/document/d/1nFeGRJD9rPP34TyhMftwgs88PFSxxjQ-dGqeDYPxigc/edit",
-    "Impromptu": "https://docs.google.com/document/d/17VUFDsH5q20jvEgE5eii4WC1_-GncxQFAkTRP1z5-EM/edit",
-    "Fashion/Internet/Recycling/Geography": "https://docs.google.com/document/d/1ovk7LyvaiHfmCMKcl3h3fqPHWp8QdBMEAR7M32OUBfA/edit",
+    "Movie": "https://docs.google.com/document/d/1XCXLIe6wjRt_2HMylK4yrDb8MlcjzvA3gd9ams_kgRQ/edit",
+    "Concert": "https://docs.google.com/document/d/1hZMUXd-CRytRQ5wgLR6k48_o8_FJoh1BoqCLnIDamkQ/edit",
+    "Household": "https://docs.google.com/document/d/1adWRSbndAjmNzGjEjX1sRsIdvKASEDQ-LHINrpAHe3U/edit",
+    "Trip": "https://docs.google.com/document/d/1eBtpCU17N7h5XumYlTyG1MdK1V-_O1TfHMgamti1faA/edit",
+    "Academy": "https://docs.google.com/document/d/1i-JhV_2QyQAfgxThCMMm73UZ6i_LWUVuT9GHtWoT5EM/edit",
+    "Workplace": "https://docs.google.com/document/d/1xWBKQzWvPU-Z9IyI-wNJIXS9rx-Bf89V5VvJFvsRqqE/edit",
+    "Technology": "https://docs.google.com/document/d/1sz_HWeE13roBW2Pz8TgoMDxEd_r6tCkTosXTVn7oV74/edit",
+    "Park": "https://docs.google.com/document/d/18DMnLAq2GkFTKluC3csJqyRTle9ZMycNQv7-wcXA6_8/edit",
+    "Role Play": "https://docs.google.com/document/d/1qBp-jyD1ZZODJ_5GB5bX_s_PRXu6Sy6a5z98zC_C96g/edit",
+    "Impromptu": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Fashion/Internet/Recycling/Geography": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
 }
 
 
