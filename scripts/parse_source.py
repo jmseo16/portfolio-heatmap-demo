@@ -129,6 +129,8 @@ QUESTION_LABELS = {
     "11-2": "making appointments",
     "11-3": "childhood appointment (dentist)",
     "11-4": "childhood appointment (hair salon)",
+    "11-5": "Korean holidays (Seollal)",
+    "11-6": "best & worst projects",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those

@@ -5,12 +5,12 @@ Ok Eva, let me tell you about [the hair salons or dental clinics] I usually go f
 [kick]
 
 
-Well, the places I visit most often, like my hair salon and my dental clinic, usually have a clean, all-white interior, and right at the entrance there's a reception desk where the staff always greets me with a warm smile. Inside, there's a separate room for the actual service, so people wait in the reception area until their name gets called, and then they go in one by one. To kill the boredom while waiting, there are always magazines and a TV running in the lobby.
+Well, the places I usually visit have a clean, all-white interior, and right at the entrance there's a reception desk where the staff always greets me with a warm smile. Inside, there's a separate room for the actual service, so people wait in the reception area until their name gets called, and then they go in one by one. To kill the boredom while waiting, there are always magazines and a TV running in the lobby.
 [kick] greets me with a warm smile; actual service; boredom
 
 
 But if you ask me my favorite spot, it's actually the canteen room. It's not just a place to grab a cup of coffee — honestly, it feels more like a community hub. Sure, they brew exotic beans on an espresso machine, but actually, the canteen is fully equipped with fun stuff, including a dartboard, a playstation, and even some massage chairs in the corner. Whenever I have to wait a bit longer than expected, I don't mind it at all, because I can just relax there instead.
-[kick] canteen room; grab a cup of coffee; community hub; equipped with fun stuff
+[kick] canteen room; grab a cup of coffe; community hub; equipped with fun stuff
 
 
 All in all, these appointment spots have become such a comfortable part of my routine. Eva, what kind of places do you usually visit for your appointments?
@@ -20,11 +20,11 @@ All in all, these appointment spots have become such a comfortable part of my ro
 11-2. <What kinds of things do you do when you make appointments? Tell me what you exactly do when you make these appointments.>
 
 
-Okay Eva, when it comes to making appointments, I usually open the smartphone app and check their openings and book my appointment.
+Okay Eva, when it comes to making appointments, I usually open the smartphone app to check their openings and book my appointment.
 [kick] check their openings
 
 
-Actually, when I was a kid, I had to call the salon and check their openings one by one. Well, I had no option but to go there directly to make an appointment when they're too busy to take my call. You know, there was no way to know in advance whether a slot was actually open.
+Actually, when I was a kid, I had to call there and check their openings one by one. Well, I had no option but to go there directly to make an appointment when they're too busy to take my call. You know, there was no way to know in advance whether a slot was actually open.
 [kick] one by one; in advance; slot
 
 
@@ -62,7 +62,7 @@ Ok Eva, this question actually brings back memories of my childhood too, since I
 [kick] brings back memories of my childhood; used to dread going to
 
 
-You know, the waiting time was so boring, but the kids' hair salon had a small play corner tucked in the corner, packed with toys. Playing there helped me forget the boring wait, at least for a little while. But I really hated getting my hair cut. Every once in a while, the hairdresser would slip with the scissors, and when that happened, it hurt so bad. On top of that, the cut hair would get down inside my clothes, sneaking down my collar, and it was so itchy I couldn't stand it. Even the hair-washing part felt like it lasted forever.
+You know, the waiting time was so boring, but right by the reception, there was a kids' corner tucked in the corner, packed with toys. Playing there helped me forget the boring wait, at least for a little while. When my turn finally came, I dragged my feet all the way to the hair-cut chair. Every once in a while, the hairdresser would slip with the scissors, and when that happened, it hurt so bad. On top of that, the cut hair would get down inside my clothes, sneaking down my collar, and it was so itchy I couldn't stand it. Even the hair-washing part felt like it lasted forever.
 [kick] tucked in the corner; slip with the scissors; the cut hair sneaking down my collar; so itchy I couldn't stand it; felt like it lasted forever
 
 
@@ -72,3 +72,41 @@ After it was all done, though, the receptionist always handed me a scratch lotte
 
 Now that I think about it, they did try their best to get me to come back, isn't it Eva?
 [kick] now that I think about it
+
+
+11-5. <Tell me about the holidays in your country. What kinds of traditional foods do they enjoy on that day? Which things have changed over time?>
+
+
+Ok Eva, one of the most meaningful holidays in Korea is Seollal, the Lunar New Year.
+[kick]
+
+
+On that day, we dress up in traditional clothes, hanbok and enjoy all kinds of delicious food. But the most iconic dish is definitely tteokguk, a rice cake soup. Sliced rice cakes float in a warm broth, topped with a bit of egg garnish and shredded seaweed. There's actually a fun saying that eating a bowl of tteokguk makes you a year older, so little kids often go for a second bowl!
+[kick] makes you a year older; go for a second bowl
+
+
+But traditionally, it was mostly the women in the family who did all the cooking, and honestly, cooking for a big family isn't a joke. So these days, men pitch in a lot more with the kitchen duties too. And some families take it a step further, skipping the home-cooked meal altogether and having breakfast at a luxury hotel instead. Others just pack their bags and head overseas for the holiday.
+[kick] pitch in; skipping the home-cooked meal altogether; pack their bags; head overseas
+
+
+All in all, this is all about the biggest holiday, Seollal in Korea. Eva, which holiday do you like most?
+[kick]
+
+
+11-6. <Compare the projects that you've ever gone thru. Did you enjoy it? Or hate it?>
+
+
+Ok Eva, I've been through many projects, so let me tell you.
+[kick] the best and the worst
+
+
+Actually, one of the best projects I've ever worked on was a group project back in college. The main issue was different schedules, so a good idea hit my mind — I proposed we switch most of our meetings to online gatherings using Zoom. We assigned each other roles and gave each other constructive feedback, communicating seamlessly beyond the physical and temporal constraints. Looking back, that's exactly how I learned how to cooperate with others.
+[kick] a good idea hit my mind; switch to online gatherings; constructive feedback; communicate seamlessly; physical and temporal constraints; learned how to cooperate with others
+
+
+But if you ask me the worst one, that's got to be my individual graduation project. Since I had to submit it in English, I hated it more. I had to do it all by myself from A to Z, searching papers, writing every single line, and proofreading it alone late at night. There was no one to ask, no feedback either, so I just had to trust my own to go through the whole way. It was kind of boring and honestly quite lonely. That's why I picked the project as the worst one.
+[kick] from A to Z; no one to ask; no feedback either; trust my own
+
+
+So yeah, maybe I like to work together than do it alone. Eva, do you prefer working in a team just like me?
+[kick]
