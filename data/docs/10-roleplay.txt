@@ -1,172 +1,251 @@
-﻿10-1. <I will give you a situation and ask you to act it out. Yo want to go to park with your friend. Make a call to your friend and ask several questions about going to park together> 
+10-1. <I will give you a situation and ask you to act it out. Yo want to go to park with your friend. Make a call to your friend and ask several questions about going to park together> 
 
 
 Hey bro, what’s up? It’s me, Jungmin. I’m planning to go to the park tomorrow, and I’m calling you to join me. I remembered you telling me that you wanna hit the Han River Park sometime. How’s that sound? oh ya? You’re coming? Great! 
+[kick] hit the Han River Park; You're coming? Great
 
 
 Where should we meet? Hey, why don’t I go and pick you up from your place? dont- worry I’ll also give you a ride home afterwards. 
+[kick] pick you up from your place; give you a ride home
 
 
 And what time do you want me to pick you up? I was thinking in the morning. You know, just being in the fresh air in the morning really makes us feel refreshed and relaxed. And then let’s go jogging together, or we can just stroll over the green lawn if you wanna feel unwinded. Anyway, if you would like to do anything else there, please let me know. 
+[kick] fresh air in the morning; stroll over the green lawn
 
 
 All right, I’ll see you tomorrow at nine AM. I’ll call you when I arrive at your home. I’m already too excited about our time. See you! 
+[kick] already too excited about our time
 
 
 10-2. <I will give you a situation and ask you to act it out. You were planning to go to the park with your friend, but the park is closed. Make a call to your friend and explain the situation and give several suggestions to solve this situation.>
 
 
 Man,, I have a bad news to tell you. The park that we have planned to go to is closed for several days. There was a big fire last night. 
+[kick] closed for several days; a big fire last night
 
 
 So here’s my suggestions. First, why don’t we go to Seoungnae park instead? As you know, the park is on the way to the Han river park. Seoungnae park is also famous for its beautiful landscape with big street trees and blooming flowers along the river. So I don’t think it is a bad option. 
+[kick] Seoungnae park instead; blooming flowers along the river
 
 
 Or, why don’t we watch movies instead? Well, we can go to the park on the other day. Spiderman was released recently, and my friend told me that it is fun! So this can be a good option also. 
+[kick] watch movies instead; Spiderman was released recently
 
 
 If you have other alternatives in mind, plz let me know. I will follow your opinion. Take you time, and get back to me in 30 mins. Bye! ‘
+[kick] get back to me in 30 mins
 
 
 10-3. <I am sorry, but there is a problem that you have to resolve. You are not feeling well on that day that you have planned to go to the park with your friend. You don’t think you can go to the park today. Make a call to your friend and explain the situation and give several solution about this matter> 
 
 
 Hey bro, it’s me. I'm afraid I won’t be able to make it to the park we planned to visit today. I think I ate something wrong yesterday. I’ve got food poisoning. I threw up several times last night, and I don’t have any energy to step out of bed. I’m so sorry. 
+[kick] got food poisoning; threw up several times
 
 
 Janghoon, can I have a rain check? If you are free next Saturday, why don’t we go to the park that day? I feel terrible for backing out our plans for today. I’m so sorry again. 
+[kick] have a rain check; backing out our plans
 
 
 Or, why don’t you go there with your wife Ara? I don’t want to ruin your day and I already bought some burger and snacks for our lunch. So you can just drop by my home and take them from me. Of course you can! Never mind, it’s not like I can eat them anyway. I don’t want to ruin your day just because of me. 
+[kick] go there with your wife Ara; drop by my home
 
 
 Yes, sure, go ahead. Let me give you a tip. ACt as if you prepared all of this for your wife. She must like it. Yeah, just give me a call if you’re coming to pick up the foods. You can always go jogging with me, bro. Ok, talk to you later.
+[kick] act as if you prepared; talk to you later
 
 10-4. <I'm going to give you a situation and ask you to act it out. You want to buy new furniture. Make a call to the shop and ask a few questions about the furniture that you want to buy.>
 
 
 Hello, is this Hansamm Furniture Company? I'm calling to ask some questions about your chair. I saw your flyer by chance yesterday and I'm interested in buying a model X20.
+[kick] saw your flyer by chance; interested in buying
 
 I saw the black one on your flyer, but what colors are available? I'm looking for white one that fits the overall mood of my room. Do you have any of those in stock? Good! Yes.
+[kick] what colors are available; fits the overall mood; in stock
 
 By the way, how much is it? 500 dollars? Wow, that's such a hefty price. The price is too steep, so I don't think I can afford it. Well, I think you should offer a discount. You know, I'm holding a VISA infinity card, do you have any partnership offers?
+[kick] such a hefty price; offer a discount; VISA infinity card
 
 That's all I wanted to ask. Thanks for your time. I'll stop by your store tomorrow. See you then!
+[kick] stop by your store tomorrow; see you then
 
 
 10-5. <I am sorry but there's a problem that you have to solve. You bought the furniture and it was delivered to your place this morning. But the one that got delivered to your house is different from the one that you ordered. Make a call to the store and explain the situation. Give several options about this issue.>
 
 
 Hello, this is Jungmin. I'm calling you because I think there is some mistake on your delivery.
+[kick] some mistake on your delivery; model number is X20
 
 I ordered a white chair from your store and the model number is X20. I asked for the chair to be delivered to my home and I've just received it right now. Unfortunately, there is a problem with your delivery. I'm afraid you've sent the wrong color. I definitely asked for the white one, but I think you sent the black one by mistake. I was really looking forward to receiving it today, since there are some guests coming over to my house. It's very disappointing that this has happened! It's gonna spoil my plans today!
+[kick] sent the wrong color; guests coming over; spoil my plans
 
 So, let me give you my suggestion. Could you please bring me the chair in the right color that I ordered until this afternoon? If you can't make it, I'll have to ask for a refund and order from another branch. Please call me back at 123-123, and fill me in on how you'd like to proceed.
+[kick] bring me the chair by this afternoon; ask for a refund
 
 
 10-6. <I'm sorry, but there's a problem that you have to solve. The phone that you want to buy is not available right now. Make a call to the store and ask several questions to find out how to get that model>
 
 
 Hello, is this Hi-mart Electronics? This is Jungmin and I got a call from your store about 10 minutes ago. According to your manager, the phone that I wanted to buy, I mean the white iphone Fold is no longer available. Wow, it must be really popular. Aww, I should've bought it during the presale season.
+[kick] no longer available; should've bought during presale
 
 Anyway, do you have any other way that I can get this phone? Are you sure that you can't order it from other branches? Ok, so you'll call me when the next batch comes in, right? How long would it take then? Three weeks? Oh no, I don't think I can wait that long.
+[kick] call me when the next batch comes in; three weeks; can't wait that long
 
 Well, I guess I'm out of options. I'd rather choose another color then. Which other colors are available now? The black one? Okay. Well, honestly, that color was my second choice. Yeah, I can drop by your store now. Thank you so much.
+[kick] choose another color; my second choice; drop by your store now
 
 
 10-7. <I'm sorry, but there is a problem with your new phone. Make a call to the store and explain the situation. Give several suggestions on how to solve this problem.>
 
 
 Hello, good morning. My name is Jungmin and I bought a smartphone from your store a couple of days ago. I'm calling you because the screen went black all of a sudden and it hasn't come back for an hour now. I swear I didn't do anything and it just happened. You know, it's only been three days and I'm very angry about the thing happened.
+[kick] screen went black; hasn't come back for an hour; only been three days
 
 Repairs? No, I don't want to take it for repairs. It must be a defective product, and I didn't pay good money to receive a faulty one. I'd like to exchange this with the other new ones. Otherwise, I'm gonna request a full refund.
+[kick] must be a defective product; exchange this; full refund
 
 Okay, thanks for understanding my frustration. I can visit your store within an hour. See you soon.
+[kick] visit your store within an hour
 
 
 10-8. <I will give you a situation and ask you to act it out. You are planning to buy an MP3 player. Make a call to your friend and ask several questions and get some information about the player that you want to buy>
 
 
 Hey dude, this is Jungmin. I'm calling to ask some questions about the MP3 player I'm gonna buy. I was considering an iPod, and as far as I remember you also bought that too, right?
+[kick] considering an iPod; you also bought that too
 
 I saw a commercial, but the prices seemed awfully steep. How did you pay for yours? 300 dollars? Wow, that's almost 100 dollars over my budget! Okay I got it. Also, were you able to get any discounts? I got a flyer by chance, and apparently there's a special discount for students. Is that correct? Oh, that's awesome!
+[kick] prices seemed awfully steep; over my budget; special discount for students
 
 And how about the battery life? I use my MP3 player a lot when I'm studying English. Oh, 8 hours for full charging? That sounds perfect for me.
+[kick] battery life; 8 hours for full charging; sounds perfect
 
 Thank you for your tip! Good night!
+[kick] thank you for your tip
 
 
 10-9. <I will give you a situation and ask you to act it out. You borrowed an MP3 player from your friend, but it was broken. Make a call to your friend and explain the problem and give several solutions about this situation>
 
 
 Hey man, it's me Jungmin. I'm sorry to say that I've broken your precious MP3 player that I borrowed last week. It went all of a sudden, I swear I did not do anything on it, and it just happened. Anyway, I'm so sorry about this. Look, let me take it to a repair shop and pay for them to repair it. I feel terrible that your MP3 player has broken while I was using it.
+[kick] broken your precious MP3 player; all of a sudden
 
 Hopefully, the technicians can find out what's wrong with it and fix this one. If not, I'm willing to buy you a new one. I'm responsible for this happening, so making it up to you is the least I can do.
+[kick] take it to a repair shop; willing to buy you a new one
 
 I'm sorry again, and please think about my suggestions and get back to me. I'll wait for your call. Have a great day.
+[kick] think about my suggestions; get back to me
 
 
 10-10. <I'll give you a situation and ask you to act it out. You are going to have a party at your home. Make a call to your family and explain the situation and ask a few questions about having the party>
 
 
 Hey honey, it's me. You know, my friend Janghoon got selected as a visiting scholar in his company, so he's gonna go to America with his wife at the end of this year. So, I'm planning on throwing a party, and that's why I'm calling you. Do you mind if I host a farewell dinner party for them? No? Great. Thank you for your understanding.
+[kick] visiting scholar; go to America; host a farewell dinner party
 
 I think that Saturday night around 6 o'clock would be perfect. You know, we have our vast garden in the backyard, so I'm gonna throw a barbeque party there. They'll definitely miss Korean food once they move to US, so I want to treat them with Korean BBQ. It won't take too much preparation, right? I think just getting the meat, marinade, and some rice would be enough.
+[kick] Saturday night around 6; throw a barbeque party; treat them with Korean BBQ
 
 All right, then I'll call them to confirm the details of the party. See you soon, Love you!
+[kick] call them to confirm the details
 
 
 10-11. <I'm sorry, but there is a problem that you have to solve. One of your family members got sick so you can't have the party at your house anymore. Make a call to your friend and explain this situation and talk through several solutions to this problem>
 
 
 Hey bro, this is Jungmin. I'm calling to update you on the farewell party we were planning. You know, the flu is really going around these days, so my son came down with the flu. I'm sorry to say that we should throw a party somewhere else.
+[kick] the flu is really going around; came down with the flu
 
 So here are my suggestions. First, I'm thinking about reserving a private room at a Japanese restaurant nearby. They serve great food and the price is reasonable too. And you love Japanese cuisine right? I think we can have an intimate party there.
+[kick] reserving a private room; Japanese restaurant nearby; love Japanese cuisine
 
 Or, maybe we can change the date we were supposed to meet. You know, it takes around a week to overcome the flu, so why don't we postpone our party a week? If it is okay with you, we don't need to change anything else, just the date.
+[kick] postpone our party a week; overcome the flu
 
 Think about it and give me a call back. In the meantime, I'll call the restaurant to see if there is a room available. Talk you soon!
+[kick] give me a call back; call the restaurant
 
 
 10-12. <I am sorry there is a problem that you have to resolve. You cannot attend your class tomorrow. Make a call to your English instructor and explain the situation and ask several questions about tomorrow's lecture and homework.>
 
 
-Hello, Sarah, this is Jungmin. I'm calling you to tell you about my accident. Yesterday, I got a fender bender. Oh no worries, I didn't get hurt a lot, but I was a bit shocked. My condition is not that good so I don't think I can attend tomorrow's class. As far as remember, you are gonna cover a very important part in the next class. I really don't want to miss it, so if you tell me the contents, I'll cover it by myself. Oh, I almost forgot. I know I have to submit the project by tomorrow, don't worry, I'll definitely send it to you via e-mail. Sorry for making you worried and thank you for taking your time. Have a great day. See you next time. Bye~
+Hello, Sarah, this is Jungmin. I'm calling you to tell you about my accident. Yesterday, I got a fender bender. Oh no worries, I didn't get hurt a lot, but I was a bit shocked. My condition is not that good so I don't think I can attend tomorrow's class.
+[kick] got a fender bender; a bit shocked; can't attend tomorrow's class
+
+
+As far as remember, you are gonna cover a very important part in the next class. I really don't want to miss it, so if you tell me the contents, I'll cover it by myself.
+[kick] a very important part; tell me the contents; cover it by myself
+
+
+Oh, I almost forgot. I know I have to submit the project by tomorrow, don't worry, I'll definitely send it to you via e-mail. Sorry for making you worried and thank you for taking your time. Have a great day. See you next time. Bye~
+[kick] submit the project by tomorrow; send it to you via e-mail
 
 
 10-13. <Unfortunately, you are lost on your way to the academy on the first day. You can't find the right building where your class is being held. Make a call to your English academy to explain the situation and ask for directions>
 
 
 Hello, is this Hackers Academy? This is Jungmin and I registered for a test prep course at your academy. I'm trying to get to the main building but I think I lost my way since it's my first day. Can you please help me get there?
+[kick] registered for a test prep course; lost my way; my first day
 
-Okay, I've just come out of Gangnam Station exit number 2, and I've been looking around for the main orange building, but I couldn't find it yet. Well, I can't find even a single sign pointing the way. It says that the building should be right in front of here, Hmm. What? You moved to the other building? Oh my goodness, I didn't know that. Then how can I find it? Okay, find the exit number 3,, I got it, and find the golden cinema, hmm I'm with you so far, oh man, now I got the building! Thank you for your help. I think I'm not late yet. See you!
+Okay, I've just come out of Gangnam Station exit number 2, and I've been looking around for the main orange building, but I couldn't find it yet. Well, I can't find even a single sign pointing the way. It says that the building should be right in front of here, Hmm.
+[kick] Gangnam Station exit number 2; main orange building; couldn't find even a single sign
+
+
+What? You moved to the other building? Oh my goodness, I didn't know that. Then how can I find it? Okay, find the exit number 3,, I got it, and find the golden cinema, hmm I'm with you so far, oh man, now I got the building!
+[kick] moved to the other building; find the exit number 3; the golden cinema
+
+
+Thank you for your help. I think I'm not late yet. See you!
+[kick] not late yet; thank you for your help
 
 
 10-14. <I'm going to give you a situation and ask you to act it out. You took the first class, but the class is not what you expected. Go to the instructor to explain your situation and ask for a solution about this matter>
 
 
 Hello, Sarah. You know, I'm taking your first class, and I really like your class. But it's too advanced for me to follow, so I always need to ask someone for help to catch up your class.
+[kick] too advanced to follow; always need to ask someone for help
 
 Could you please slow down your lecture a bit? You speak too fast, so I can't follow your speed. I feel like I'm falling behind whenever I miss your words.
+[kick] slow down your lecture; speak too fast; falling behind
 
 And Sarah, could you please upload your materials before your class begins? You know, I'm a slow learner so it would be grateful if you could provide me with time to preview. After the class, I'll definitely review your class using the uploaded materials.
+[kick] upload your materials before your class; a slow learner; time to preview
 
 Please consider my suggestions and let me know your thoughts. Thank you for taking the time to listen to my complaints and I hope I can continue to take your class with more confidence. Bye!
+[kick] consider my suggestions; continue to take your class with more confidence
 
 
 10-15. <I would like to give you a situation and ask you to act it out. Imagine you want to take an English lesson. Make a call to the English school and ask three or four questions about the class>
 
 
 Hello, is this Hackers academy? My name is Jungmin and I'd like to ask some questions before I enroll in a test prep course. Yes, it's my first time registering for a class in Hackers.
+[kick] first time registering; ask some questions before I enroll
 
-You know, I'm interested in Sarah's class, as a friend of mine highly recommended her class. My friend said she is a professional teacher but with a positive attitude that encourages her students. Could you please tell me her class timetable? Well, I prefer taking the class on Saturday. What? Is there a placement interview? Oh well, I'm too nervous to know that there is a level test. Okay anyway, lastly, may I ask the price? I'm just wondering how much I'll have to pay each month. Three hundred dollars? Wow, that's such a steep price. But I believe her class will be worth it. Well, I hope there will be some discount though. Oh good! Discount on students! Let me show you my student ID card when I visit for enrollment. Thank you for your help. Bye!
+You know, I'm interested in Sarah's class, as a friend of mine highly recommended her class. My friend said she is a professional teacher but with a positive attitude that encourages her students. Could you please tell me her class timetable? Well, I prefer taking the class on Saturday.
+[kick] highly recommended her class; class timetable; prefer Saturday
+
+
+What? Is there a placement interview? Oh well, I'm too nervous to know that there is a level test. Okay anyway, lastly, may I ask the price? I'm just wondering how much I'll have to pay each month. Three hundred dollars? Wow, that's such a steep price. But I believe her class will be worth it. Well, I hope there will be some discount though.
+[kick] a level test; may I ask the price; such a steep price
+
+
+Oh good! Discount on students! Let me show you my student ID card when I visit for enrollment. Thank you for your help. Bye!
+[kick] discount on students; show you my student ID card
 
 
 10-16. <I'm sorry, but there is a problem that you have to solve. The class that you want to take is already full. Make a call to your English instructor and explain why you have to take this specific course and give several solutions to take the course>
 
 
 Hello Sarah, it's Jungmin. I'm calling you talk to you about a problem that I could really use your help on. I was planning to take your test prep course starting from May, but I was just informed that the class is already full. If I cannot attend this course, I have to wait until June, and I can't wait that long because, you know, the hiring season starts soon. I'm desperate to get my target score by the end of this month. So could you please listen to my suggestions and tell me if you can resolve those or not?
+[kick] already informed the class is full; can't wait that long; hiring season starts soon
 
-First, could you tell the academy to give me an extra seat? One of the receptionists told me it's possible as soon as you're okay with it. Or, you know, your class is always packed with students and there are still many students who want to take your class outside. So I'm wondering if you have a plan to open an additional class.
+First, could you tell the academy to give me an extra seat? One of the receptionists told me it's possible as soon as you're okay with it.
+[kick] give me an extra seat; one of the receptionists told me it's possible
+
+
+Or, you know, your class is always packed with students and there are still many students who want to take your class outside. So I'm wondering if you have a plan to open an additional class.
+[kick] always packed with students; a plan to open an additional class
 
 Sarah, please consider my suggestions and get back to me. I'd be much appreciated if you'd take me in this month. Thank you. Bye!
+[kick] consider my suggestions; get back to me

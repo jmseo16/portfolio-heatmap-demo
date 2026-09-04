@@ -1,83 +1,116 @@
-﻿7-1. <These days, lots of technologies are used at school. What are they? And how are they convenient? Tell me everything with examples> 
+7-1. <These days, lots of technologies are used at school. What are they? And how are they convenient? Tell me everything with examples> 
 
 
 Technology has had a significant impact on schools, transforming both the teaching and learning experiences. This has been accelerated with the development of AI, resulting in both positive and negative impacts. 
+[kick] has had a significant impact; has been accelerated with
 
 
-Actually, my wife has recently been appointed as a professor to Dongnam university, and she was concerned about preparing her lecture materials. Well, she was in panic realizing that she didn’t have any materials made even a week before the start of a semester! 
-Watching her struggle, I suggested her to use AI. AI made her 30-page long materials within an hour! Like this experience, I’ve heard that more and more lecture materials are being created using AI. The AI has significantly lessened the workload of preparing lecture materials, allowing professors to dedicate more time to their research.   
+Actually, my wife has recently been appointed as a professor to Dongnam university, and she was concerned about preparing her lecture materials. Well, she was in panic realizing that she didn’t have any materials made even a week before the start of a semester!
+[kick] was appointed as; she was in panic
+
+
+Watching her struggle, I suggested her to use AI. AI made her 30-page long materials within an hour! Like this experience, I’ve heard that more and more lecture materials are being created using AI. The AI has significantly lessened the workload of preparing lecture materials, allowing professors to dedicate more time to their research.
+[kick] within an hour; lessened the workload; dedicate more time to
 
 
 However, AI also brought some negative downsides for sure. Students often just dump their homework on AI without even thinking about it. Furthermore, some students tend to skip fundamentals altogether, relying on AI to predict the exam questions. The more they rely on AI, the less they think by themselves. 
+[kick] dump their homework on AI; skip fundamentals altogether; the more they rely the less they think
 
 
 Well, AI did bring us convenience, but also we need to be wary of its side effects. I think schools should teach students how to use AI wisely to prevent misuse of AI. 
+[kick] be wary of its side effects; use AI wisely
 
 
 7-2 <Tell me about the technology that you use a lot in your daily life. What are the devices that you use and how are they convenient? Are there any problems appearing? Please tell me all the merits and demerits of current technology that you use daily.>
 
 
 We are living in the era of smartphones, and we can’t call our days convenient without mentioning our smartphones. 
+[kick] the era of smartphones
 
 
 Everything can be done easily with a few finger taps, whether it may be checking our bank balance, or messaging our friends abroad. For me, mobile stock trading is the most useful feature among them. You know, I remember my father calling his fund manager to sell or buy stocks. That seemed so uncomfortable given that  stock trading is such a frequently-occurred and time-sensitive activity. With my mobile trading system on my smartphone, I can trade stocks whenever and wherever I want with unlimitied time and place. 
+[kick] with a few finger taps; time-sensitive; whenever and wherever
 
 
 Ironically, this convenience often takes the joy out of our daily lives. Convenient stock trading is indeed a double-edged sword in that some people do nothing but to look at their stock prices. People are always busy doing something with their smartphones, I’m not sure whether that is of any great importance though, they create a huge barrier to meaningful communication with others. This smartphone addiction took away valuable face-to-face communication even when they’re together. 
+[kick] takes the joy out of; a double-edged sword; a huge barrier to meaningful communication
 
 
 Well, it’s our responsibility to control our use of technology, and to not let it distract us from what’s more important and meaningful in our lives.
+[kick] distract us from
 
 
 7-3 <Many homes today are equipped with new appliances or electronic devices that make everyday life more convenient. What are some of these  new appliances or electronic devices in your home? How have they changed household responsibilities?> 
 
 
 Alright Eva, as an engineer, I utilize my home appliances to its maximum. I’d love to tell you about some of my favorites. 
+[kick] to its maximum
 
 
 One of my primary household chores is cleaning up after meals. To be honest, my dish washer does it, not me. My wife always says that it is better to wash the dishes by hand, not by the machine. Well, I’m firmly on the other side of that opinion. I believe that the dishwasher is one of the greatest inventings that mankind has ever made. I just open the door, load the dishes and add the detergent and hit the start button! It’s such a huge time-saver that liberates me from one of the most monotonous and tedious house chores. 
+[kick] the dish washer does it not me; such a huge time-saver; monotonous and tedious
 
 
 Another house chore I handle is laundry. Since our family is four, we generate a mountain of laundry every single day. Doing the whole cycle of washing and hanging clothes to dry daily would be physically draining.Well, I always have my plan. Eva, did you know that the brand-new laundry machine provides a full course from washing to drying? There is no need to manually pull out the washed clothes to dry! Just toss the laundry in, and add some detergent and fabric softeners, and hit the start! It’s super easy huh?
+[kick] a mountain of laundry; physically draining; a full course from washing to drying
 
 
 Eva, my credo is to fully utilize the modern conveniences. Why don’t you look around for your brand-new home appliances this weekend?
+[kick] my credo; look around for
 
 
 7-4. <How had technology changed from the past to the present? What kind of technology have you used in the past? How is it different from the technology you use today?> 
 
 
 You know, technology has transformed considerably in the past few decades. It has helped us get things done much easier and faster. And I’d say the smartphone is at the forefront of these changes. 
+[kick] has transformed considerably; at the forefront of these changes
 
 
-Even about ten years ago, a cell phone was basically what we used only for calling and texting others. Although we could access the internet with cell phones, it came at a hefty price. So for other tasks, we had to use our computers. But after Apple’s iphone first unveiled to the world, our whole life has been changed. It was more than just a phone. Rather, it was closer to a mini computer. We could do anything once connected to the internet, such as doing online banking, playing games with friends, surfing the web, and you name it. 
+Even about ten years ago, a cell phone was basically what we used only for calling and texting others. Although we could access the internet with cell phones, it came at a hefty price. So for other tasks, we had to use our computers.
+[kick] only for calling and texting; at a hefty price
+
+
+But after Apple’s iphone first unveiled to the world, our whole life has been changed. It was more than just a phone. Rather, it was closer to a mini computer. We could do anything once connected to the internet, such as doing online banking, playing games with friends, surfing the web, and you name it.
+[kick] more than just a phone; closer to a mini computer; and you name it
 
 
 It’s truly remarkable, isn’t it?
+[kick] truly remarkable
 
 
 7-5. <How did you learn certain skills or technology? Tell me all the steps that you went through to learn that specific skill or technology> 
 
 
 You know, I’m not very tech savvy or an early adaptor. It takes me a while to learn advanced features of high-end devices. That’s why I think that either asking my friends for know-hows or watching video clips is the best way to learn instructions of the devices. 
+[kick] not very tech savvy; an early adaptor; takes me a while
 
 
 I’ve had a cell phone for a few years, actually I never really used its features other than calling and texting. But my friends were using their smart phones for things like a mini computer! learned a bit from them, but I felt like I still wasn’t using my phone to its full potential. 
+[kick] to its full potential
 
 
 I wanted to learn more, but I didn’t know how to. So I searched on Youtube, hoping to find some easy-to-follow tutorial videos with kind explanations. Fortunately, I was able to find videos that taught me how to master my smartphone! Now I can use my phone for everything, including banking, mobile trading, ordering food, you name it. I never realized just how versatile it really was! 
+[kick] easy-to-follow tutorials; how versatile it really was
 
 
 All in all, that’s how I feel about learning new skills and technology. Well, I have my friends to ask how, I feel self-conscious about bothering them.  That's why I’m relying on the instructional video! How about you Eva? 
+[kick] all in all; feel self-conscious about
 
 
 7-6. <★Tell me about the technology you used when you were doing a project. How was it convenient? Tell me about the project and the technology that you used in detail> - english academy 로 쓸수 있게 인터넷/줌미팅으로 내용 쓸것 
 
 
 One of the projects that I worked on was preparing a presentation at my English course. It was a team project, so you know, the main issue was communication. We had to meet at least twice a week in order to make progress, but it was hard to meet even once a week because of different schedules. 
+[kick] make progress; because of different schedules
 
 
-I thought a lot about how to solve this problem, and a good idea hit my mind. I proposed that we switch most of our meetings to online gatherings using Zoom. Everyone agreed, and we could meet up regularly and frequently online. We assigned each other roles, shared information and constructive feedback, and discussed various issues for the presentation. Those were all done online, and we met in person only  when it was necessary such as the day before the presentation. Other than that, we would not be able to give our presentation on time. 
+I thought a lot about how to solve this problem, and a good idea hit my mind. I proposed that we switch most of our meetings to online gatherings using Zoom. Everyone agreed, and we could meet up regularly and frequently online.
+[kick] a good idea hit my mind; switch to online gatherings
+
+
+We assigned each other roles, shared information and constructive feedback, and discussed various issues for the presentation. Those were all done online, and we met in person only  when it was necessary such as the day before the presentation. Other than that, we would not be able to give our presentation on time.
+[kick] assigned each other roles; constructive feedback; in person
 
 
 Thanks to the development of modern technology, we were able to communicate seamlessly, overcoming the limit of physical and temporal constraints we faced before. Looking back on it, I think we used our time and energy as efficiently as possible. Not to mention that we had a very good job on the presentation!
+[kick] communicate seamlessly; physical and temporal constraints; not to mention

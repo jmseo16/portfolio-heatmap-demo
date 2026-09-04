@@ -1,13 +1,16 @@
-﻿4-1. <When people think about traveling to other countries, what do you think are some of the things they are most interested in? Why do you think these things are of such interest to travelers?> 
+4-1. <When people think about traveling to other countries, what do you think are some of the things they are most interested in? Why do you think these things are of such interest to travelers?> 
 
 
 I think everyone has their own interests and priorities when they travel overseas. But I think those can be narrowed down to food and drink. 
+[kick] interests and priorities; be narrowed down to
 
 
 Let’s imagine that we go overseas. The first thing we should do now is to find and save famous local restaurants. I believe the dining culture tells us much about how people are living there. I still remember that I went to New Zealand fifteen years ago. Well, I was a foodie in a hoodie, visiting famous local restaurants in every town. Eva, have you ever tried a lamb burger? I realized the reason why the lamb burger was famous there, after seeing so many lambs grazing throughout the countryside.
+[kick] the dining culture tells us; a foodie in a hoodie; grazing throughout the countryside
 
 
 On the other hand, it is interesting to visit supermarkets, and I know that many people visit there intentionally to feel the local atmosphere. You know, it is interesting to look around what local people usually eat and drink ! You know what? It was quite a surprise to me that beef was actually cheaper than salads in New Zealand. But I could understand that when I heard that the cows outnumber the population of people there. Yeah, so I grabbed a steak in my left hand, and some local beer in my right hand, without any hesitation. Those made the perfect dinner that night.  
+[kick] feel the local atmosphere; outnumber the population; without any hesitation
 
 
 That’s it Eva! 
@@ -17,12 +20,15 @@ That’s it Eva!
 
 
 Well, I think the purpose of a vacation falls into two categories although everyone has different ways of spending their vacation. They are resting and sightseeing. I have experienced both types, and now I have my preference. 
+[kick] falls into two categories; resting and sightseeing
 
 
 Well, my first overseas trip was Italia. You know, there are a number of monuments and heritages in a single city, Rome, so I had a lot of things to look around. But, as I spend the time in Rome, I started to get tired and tired and even I thought I wanted to go back to Korea. I think that unpleasant memory has changed my attitude towards a vacation. 
+[kick] monuments and heritages; get tired and tired; changed my attitude towards
 
 
 Yes, I’d rather stay home and take a rest alone when I have spare time these days. Maybe it is due to my hard work routine. Our body and mind need time to reset, especially when we are overworked. Well, I believe intermittent vacations do prevent our burn-out. That’s why  I really prefer this kind of vacation to roaming around for sightseeing. What I like most for my vacation is to stay cooped in my hotel room and do nothing. It really blows my stress away and makes me feel rehabilitated and refreshed.Well, Ilove to be a hotelbody, than a homebody. 
+[kick] intermittent vacations; stay cooped in; a hotelbody than a homebody
 
 
 That’s it Eva. 
@@ -46,30 +52,38 @@ That’s it Eva.
 
 
 When it comes to white sandy beach and clear blue water, Jeju island comes first. 
+[kick] when it comes to; comes first
 
 
 You know, Jeju island is so called “Hawaii of Korea” because of its emerald and crystal-clear water with palm trees along the beach. My family went there for the summer vacation. 
+[kick] so called Hawaii of Korea; crystal-clear water
 
 
 Right after we arrived at the beach, we ran into the water and splashed water on each other. My son really enjoyed it with lots of laughter and fun. On the first night, we hit the bars near the beach and celebrated our summer break. Also, it was my second son’s birthday, so my wife surprised him with a birthday cake topped with a dinosaur toy. His face lit up and he clapped like a seal. That moment we spent at the beach was so precious and unforgettable. 
+[kick] splashed water on each other; hit the bars; clapped like a seal
 
 
 On the second day, we went snorkeling and appreciated the beautiful marine life. We were surprised to see people enjoying snorkeling with turtles! That was our first time seeing wild turtles on the beach. Our family also tried snorkeling for the first time there, and we really enjoyed our moment. It was really beautiful and we were amazed to see a new underwater world. You know what? We saw a clown fish like Nemo hiding in a coral!  We really had the time of our lives with schools of fish and lots of beautiful coral. It was really like a dream that I didn’t want to wake from.
+[kick] the time of our lives; schools of fish; a dream I didn't want to wake from
 
 
 Eva, we truely spent quality time last summer at the beach. I still cherish that moment. 
+[kick] spent quality time; still cherish that moment
 
 
 4-4. <You indicated in the survey that you stay at home for vacations. How do you spend your vacations at home? What do you usually do? With whom do you spend your time? > - 보라 142
 
 
 Well, I like to spend my own time at home taking a rest.
+[kick] recharge my battery; I am a homebody
 
 
 You know, I had a tough time these days, so I needed time to recharge my battery. So I try not to meet anybody during my spare time, and I’d rather spend time alone. Yes! I am a homebody. I try to be as lazy as I can. I usually sleep as late as I can, and enjoy my brunch at my favorite cafe near my house. After having brunch, I usually hit the gym and work out. Though regular exercise is not really my thing, I try to do it, otherwise I’d end up like a pig. After the workout I take a bath and unwind in the tub. Well, after taking my bath, I like to lie on my couch and binge-watch TV like a couch potato. 
+[kick] as lazy as I can; otherwise I'd end up like a pig; like a couch potato
 
 
 If I feel bored to be lazy at home, I usually imagine how to change my room. These days, I’m thinking that my closets are taking up too much room. Maybe I’m gonna change those into a built-in closet! I love brainstorming ways to renovate my living space like this.
+[kick] taking up too much room; brainstorming ways to renovate
 
 
 Well Eva, How do you like to spend your day when you’re home? Do you do anything special? 
@@ -80,15 +94,19 @@ Well Eva, How do you like to spend your day when you’re home? Do you do anythi
 
 
 I can definitely say that taking vacations has become easier than in the past. Well, now we can find nice places and hidden local spots without a travel agency! 
+[kick] hidden local spots; without a travel agency
 
 
 Youtube has been a real game-changer in making travel so much easier. From flight tickets to local restaurants, almost every information is on Youtube. The information is no longer exclusive to travel agencies. I’m subscribing to a youtuber called “A guy leaving again”, and I mostly refer to him whenever I want to leave somewhere. He unveils a secret to buy the cheapest tickets, high-end hotels with an affordable price, and suggests his favorite local spots. All I have to do is just to follow him, which finishes my travel planning. 
+[kick] a real game-changer; no longer exclusive to; unveils a secret
 
 
 Well, Eva, I’m subscribing to the AI, Claude, paying a hundred dollars per month as a token fee. But it is really worth it. It generates a complete itinerary with timelines and provides musta-visit places on the google map just by pasting a video clip URL into the prompt! From must-visit spots to must-eat dishes, it gives me every tip that I should do at the destination. 
+[kick] a token fee; a complete itinerary with timelines; must-visit spots and must-eat dishes
 
 
 In short, I gather information mostly from youtube and let Claude to generate my itinerary. This is way better than traveling with a travel agency!
+[kick] way better than
 
 
 
@@ -97,12 +115,16 @@ In short, I gather information mostly from youtube and let Claude to generate my
 
 
 Well, it depends on whether it’s a domestic or an international trip. For domestic trips, I just wing it. on the othet hand, For international trips,it requires some planning in advance. 
+[kick] I just wing it; in advance
 
 
 The very first thing we should do when we made up our mind to go abroad, is to find the cheapest flight tickets. Well, we can redeem miles for bonus tickets, but it became nearly impossible these days due to fierce competition. So I usually book my tickets through online travel aggregators such as “why pay more”. Remember it’s always cheaper to buy a round-trip ticket than a one-way ticket.
+[kick] redeem miles for bonus tickets; due to fierce competition; online travel aggregators
 
 
 Then, I look for participating hotel branches within my loyalty program. As a platinum member of a global hotel chain “Marriott”, I’m eligible for free breakfasts and an access to a club lounge during my stay. Those advantages make me open the Marriott App and search the properties nearby my destination! 
+[kick] within my loyalty program; as a platinum member; eligible for
 
 
 The whole itinerary ends up prompting AI. Once I feed all the details into Claude, it generates a complete itinerary with detailed timelines and marked locations. That’s it Eva!
+[kick] ends up prompting AI

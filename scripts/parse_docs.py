@@ -33,10 +33,17 @@ Doc format quirks handled here:
     instead of a flat running number, so its tags look like
     "Weather-1"/"Hotel-2" rather than "N-M." - HEADER_RE accepts any
     letters/digits before the trailing "-M" to cover this too.
+  - The viewer can designate a paragraph's own kick phrases right in the
+    doc: a line "[kick] phrase one; phrase two" placed immediately after
+    a paragraph (no blank line before it, so it's still part of that same
+    paragraph's block) is pulled out as that paragraph's kicks and
+    stripped from the displayed script text — see PARA_KICK_RE / the
+    kicks return value of _clean_body().
 
 Usage (as a library):
-    from parse_docs import load_doc_scripts
+    from parse_docs import load_doc_scripts, load_doc_kicks
     scripts = load_doc_scripts(ROOT / "data" / "docs")   # {"1-1": "...", ...}
+    kicks = load_doc_kicks(ROOT / "data" / "docs")       # {"1-1": [["a", "b"], ["c"], ...], ...}
 """
 import re
 from pathlib import Path
@@ -53,6 +60,7 @@ HEADER_RE = re.compile(r"^([A-Za-z0-9]+-\d+)\.?\s*<", re.MULTILINE)
 STRAY_LIST_LINE_RE = re.compile(r"^\d+\.\s{2,}\S")
 ARROW_NOTE_RE = re.compile(r"^→")
 KOREAN_RE = re.compile(r"[가-힣]")
+PARA_KICK_RE = re.compile(r"^\[[Kk]ick\]\s*(.*)$", re.MULTILINE)
 
 
 def _drop_stray_lists(paragraphs):
@@ -74,7 +82,21 @@ def _drop_stray_lists(paragraphs):
     return kept
 
 
-def _clean_body(text: str) -> str:
+def _extract_para_kick(paragraph: str):
+    """Pulls a trailing '[kick] a; b; c' line out of one paragraph block
+    (the viewer's own kick-phrase designation for that beat), returning
+    (paragraph_without_the_kick_line, [kicks] or None). The marker line
+    is matched anywhere in the block (viewers may leave a blank line
+    before it despite the "no blank line" convention) and removed."""
+    m = PARA_KICK_RE.search(paragraph)
+    if not m:
+        return paragraph, None
+    kicks = [k.strip() for k in m.group(1).split(";") if k.strip()]
+    remainder = (paragraph[: m.start()] + paragraph[m.end() :]).strip()
+    return remainder, (kicks or None)
+
+
+def _clean_body(text: str, with_kicks: bool = False):
     text = text.replace("\r\n", "\n").replace("\r", "\n")
     # normalize the curly apostrophes/quotes the docs use into the plain
     # ASCII kind so the mindmap renders consistently.
@@ -83,12 +105,23 @@ def _clean_body(text: str) -> str:
     paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text)]
     paragraphs = [p for p in paragraphs if p]
     paragraphs = _drop_stray_lists(paragraphs)
+    kicks_by_para = []
+    if with_kicks:
+        stripped = []
+        for p in paragraphs:
+            p, kicks = _extract_para_kick(p)
+            stripped.append(p)
+            kicks_by_para.append(kicks)
+        paragraphs = stripped
+    else:
+        paragraphs = [_extract_para_kick(p)[0] for p in paragraphs]
     # collapse any leftover single-newline wrapping within a paragraph
     paragraphs = [re.sub(r"\s*\n\s*", " ", p).strip() for p in paragraphs]
-    return "\n\n".join(paragraphs)
+    body = "\n\n".join(paragraphs)
+    return (body, kicks_by_para) if with_kicks else body
 
 
-def _parse_tagged(text: str) -> dict:
+def _parse_tagged(text: str, with_kicks: bool = False) -> dict:
     """Docs that carry their own inline 'N-M.' tags."""
     out = {}
     matches = list(HEADER_RE.finditer(text))
@@ -98,11 +131,11 @@ def _parse_tagged(text: str) -> dict:
         header_line_end = text.index("\n", m.end())
         start = header_line_end + 1
         end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
-        out[tag] = _clean_body(text[start:end])
+        out[tag] = _clean_body(text[start:end], with_kicks=with_kicks)
     return out
 
 
-def _parse_workplace(text: str) -> dict:
+def _parse_workplace(text: str, with_kicks: bool = False) -> dict:
     """The Workplace doc: Korean planning-note lines '1 ...' / '2 ...' /
     '3 ...' introduce each question, with the actual '<question>' line
     right after, then the answer body until the next marker."""
@@ -122,7 +155,7 @@ def _parse_workplace(text: str) -> dict:
                 break
         body = "\n".join(lines[body_start_idx:]) if body_start_idx is not None else ""
         if i < len(WORKPLACE_TAGS):
-            out[WORKPLACE_TAGS[i]] = _clean_body(body)
+            out[WORKPLACE_TAGS[i]] = _clean_body(body, with_kicks=with_kicks)
     return out
 
 
@@ -140,6 +173,24 @@ def load_doc_scripts(docs_dir: Path = DOCS_DIR) -> dict:
             print(f"warning: {path.name} re-defines tags already seen: {sorted(overlap)}")
         scripts.update(parsed)
     return scripts
+
+
+def load_doc_kicks(docs_dir: Path = DOCS_DIR) -> dict:
+    """Returns {tag: [kicks_or_None, ...]} — one entry per paragraph of
+    that question's script, in order, from any '[kick] a; b; c' lines the
+    viewer left in the doc. A paragraph with no such line gets None, not
+    an empty list, so a caller can tell "no kicks written here yet" apart
+    from "explicitly zero kicks"."""
+    kicks = {}
+    for path in sorted(docs_dir.glob("*.txt")):
+        text = path.read_text(encoding="utf-8-sig")
+        if path.name == "6-workplace.txt":
+            parsed = _parse_workplace(text, with_kicks=True)
+        else:
+            parsed = _parse_tagged(text, with_kicks=True)
+        for tag, (_, kicks_by_para) in parsed.items():
+            kicks[tag] = kicks_by_para
+    return kicks
 
 
 def main():

@@ -1,130 +1,178 @@
 Industry-1 <Tell me about one industry in your country that is well-known, Can you tell me about one promising or famous company in the particular industry? Tell me how the company started and all the things that have happened that made it become so-well known.>
 
 Oh Eva, the most famous industry in my country? That's a no-brainer — it's semiconductors. It has been the backbone of our economy for decades, and these days, with the AI boom, it's in the spotlight more than ever. So let me tell you about Samsung Electronics.
+[kick] no-brainer; semiconductors; in the spotlight more than ever
 
 Actually, I work at Samsung as a semiconductor engineer, so I can tell you firsthand. As I see in the news, tons of job seekers are dying to get into my company these days. Samsung is a comprehensive electronics company — the DS division handles chips, while the DX division covers smartphones and home appliances. And the biggest money-maker is the memory business inside DS, which is exactly where I belong. Because of the aggressive investment in AI infrastructure in America these days, the demand for memory has literally skyrocketing, so business is now better than ever.
+[kick] DS division handles chips; DX division; demand for memory skyrocketing
 
 But here's the interesting part. Samsung didn't start as a chip maker at all. Back in 1930's, the founder opened a small trading store in Daegu, and later expanded into electronics like radios and televisions. The true turning point came after his business trip to Japan, when he made up his mind to go all in on semiconductors. And it paid off — Samsung developed the 64K DRAM, the third in the world. There's a legendary story from those days: the engineers went on a 64-kilometer march on foot to demonstrate their unwavering commitment. That tiny chip is what grew into today's world number one memory business.
+[kick] small trading store in Daegu; all in on semiconductors; 64-kilometer march
 
 So yeah, I take great pride in working there, and I really grew a lot with the company. If you're curious about Samsung, why don't you look it up, Eva?
+[kick] take great pride; why don't you look it up
 
 
 Industry-2 <Tell me about a time that a product didn't meet the expectation of public. .. or a new smartphone or a software program had problems when it was first released. Tell me all about what happened in detail and describe the reactions of the public and the industry to that issue>
 
 Wow Eva, that's such a tough question, so let me think about it for a second. Well, one case just popped up in my head — the Galaxy Note 7 battery explosion. That incident sent shockwaves throughout society at that time.
+[kick] sent shockwaves throughout society
 
 It was back in 2016. The Note 7 launched with record preorders, and everyone said it was the best phone Samsung had ever made. But within just a few weeks, reports started coming in that the phones were overheating and even catching fire while charging. I couldn't believe my eyes when I saw those burnt devices all over the news. And what's worse, airlines around the world banned the phone! For those who actually owned it, it felt quite embarrassing to use in public. People were making jokes and memes about it everywhere, and the company was in crisis.
+[kick] overheating and catching fire; airlines around the world banned the phone
 
 But looking back, I think my company handled it the right way. It recalled around three million devices worldwide and eventually killed the product for good. The head of the mobile business bowed in front of hundreds of reporters and apologized in person. After that, the engineers in Samsung tested over hundred of thousands devices to find the root cause, and they came up with a brand-new safety check process.
+[kick] recalled around three million devices; bowed and apologized in person
 
 Thanks to that, the next model, the Galaxy S8, was a huge hit, and the company managed to rebuild its reputation. It was a painful lesson, but it made us much stronger. That's it, Eva!
+[kick] a huge hit; rebuild its reputation
 
 
 Industry-3 <What are some of the companies that young people want to work for these days? Why do young people want to work for these companies?>
 
 Oh Eva, that's an interesting question. Well, these days young people in Korea are crazy about big tech companies — Samsung and SK Hynix in semiconductors, and IT companies like Naver or Kakao. And in my opinion, it all narrows down to two things: the culture and the benefits.
+[kick] Samsung; SK Hynix; Naver or Kakao; culture and the benefits
 
 First of all, they want a company where they can grow together with the company itself. Nobody wants to be just another cog in the machine — they want a place where they can spread their wings and make their dreams come true. And what really matters to them is a horizontal atmosphere, where even a rookie's opinion is respected instead of being ignored just because of age or position. Not to mention, they put a lot of emphasis on work-life balance. They want to take a vacation without feeling self-conscious about their boss, and they prefer flexible working hours so they can design their own schedule.
+[kick] grow together with the company; horizontal atmosphere; work-life balance
 
 On top of that, benefits and location make a huge difference. Actually, there's a funny expression here in Korea — the "southern limit line." It originally comes from the DMZ, but young job seekers use it to mean the psychological line they refuse to go below. For engineers, that line is Pyeongtaek, so if a company is located any further south, they simply don't apply, no matter how good the offer is. And the small things count too — a nice cafeteria with free meals, a shuttle bus running from Seoul, and a generous allowance for team dinners.
+[kick] the southern limit line; Pyeongtaek; free meals and a shuttle bus
 
 So all in all, young people today are looking for much more than just a high salary. That's it, Eva!
+[kick] much more than just a high salary
 
 
 Internet-1 <What are some issues people talk about regarding the internet? What are their concerns and why are those concerns a problem? Are security problems on the internet a problem? If so, talk about that issue>
 
 Oh Eva, that's a serious topic. As people spend more and more time online, two issues keep coming up. It's a security problem, and internet addiction. There are some good examples that occurred recently this year.
+[kick] two issues keep coming up; security problem; internet addiction
 
 Regarding the security problem, actually, it happened to me. Not long ago, one of the biggest shopping platforms in Korea, Coupang, had a massive data leak. Someone stole the personal information of over thirty million users, including names, phone numbers, and home addresses. And my account was one of them. Ever since then, I keep getting calls from voice fishing scammers, and it makes me shudder every time when an unknown number pops up on my screen. You know, I've heard that the latest frontier AI models, the ones from OpenAI or Anthropic, are getting incredibly good at hacking. So I'm pretty sure security problems will get bigger and bigger from now on.
+[kick] massive data leak; thirty million users; voice fishing scammers
 
 The other issue is addiction, and there was huge news about it just a few days ago. Meta agreed to pay around billions of dollars to settle a lawsuit that said Instragram was intentionally made to get teens addicted. This tells you how serious the problem is. Many kids these days can't concentrate on their studies at all, they just scroll through Reels all day long. Meta promised to set a daily limit of two hours for teens. I really hope it works out.
+[kick] made to get teens addicted; a daily limit of two hours
 
 So all in all, the internet is a double-edged sword, and it's our responsibility to use it wisely. That's it, Eva!
+[kick] a double-edged sword; use it wisely
 
 
 Internet-2 <How is internet usage different among generations? What do younger people commonly do online, and what do older people do online?>
 
 Oh Eva, that's an interesting question, and yes, there's a huge gap between generations. Simply put, older people use the internet in a pretty limited way while younger people do almost everything online.
+[kick] a pretty limited way; almost everything online
 
 Well, it's already been over three decades since the internet first launched. Since then, the government has provided a lot of free education programs for senior citizens, so these days even older people are comfortable with simple web searching and watching YouTube. My parents are a perfect example. Honestly, they watch YouTube all day long. Well, it's a bit worrying, to be honest.
+[kick] comfortable with simple web searching; watch YouTube all day long
 
 Young people, in contrast, don't stop at YouTube. They're crazy about short-form content like Reels, they trade stocks online, they order food delivery, and you name it. And with AI booming these days, they're trying all kinds of new things like creating funny images, or even producing short films. Actually, I'm one of them. I'm totally hooked on so-called "vibe coding" these days. I built my own app using Claude, an app that really helps me with my studies, and I'm more than satisfied with it.
+[kick] crazy about short-form content; trade stocks; hooked on vibe coding
 
 So all in all, the older generation mainly consumes what the internet gives them, while the younger generation actually creates something with it. That's the biggest difference, Eva!
+[kick] consumes what the internet gives them; actually creates something with it
 
 
 Weather-1 <Tell me about the weather conditions in your country>
 
 Oh Eva, that's an interesting question. Korea actually has four distinct seasons – spring, summer, fall and winter. But these days, due to global warming, summers are getting hotter and winters are getting colder, so spring and fall have almost disappeared in recent years. even there anymore. As a spring-lover, it's too sad, but let me focus on summer and winter, since those are the two seasons that really define my country.
+[kick] four distinct seasons; spring and fall have almost disappeared
 
 Let's begin with summer. It often rains a lot in summer, but due to global warming, we're seeing more tropical-like downpours lately. These torrential rains often hit specific, localized areas and sadly, result in people getting injured. On clear days, it is usually hot and humid so many people head to the beach to cool down from the scorching heat. Beyond just water sports and sunbathing, Korea is also widely known for its delightful summer treats like patbingsu, the traditional shaved ice topped with red beans, or naengmyeon, the traditional cold noodle dish, are loved by both adults and kids.
+[kick] tropical-like downpours; head to the beach; patbingsu; naengmyeon
 
 Now I'd like to describe what winter is like in Korea. From early December, the temperature usually starts to drop noticeably and it gets freezing cold until March. Gangwon-do in particular is famous for its heavy snow, thanks to the Taebaek mountain range, the longest and highest range in Korea. Along its slopes, you'll find plenty of resorts where people enjoy skiing, sledding, you name it, so tons of people flock there every winter to make the most of it.
+[kick] freezing cold until March; Gangwon-do; Taebaek mountain range; skiing and sledding
 
 All in all, though I do miss the gentle days of spring and fall, I've come to appreciate the extremes of summer and winter also, from cooling off at the beach to carving down a snowy slope. That's it, Eva
+[kick] appreciate the extremes of summer and winter
 
 
 Weather-2 <Have you ever had a memorable or and unexpected experience because of strange or unusual weather conditions? How was the weather condition on that day? When was it? What happened? Tell me about it in as much detail as possible>
 
 Wow Eva, that reminds me of my terrible memory. I did have a shivering experience that happened to me at Jeju airport last summer.
+[kick] a shivering experience; Jeju airport last summer
 
 As I mentioned earlier, tons of people flock to Jeju island in summer, and my family and I also went there for our summer vacation last year. It was a three-day trip and the weather while we were there was picture-perfect. But here's the thing, Jeju is notorious for its strong winds, and many typhoons tend to strike the island in summer. And wouldn't you know it, on the exact day we were supposed to fly back from Jeju to Incheon, the wind suddenly picked up, out of nowhere. Bursts of lightning lit up the sky, and the sound of strong winds was very loud.
+[kick] notorious for its strong winds; wind suddenly picked up; bursts of lightning
 
 In the end, our flight was delayed for five hours, and we had no choice but to wait at the airport. We managed to kill some time in the airline lounge, but my kids were bored out of their minds, crying and throwing tantrums the whole time. By the time we finally boarded, I was completely drained.
+[kick] delayed for five hours; bored out of their minds; completely drained
 
 After going through that incident, I try to avoid traveling to Jeju in summer. It's also too hot anyway, so I'd rather go in spring or fall. Eva, have you ever run into a similar travel headache?
+[kick] avoid traveling to Jeju in summer
 
 
 Hotel-1 <Tell me about the first hotel that you have ever stayed in. When did you stay, and who did you go with? What kind of services did you enjoy? Please describe everything in detail>
 
 Oh Eva, let me tell you about my hotel stay. It was about five years ago, and I stayed at the Shilla Hotel. As you know, the Shilla is by far the most famous, traditional, and historic hotel in Korea. It has many facilities in it, there are restaurants, bars, and even an arcade where you can shop for luxury collections!
+[kick] the Shilla Hotel; most famous; traditional; and historic
 
 The moment I arrived at the lobby, the staff took care of the valet parking for me. They pulled our heavy luggage right out of the trunk and carried it up to our room safely. The staff who greeted us at check-in were incredibly professional and warm, I was blown away. Once we got to the room, there was a welcome amenity waiting for us, along with a handwritten greeting letter. How thoughtful they were!
+[kick] took care of the valet parking; incredibly professional and warm; a handwritten greeting letter
 
 The room itself was spacious and clean, and since we stayed on the 27th floor, we had the privilege of a spectacular view of Namsan right from our window. But my favorite part of the room was, without a doubt, the bed. The bedding was flawless, and the plush texture of the quilt was so unforgettable that I ended up buying the same one for my house. Even though I spent my fortune, it was worth every penny.
+[kick] spectacular view of Namsan; without a doubt; the bed; worth every penny
 
 Ah, that reminds me of how badly I need a vacation! Eva, do you enjoy traveling too?
+[kick] how badly I need a vacation
 
 
 Hotel-2 <Let me ask you more about the hotel's facilities. Was there a pool in the hotel? If so, did you ever go there during your stay? How was it? Please tell me everything in detail>
 
 All right, I like this question, because the Shilla Hotel I mentioned earlier actually has a legendary pool called "Urban Island." Let me tell you all about it.
+[kick] a legendary pool called Urban Island
 
 We were relaxing in our room but we suddenly heard some upbeat music drifting in. We peeked out the window, and down at the outdoor pool, a DJ and a singer were putting on a live show. We headed straight down there.
+[kick] upbeat music drifting in; a DJ and a singer; live show
 
 It was my first time at a pool party, and it was absolutely mind-blowing. The stage set was amazing with up-to-date sound gears, and the moment the DJ dropped the beat, the whole place heated up. We ran into the water and splashed water on each other. We really had a blast. The upbeat sound and lighting made the atmosphere even more electric, and honestly, I was completely blown away by the time when my favorite band, Coldplay's hit song blasted out of the speakers. People around us were singing along and moving to the groove, and the energy just kept building through the night.
+[kick] absolutely mind-blowing; splashed water on each other; Coldplay's hit song
 
 This is everything I remember about my experience at the pool. It was so amazing that it's been lingering in my mind ever since. I can't wait for a chance to get there someday.
+[kick] lingering in my mind ever since
 
 
 Restaurant-1 <Many restaurants are changing their menus to suit customers who are more health-conscious. Talk about the changes you notice about a restaurant in your country related to this trend.>
 
 Oh Eva, that's a great question, because I've noticed this shift happening in my country these days.
+[kick] this shift happening; more health-conscious
 
 Compared to the past, way more restaurants nowadays are offering healthy options like low-calorie food and vegan dishes. I've actually heard that with the rise of obesity treatment drugs, some people say fewer people feel the need to diet these days. But honestly, I don't think that's slowing down the trend toward healthy food at all. From vegan menus to acai berry smoothies, many health-food chains are popping up everywhere in Korea.
+[kick] low-calorie food and vegan dishes; health-food chains are popping up
 
 This actually reminds me of a personal experience. Years ago, when I visited Hawaii, I tried tuna poke for the first time, and I was completely blown away. Not only was the dish delicious, but it was also surprisingly low in calories. I ended up eating poke almost every single day for the rest of that trip! You know what? There's a poke place near my office that serves something pretty close to that I had in Hawaii, so often I stop by there whenever I'm craving that same flavor.
+[kick] tried tuna poke for the first time; completely blown away; a poke place near my office
 
 Overall, I think this shift toward healthier menus is a great trend. How's your appetite, Eva?
+[kick] a great trend
 
 
 Restaurant-2 <Please tell me about your favorite restaurant. Where is it located and why do you like to go there? Also which menu item do you usually choose when you go there? Tell me its taste in as much detail as possible>
 
 Oh, my favorite restaurant! This takes me back about ten years, to a deep-dish pizzeria I visited on a business trip to Chicago. I can't recall the exact name, but it was the kind of local hotspot that's always packed with people.
+[kick] a deep-dish pizzeria; a business trip to Chicago
 
 After finishing up a tour of Millennium Park with my colleagues from the lab, we were starving for lunch. We felt like we could eat a horse. One of my colleagues twisted my arm into trying this particular pizzeria, where the star of the menu was the pepperoni deep-dish. It was clear why the place was packed, when I got the first bite.
+[kick] starving for lunch; could eat a horse; the pepperoni deep-dish
 
 When I took the first bite of the pizza, I was blown away. The rich gooey cheese was out of this world. The crust was crispy on the outside, but thick and fluffy on the inside. It just melted in a second! We washed it down with cold beer, and honestly, it was the perfect pairing. After coming back to Korea, I've tried plenty of so-called Chicago deep-dish spots, but none of them have ever come close to that original taste.
+[kick] the rich gooey cheese; crispy on the outside; washed it down with cold beer
 
 Anyway, this talk is making me crave a slice right now. Eva, have you ever been to Chicago?
+[kick] craving a slice right now
 
 
 Food-1 <Food can get contaminated because of bacteria. It can go bad or become toxic. Tell me about an incident you heard on the news regarding this issue. What was the problem? How was it dealt with?>
 
 Wow Eva, that's such a tough question, so let me think about it for a second. Well, one case that comes to mind is a mass food poisoning outbreak at a famous seafood restaurant that I saw on the news.
+[kick] a mass food poisoning outbreak; a famous seafood restaurant
 
 At first, everyone just assumed it happened because of the hot, humid summer weather. But after some investigation, it turned out the restaurant had been completely careless about hygiene, leaving ingredients exposed to the heat blast for a long time. It was shocking to see such a contrast between the elegant, upscale dining area and the filthy, unhygienic kitchen.
+[kick] completely careless about hygiene; exposed to the heat blast
 
 You know what? Actually I had a similar thing that happened before. On a trip to Busan, I had some oysters at a seafood restaurant, and not long after, I came down with norovirus. It was brutal, I was throwing up for three straight days and couldn't keep a single thing down, not even water. I remember lying in bed feeling completely drained, and I couldn't step out of the bed.
+[kick] had some oysters; came down with norovirus; throwing up for three straight days
 
 All in all, both that news story and my own experience taught me the same lesson. Never try seafood in summer! Eva, be careful when you visit Korea in summer!
+[kick] never try seafood in summer

@@ -1,58 +1,73 @@
-﻿2-1. <Please tell me about a recent concert that you’ve been to. Where was it and when did you go? And who did you go with? How was the concert?> - 보라색 40
+2-1. <Please tell me about a recent concert that you’ve been to. Where was it and when did you go? And who did you go with? How was the concert?> - 보라색 40
 
 
 Wow, I like this question because I have soooo many things to tell you. Okay, I will tell you about my experience. 
+[kick] soooo many things to tell you
 
 
 Actually, it was about ten years ago. I heard that my favorite band, Coldplay, was coming to Korea for the Hyundai Card Super Concert. Since I was a premium cardholder at the time, I had a chance to get a VIP ticket! I didn’t miss the chance, so finally I could get the seat right in front of the stage. 
+[kick] a premium cardholder; right in front of the stage
 
 
 The concert was held at Jamsil Stadium in May. Though I had to wait in a long line - that was all worth it. Though I was alone, the performance was way better than I expected. The stage set was amazing. The lighting and visual effects were mind-blowing. I jumped and had a blast. I really had the time of my life, all of my stress was blown away. When the hit song “Something just like this” started playing over the speakers with famous choreography, everyone in the hall sang along and moved to the groove. Coldplay totally heated up the stage and the atmosphere was electric. 
+[kick] mind-blowing; the time of my life; the atmosphere was electric
 
 
 Eva, if you ever get the chance to go to Coldplay’s concert, you should not miss it! I bet you love it. 
+[kick] you should not miss it
 
 
 2-2. <Do you have any unpleasant memory when you were at the concert hall? If then, what was it? How did you solve that problem? Please tell me in detail> 
 
 
 Oh, that just brought back some painful memories. The memory still makes me shudder. 
+[kick] brought back some painful memories; makes me shudder
 
 
 Well, it was about ten years ago, after the coldplay concert I mentioned a minute before. I fully enjoyed the concert and got on the bus to go back home. I was trying to pay for my fare, but .. oh my goodna2ess. I couldn’t find my wallet! Even worse, I didn’t have a single penny then.
+[kick] pay for my fare; not a single penny
 
 
 I scrambled off the bus, but kept my cool and quickly made a call to the credit card service center to deactivate my card. Oh thank god, no one had used my card! But it was a horrible moment for me. I’ve learned that it is dangerous to keep my wallet in my back pocket. from that incident, I always keep my wallet in my bag now, with a habit of double-checking!
+[kick] scrambled off the bus; kept my cool; deactivate my card
 
 
 I still get shivers when I think about it. Eva, you should always check on your belongings whenever and wherever you are!
+[kick] I still get shivers; check on your belongings
 
 
 2-3. <Do you have any special places or a specific time for listening to the music? When and Where do you usually listen to music? Also, do you use any special equipment for listening to music?>
 
 
 As a music-lover, I have my own routines for listening to music on and off the work. Let me tell you. 
+[kick] as a music-lover; on and off the work
 
 
 (When/ Where) Actually, I have two playlists. One for my commute, and the other for my work. Well, I can’t occasionally concentrate on my work while listening to pop-songs. Don’t you Eva? So I tend to listen to my favorite pop-songs on my commute bus or when I’m off the work. During the work time, I rarely listen to pop-songs as I mentioned, rather I listen to classic or ASMR which helps me to boost up my concentration.
+[kick] two playlists; boost up my concentration
 
 
 (Equipment) When it comes to my equipment for listening to music, you know what? I just got a brand-new gadget recently. These are open-ear earphones, which look like earrings, unlike the common in-ear type. The great merit of the open-ear type is that we are free from the swimmer's ear even during the sweaty workouts! The famous brand is “Shockz” which advertises that its product can be even used during swimming. 
+[kick] open-ear earphones; look like earrings; free from the swimmer's ear
 
 
 Yeah, indeed it’s a perfect gadget for heavy workouts. Eva, why don’t you get one? 
+[kick] a perfect gadget for
 
 
 2-4. <Tell me about the devices you use to listen to music. How are they different from the devices you have had in the past? Please tell me the differences in detail> 
 
 
 Well, like many others do, I mostly listen to music on my smartphone app using wireless earphones. Development of technology surely changed the way we listen to music. 
+[kick] like many others do
 
 
 I remember having my first CD player when I was an elementary school student. Back then, carrying a CD player and listening to music with wired earphones was the mark of a trendy student. Well, you must have seen the meme on the internet!  A few years later, the mark had been shifted to Apple’s ipod as soon as it was unveiled, leaving the CD player in the old man’s gadget. The true turning point was Apple’s iPhone, which replaced all other music gadgets with its connectivity to the internet. 
+[kick] the mark of a trendy student; the old man's gadget; the true turning point
 
 
 Yeah, the connectivity is one of the most different things that we used to have in the past. We had to download music records one-by-one to fill our playlist, which was quite a tedious job. However, nowadays we can search for music whenever we want via streaming platforms. Thanks to the AI, they recommend brand-new songs based on our preferences. All we need is a small subscription fee. I am totally satisfied with my current setup for listening to music. 
+[kick] one-by-one; quite a tedious job; a small subscription fee
 
 
 That’s it Eva! 
@@ -63,10 +78,17 @@ That’s it Eva!
 2-5. <Who was your favorite singer when you were young and who is your favorite singer these days? Please tell me about some of your favorites the past and today> 
 
 
-All right, A few names just popped up in my head that I’d like to talk about. When I was a student, I preferred ballads to upbeat music such as rock or dance. I really liked a Korean singer-sonag-writer “IU”, who had pure and emotional voice. I listened to her song again and again, and even I signed-up her fan club, named “U and I”. My fan-club activity was ended up with my marriage though :P . Until that time, I didn’t understand why people like boys or girl groups singing upbeat music. Those kinds of music are quite noisy for me. 
+All right, A few names just popped up in my head that I’d like to talk about.
+[kick] popped up in my head
+
+
+When I was a student, I preferred ballads to upbeat music such as rock or dance. I really liked a Korean singer-sonag-writer “IU”, who had pure and emotional voice. I listened to her song again and again, and even I signed-up her fan club, named “U and I”. My fan-club activity was ended up with my marriage though :P . Until that time, I didn’t understand why people like boys or girl groups singing upbeat music. Those kinds of music are quite noisy for me.
+[kick] preferred ballads to upbeat music; pure and emotional voice; ended up with my marriage
 
 
 However, my conviction totally crashed when I first saw the performance of BTS’s. BTS was different. Their choreography was powerful and energrtic and their beat was catchy. It was very interesting how their songs caught my ears and stuck in my head. You know what? BTS had a mid-time concert in the latest world cup final. My favorite song “Dynamite” echoed over the stadium, and  I was very proud to see how people all over the world were humming the Korean song. Yeah, they are my favorite band now for sure. 
+[kick] my conviction totally crashed; their beat was catchy; stuck in my head
 
 
 Eva, are you in the fan Club of BTS, ARMY? If so, why don’t we go to the concert together?
+[kick] humming the Korean song
