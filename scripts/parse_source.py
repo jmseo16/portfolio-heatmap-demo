@@ -125,6 +125,10 @@ QUESTION_LABELS = {
     "9-6": "recycling tools",
     "9-7": "a recycling difficulty",
     "9-8": "geographic features",
+    "11-1": "appointment spots",
+    "11-2": "making appointments",
+    "11-3": "childhood appointment (dentist)",
+    "11-4": "childhood appointment (hair salon)",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
@@ -207,6 +211,7 @@ TOPIC_SCRIPT_URLS = {
     "Role Play": "https://docs.google.com/document/d/1qBp-jyD1ZZODJ_5GB5bX_s_PRXu6Sy6a5z98zC_C96g/edit",
     "Impromptu": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
     "Fashion/Internet/Recycling/Geography": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
+    "Appointment": "https://docs.google.com/document/d/19WZIbQtJx8DQPo3Jipg46zuXwwjIQZiuodxg3wQ19FE/edit",
 }
 
 
