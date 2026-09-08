@@ -135,6 +135,14 @@ QUESTION_LABELS = {
     "11-4": "childhood appointment (hair salon)",
     "11-5": "Korean holidays (Seollal)",
     "11-6": "best & worst projects",
+    "12-1": "subway system overview",
+    "12-2": "public transit then vs. now",
+    "12-3": "the healthiest person you know",
+    "12-4": "being healthy across generations",
+    "Celebration-1": "celebrating in big vs. small cities",
+    "Bank-1": "a recent bank visit",
+    "Bank-2": "bank then vs. now",
+    "Friends-1": "conversation topics then vs. now",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
@@ -236,6 +244,18 @@ TOPIC_SCRIPT_URLS = {
     "Hotel": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
     "Restaurant": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
     "Food": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    # Celebration-1/Bank-1/Bank-2/Friends-1 were added to the "0. 돌발" doc
+    # in a later edit than the ones above. Friends-1 started life tagged
+    # "12-1" in that doc too -- renamed here to avoid colliding with the
+    # unrelated "12. 대중교통" doc's own "12-1" (see below).
+    "Celebration": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Bank": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Friends": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    # "12. 대중교통" doc: 12-1/12-2 are Public Transportation, 12-3/12-4 are
+    # an unrelated Health topic -- split by theme, same convention as the
+    # "0. 돌발" / "9. Fashion/Internet/Recycling/Geography" catch-all splits.
+    "Public Transportation": "https://docs.google.com/document/d/1if1XoRP3SM0Wmd4KDfHERSpdO2xxCQa6LJ_PnkoncaI/edit",
+    "Health": "https://docs.google.com/document/d/1if1XoRP3SM0Wmd4KDfHERSpdO2xxCQa6LJ_PnkoncaI/edit",
 }
 
 

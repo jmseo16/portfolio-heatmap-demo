@@ -349,3 +349,35 @@ Role Play,"10-20. I am sorry there is a problem that you have to resolve. On you
 ,,"(body 1) asks to push today's appointment back later, no luck","push my appointment back, completely understand, reschedule for another day"
 ,,"(body 2) asks about tomorrow's opening at the same time, 3 PM, still available","check your openings, still available, that's such a relief"
 ,,"(closing) apologizes, will arrive early tomorrow to make up for it","all this trouble, make up for it, thanks so much for understanding"
+Public Transportation,12-1. Tell me about the public transportation system in your country. What kind of transportation do you use the most often? Why? Tell me the details.,"(intro) picks the subway as Korea's top transportation, lines up to 9, multilingual signage","if I had to pick just one, number 9, its own colors, finding your way around is surprisingly easy"
+,,"(body 1) free transfers between subway lines, unlike Japan's per-company fares","switch over, won't be charged a single extra cent, end up paying more, basically free"
+,,"(body 2) cheap fares, transit card discount, but Seoul Metro runs a deficit","way cheaper, public transportation card, The catch is, run a deficit, make up for it"
+,,(closing) asking Eva about Seoul Metro,
+Public Transportation,12-2. Let's talk more about the public transportation system in your country. What kind of transportation did you use when you were a child? How about today? Tell me all the differences in many details as possible.,(intro) transfers have changed a lot since childhood,so much has changed
+,,"(body 1) transfers now cross bus/subway/car, especially helpful in Gyeonggi-do","evolved into something much bigger, You wouldn't imagine that"
+,,"(body 2) screen doors keep every station safe, tech now exported overseas","backs pressed flat against the wall, subway pushing, being exported overseas"
+,,(closing) subway system keeps getting smarter,keeps getting smarter
+Health,12-3. Could you please tell me about the healthiest person around you? Why do you think he or she is healthy? What are the factors that made you consider him or her as a healthy person? Please tell me all about them in detail.,"(intro) friend Janghoon, the best example of a healthy lifestyle","maintain their health, on a regular basis, the best example of"
+,,(body 1) military service turned his body around,"mandatory military service, fit in shape, wake up and go to bed at a fixed time"
+,,"(body 2) switched to balanced meals, hooked on poke bowls","nutritionally balanced meals, got him hooked on, taste of Hawaii, completely blown away"
+,,(closing) maintaining health through exercise and fresh food,
+Health,"12-4. In your opinion, what is the standard of being healthy to the older generation and what is the meaning of being healthy to the young generation? Do they think differently? In your age group, how do you define what healthy is? Please tell me in detail.","(intro) older and younger generations define ""healthy"" differently",quite different ideas
+,,"(body 1) older generation: physical health only, relies on supplements","physical health, that's really the only thing that matters to them, mild activities, overtake it"
+,,"(body 2) younger generation: physical + mental health, extreme sports","just a part of the bigger picture, mental health, extreme sports, blow off stress"
+,,(closing) asking Eva which side she's on,"hope of being healthy, which side are you on?"
+Celebration,Celebration-1. How do people celebrate in big cities compared to small cities?,(intro) comparing celebrations in a small town vs Seoul,
+,,(body 1) childhood: backyard barbecues and neighborhood potlucks,"a freestanding house, on the outskirts of Seoul, took full advantage of, throw a potluck party"
+,,"(body 2) now: community center parties, five-star hotel dinners","huge community center, an intimate party, we're all office workers, we can afford them"
+,,(closing) asking Eva how people celebrate,that's basically how
+Bank,"Bank-1. Have you ever been to the bank recently? If so, why did you go there? Tell me your experience in as much detail as possible.",(intro) rarely visits the bank thanks to internet banking,with a few finger taps
+,,(body 1) had to visit in person for a large loan,"no choice but to, go in person, face to face"
+,,"(body 2) grilled on identity/income, loan finally approved","grilled me about, jumping through hoops with document after document, everything went through"
+,,(closing) lucky to get the loan before new restrictions,"If I had waited any longer, couldn't have gotten the loan"
+Bank,Bank-2. What kinds of differences can you tell from your current bank? Tell me the differences in as much detail as possible.,(intro) banks have gone through a total digital transformation,
+,,"(body 1) mobile banking: balance checks, transfers, even loans","with a few finger taps, savings or deposit account, a small loan"
+,,"(body 2) branches went paperless, everything signed on a tablet","stack of paper documents, walk me through each page, gone paperless from start to finish"
+,,(closing) asking Eva about digital banking at her bank,
+Friends,"Friends-1. Tell me about how the topics you talk about with your friends have changed over the years. What did you use to talk about in the past, and what do you talk about now?",(intro) how conversation topics with friends have changed over the years,"changed quite a bit over the years, walk you through both"
+,,(body 1) college days: campus life and job-hunting talk,"such a social butterfly, I had good people skills"
+,,"(body 2) now: married life, kids, online-only friendships","face to face, when we had gatherings in person last time, chat room"
+,,(closing) how our messaging topics reflect changed priorities,the changes in our messaging topics reflect how our priorities have changed
