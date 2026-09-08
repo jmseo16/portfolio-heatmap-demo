@@ -215,9 +215,28 @@ TOPIC_SCRIPT_URLS = {
     "Technology": "https://docs.google.com/document/d/1sz_HWeE13roBW2Pz8TgoMDxEd_r6tCkTosXTVn7oV74/edit",
     "Park": "https://docs.google.com/document/d/18DMnLAq2GkFTKluC3csJqyRTle9ZMycNQv7-wcXA6_8/edit",
     "Role Play": "https://docs.google.com/document/d/1qBp-jyD1ZZODJ_5GB5bX_s_PRXu6Sy6a5z98zC_C96g/edit",
-    "Impromptu": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Fashion/Internet/Recycling/Geography": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
     "Appointment": "https://docs.google.com/document/d/19WZIbQtJx8DQPo3Jipg46zuXwwjIQZiuodxg3wQ19FE/edit",
+    # These 9 topics used to be lumped together as two catch-all categories
+    # ("Impromptu" / "0. 돌발" and "Fashion/Internet/Recycling/Geography") —
+    # split apart by category, one topic per real-world theme, while the
+    # underlying script text (keyed by tag, not category) still lives in
+    # the same two source docs. Each new topic's "Show script" link points
+    # back at whichever of those two docs its questions came from; the doc
+    # itself hasn't been split, so the link opens more than just that one
+    # topic's section.
+    "Fashion": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
+    "Recycling": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
+    "Geography": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
+    # Internet spans both former docs (9-2/9-3 from the Fashion doc,
+    # Internet-1/Internet-2 from the Impromptu doc) — linked to the
+    # Impromptu doc since Internet-1/2 are its more central discussion
+    # questions.
+    "Internet": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Industry": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Weather": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Hotel": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Restaurant": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
+    "Food": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
 }
 
 
