@@ -139,16 +139,15 @@ QUESTION_LABELS = {
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
 # already double as a beat name (Opening, Reason1, Closing, ...) and don't
-# need an override. Keyed by paragraph id, which is stable across re-parses
-# as long as row order in the sheet doesn't change.
+# need an override. Keyed by paragraph id ("t|<topic>|<tag>|p<n>" — tag- and
+# index-based, not positional), which stays valid as long as that question
+# keeps the same number of paragraphs in the same order; if a future
+# paragraph gets inserted/removed ahead of it within the same question, its
+# "p<n>" index shifts and any override here would need updating too.
 #
 # As of the sheet's "(intro)/(body N)/(closing)" convention, every paragraph
 # already carries a clean cue, so this is empty — add an entry here only if
-# a future paragraph goes back to having no leading (Cue) at all. Note ids
-# are positional (t{topic}-q{question}-p{paragraph}), so an override written
-# against one version of the sheet can silently mislabel a later version's
-# different paragraph at that same position; if you do add entries, re-check
-# them after every re-parse rather than assuming they still apply.
+# a future paragraph goes back to having no leading (Cue) at all.
 PARAGRAPH_LABEL_OVERRIDES = {}
 
 
@@ -244,8 +243,20 @@ def to_forest(topics, doc_scripts=None):
     doc_scripts = doc_scripts or {}
     forest = []
     for ti, t in enumerate(topics):
+        # IDs are content-stable, not positional: "t|<topic name>", then one
+        # more "|"-joined segment per level down ("|<tag>", "|p<n>", "|k<n>").
+        # Tags themselves already contain hyphens (e.g. "9-3", "Internet-1"),
+        # so "|" is the level separator, never "-" — a positional id
+        # ("t{ti}-q{qi}-p{pi}") would silently point at a *different*
+        # question after any reordering/recategorization of topics, since
+        # every viewer's script edits, marked kicks, take counts, and
+        # recorded audio are keyed by this id in their browser's
+        # localStorage/IndexedDB. A tag never changes once assigned, so
+        # content keyed by these ids survives topics being renamed, split,
+        # merged, or reordered.
+        topic_id = f"t|{t['name']}"
         topic_node = {
-            "id": f"t{ti}",
+            "id": topic_id,
             "name": t["name"],
             "type": "topic",
             "full": t["name"],
@@ -257,8 +268,9 @@ def to_forest(topics, doc_scripts=None):
             tag = m.group(1) if m else f"Q{qi + 1}"
             qtext = (m.group(2) if m else q["text"]).strip()
             q_label = QUESTION_LABELS.get(tag, tag)
+            q_id = f"{topic_id}|{tag}"
             q_node = {
-                "id": f"t{ti}-q{qi}",
+                "id": q_id,
                 "name": q_label,
                 "tag": tag,
                 "type": "question",
@@ -270,7 +282,7 @@ def to_forest(topics, doc_scripts=None):
                 ptext = p["text"].strip()
                 if not ptext and not p["kick"].strip():
                     continue
-                p_id = f"t{ti}-q{qi}-p{pi}"
+                p_id = f"{q_id}|p{pi}"
                 p_label = PARAGRAPH_LABEL_OVERRIDES.get(p_id) or (short_para_label(ptext, pi) if ptext else f"Beat {pi + 1}")
                 p_node = {
                     "id": p_id,
@@ -278,7 +290,7 @@ def to_forest(topics, doc_scripts=None):
                     "type": "paragraph",
                     "full": ptext,
                     "children": [
-                        {"id": f"t{ti}-q{qi}-p{pi}-k{ki}", "name": k, "type": "kick", "full": k}
+                        {"id": f"{p_id}|k{ki}", "name": k, "type": "kick", "full": k}
                         for ki, k in enumerate(x.strip() for x in p["kick"].split(","))
                         if k.strip()
                     ],

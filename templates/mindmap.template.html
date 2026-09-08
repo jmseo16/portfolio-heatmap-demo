@@ -2227,15 +2227,15 @@
   // ALL_NODES (built once, below, for search) is a flat list of raw data
   // objects; a kick edit has to patch it too or search would keep
   // matching removed kicks and never find new ones. Kick ids are always
-  // "<paragraphId>-k<n>", so they're easy to pick out and replace. The
-  // topic is looked up from the id's own "tN-" prefix rather than
+  // "<paragraphId>|k<n>", so they're easy to pick out and replace. The
+  // topic is looked up from the id's own "t|<name>|" prefix rather than
   // state.topicIndex, since a bulk import can edit a paragraph that isn't
   // in the topic currently on screen.
   function reindexKicksFor(paragraphData) {
-    const m = /^t(\d+)-/.exec(paragraphData.id);
-    const topicData = m ? FOREST[Number(m[1])] : FOREST[state.topicIndex];
+    const m = /^t\|([^|]*)\|/.exec(paragraphData.id);
+    const topicData = m ? FOREST.find((t) => t.name === m[1]) || FOREST[state.topicIndex] : FOREST[state.topicIndex];
     for (let i = ALL_NODES.length - 1; i >= 0; i--) {
-      if (ALL_NODES[i].node.id.startsWith(paragraphData.id + "-k")) ALL_NODES.splice(i, 1);
+      if (ALL_NODES[i].node.id.startsWith(paragraphData.id + "|k")) ALL_NODES.splice(i, 1);
     }
     (paragraphData.children || []).forEach((k) => ALL_NODES.push({ node: k, topic: topicData }));
   }
@@ -2278,7 +2278,7 @@
       localStorage.setItem(kicksKey(p.id), JSON.stringify(kicks));
     } catch (e) {}
     markDriveSyncDirty();
-    p.children = kicks.map((text, i) => ({ id: `${p.id}-k${i}`, name: text, type: "kick", full: text }));
+    p.children = kicks.map((text, i) => ({ id: `${p.id}|k${i}`, name: text, type: "kick", full: text }));
     reindexKicksFor(p);
     const master = findNodeById(roots[state.topicIndex], p.id);
     if (master) rebuildKickChildren(master, false);
@@ -2580,14 +2580,14 @@
 
     // every kick phrase across every beat of this question, with the id
     // each one WOULD have right now — computed positionally
-    // ("<beatId>-k<index>"), the same scheme applyKicks() itself uses, so
+    // ("<beatId>|k<index>"), the same scheme applyKicks() itself uses, so
     // it's correct even for a beat whose data.children hasn't been
     // refreshed from a localStorage override yet this session.
     function allKicksForQuestion() {
       const out = [];
       (node.data.children || []).forEach((p) => {
         effectiveKicksFor(p).forEach((text, i) => {
-          out.push({ id: `${p.id}-k${i}`, text });
+          out.push({ id: `${p.id}|k${i}`, text });
         });
       });
       return out;
@@ -3178,7 +3178,7 @@
         else localStorage.setItem(kicksKey(node.id), JSON.stringify(cleaned));
       } catch (e) {}
       markDriveSyncDirty();
-      node.data.children = cleaned.map((text, i) => ({ id: `${node.id}-k${i}`, name: text, type: "kick", full: text }));
+      node.data.children = cleaned.map((text, i) => ({ id: `${node.id}|k${i}`, name: text, type: "kick", full: text }));
       reindexKicksFor(node.data);
       rebuildKickChildren(node, true);
       renderTree(false);
@@ -3797,7 +3797,7 @@
         try {
           localStorage.setItem(kicksKey(pid), JSON.stringify(kicks));
         } catch (err) {}
-        paragraphData.children = kicks.map((text, i) => ({ id: `${pid}-k${i}`, name: text, type: "kick", full: text }));
+        paragraphData.children = kicks.map((text, i) => ({ id: `${pid}|k${i}`, name: text, type: "kick", full: text }));
         reindexKicksFor(paragraphData);
         kicksApplied++;
       });
@@ -4697,20 +4697,22 @@
   // ancestor when the exact id is gone — e.g. a kick phrase the viewer was
   // reading got deleted/reordered by a concurrent edit that just synced
   // in, so its old positional id ("...-k2") no longer matches anything
-  // after that beat's kicks were rebuilt. IDs are "t{n}-q{n}-p{n}-k{n}",
-  // one hyphen-joined segment per level, so repeatedly trimming the last
-  // "-segment" walks straight up the ancestor chain (kick -> paragraph ->
-  // question -> topic); the topic itself is never removed by a sync, so
-  // this is guaranteed to land on *something* rather than coming up empty
-  // and leaving the reading panel on the empty "Select any node" screen.
+  // after that beat's kicks were rebuilt. IDs are "t|<name>|<tag>|p<n>|k<n>",
+  // one "|"-joined segment per level (tags like "9-3" contain hyphens of
+  // their own, so "|" — never "-" — is the level separator), so repeatedly
+  // trimming the last "|segment" walks straight up the ancestor chain
+  // (kick -> paragraph -> question -> topic); the topic itself is never
+  // removed by a sync, so this is guaranteed to land on *something* rather
+  // than coming up empty and leaving the reading panel on the empty
+  // "Select any node" screen.
   function findAndRevealNearest(root, id) {
     let candidate = id;
     while (candidate) {
       const target = findAndReveal(root, candidate);
       if (target) return target;
-      const lastDash = candidate.lastIndexOf("-");
-      if (lastDash === -1) break;
-      candidate = candidate.slice(0, lastDash);
+      const lastBar = candidate.lastIndexOf("|");
+      if (lastBar === -1) break;
+      candidate = candidate.slice(0, lastBar);
     }
     return null;
   }
@@ -4771,19 +4773,163 @@
   renderGrove();
   renderTree(true);
 
+
+  // ---- one-time migration: old positional ids -> new content-stable ids -
+  // The Sep 2026 topic recategorization (splitting "0. Impromptu" and the
+  // merged Fashion/Internet/Recycling/Geography topic into one topic per
+  // real theme) shifted every topic's array position from "Role Play"
+  // onward. Node ids used to be positional ("t{n}-q{n}-p{n}-k{n}"), and
+  // every viewer's script edits, marked kicks, take counts, and recorded
+  // audio blobs are keyed in localStorage/IndexedDB by that id -- so the
+  // reorder silently reattached a viewer's own saved data to a DIFFERENT
+  // question wherever the id string happened to collide across the old
+  // and new tree shapes (e.g. old "t10-q3" was the Recycling question;
+  // new "t10-q3" landed on the Internet question -- an Internet learner
+  // would see stale Recycling script/kicks/recordings). Ids are now
+  // content-stable ("t|<topic name>|<tag>|p<n>|k<n>", keyed off each
+  // question's permanent tag rather than its position), so this class of
+  // bug can't recur -- but existing browsers still have data filed under
+  // the old positional keys, so this sweep runs once, moves every old key
+  // it recognizes to its correct new key, and never runs again.
+  const ID_MIGRATION_MAP = {"t0":"t|Movie","t1":"t|Concert","t2":"t|Household","t3":"t|Trip","t4":"t|Academy","t5":"t|Workplace","t6":"t|Technology","t7":"t|Park","t8":"t|Role Play","t11":"t|Appointment","t0-q0":"t|Movie|1-1","t0-q0-p0":"t|Movie|1-1|p0","t0-q0-p1":"t|Movie|1-1|p1","t0-q0-p2":"t|Movie|1-1|p2","t0-q0-p3":"t|Movie|1-1|p3","t0-q0-p4":"t|Movie|1-1|p4","t0-q0-p5":"t|Movie|1-1|p5","t0-q1":"t|Movie|1-2","t0-q1-p0":"t|Movie|1-2|p0","t0-q1-p1":"t|Movie|1-2|p1","t0-q1-p2":"t|Movie|1-2|p2","t0-q1-p3":"t|Movie|1-2|p3","t0-q2":"t|Movie|1-3","t0-q2-p0":"t|Movie|1-3|p0","t0-q2-p1":"t|Movie|1-3|p1","t0-q2-p2":"t|Movie|1-3|p2","t0-q2-p3":"t|Movie|1-3|p3","t0-q3":"t|Movie|1-4","t0-q3-p0":"t|Movie|1-4|p0","t0-q3-p1":"t|Movie|1-4|p1","t0-q3-p2":"t|Movie|1-4|p2","t0-q3-p3":"t|Movie|1-4|p3","t0-q4":"t|Movie|1-5","t0-q4-p0":"t|Movie|1-5|p0","t0-q4-p1":"t|Movie|1-5|p1","t0-q4-p2":"t|Movie|1-5|p2","t0-q4-p3":"t|Movie|1-5|p3","t0-q5":"t|Movie|1-6","t0-q5-p0":"t|Movie|1-6|p0","t0-q5-p1":"t|Movie|1-6|p1","t0-q5-p2":"t|Movie|1-6|p2","t0-q5-p3":"t|Movie|1-6|p3","t0-q6":"t|Movie|1-7","t0-q6-p0":"t|Movie|1-7|p0","t0-q6-p1":"t|Movie|1-7|p1","t0-q6-p2":"t|Movie|1-7|p2","t1-q0":"t|Concert|2-1","t1-q0-p0":"t|Concert|2-1|p0","t1-q0-p1":"t|Concert|2-1|p1","t1-q0-p2":"t|Concert|2-1|p2","t1-q0-p3":"t|Concert|2-1|p3","t1-q1":"t|Concert|2-2","t1-q1-p0":"t|Concert|2-2|p0","t1-q1-p1":"t|Concert|2-2|p1","t1-q1-p2":"t|Concert|2-2|p2","t1-q1-p3":"t|Concert|2-2|p3","t1-q2":"t|Concert|2-3","t1-q2-p0":"t|Concert|2-3|p0","t1-q2-p1":"t|Concert|2-3|p1","t1-q2-p2":"t|Concert|2-3|p2","t1-q2-p3":"t|Concert|2-3|p3","t1-q3":"t|Concert|2-4","t1-q3-p0":"t|Concert|2-4|p0","t1-q3-p1":"t|Concert|2-4|p1","t1-q3-p2":"t|Concert|2-4|p2","t1-q3-p3":"t|Concert|2-4|p3","t1-q4":"t|Concert|2-5","t1-q4-p0":"t|Concert|2-5|p0","t1-q4-p1":"t|Concert|2-5|p1","t1-q4-p2":"t|Concert|2-5|p2","t1-q4-p3":"t|Concert|2-5|p3","t2-q0":"t|Household|3-1","t2-q0-p0":"t|Household|3-1|p0","t2-q0-p1":"t|Household|3-1|p1","t2-q0-p2":"t|Household|3-1|p2","t2-q0-p3":"t|Household|3-1|p3","t2-q1":"t|Household|3-2","t2-q1-p0":"t|Household|3-2|p0","t2-q1-p1":"t|Household|3-2|p1","t2-q1-p2":"t|Household|3-2|p2","t2-q1-p3":"t|Household|3-2|p3","t2-q2":"t|Household|3-3","t2-q2-p0":"t|Household|3-3|p0","t2-q2-p1":"t|Household|3-3|p1","t2-q2-p2":"t|Household|3-3|p2","t2-q3":"t|Household|3-4","t2-q3-p0":"t|Household|3-4|p0","t2-q3-p1":"t|Household|3-4|p1","t2-q3-p2":"t|Household|3-4|p2","t2-q3-p3":"t|Household|3-4|p3","t2-q4":"t|Household|3-5","t2-q4-p0":"t|Household|3-5|p0","t2-q4-p1":"t|Household|3-5|p1","t2-q4-p2":"t|Household|3-5|p2","t2-q5":"t|Household|3-6","t2-q5-p0":"t|Household|3-6|p0","t2-q5-p1":"t|Household|3-6|p1","t2-q5-p2":"t|Household|3-6|p2","t2-q5-p3":"t|Household|3-6|p3","t2-q6":"t|Household|3-7","t2-q6-p0":"t|Household|3-7|p0","t2-q6-p1":"t|Household|3-7|p1","t2-q6-p2":"t|Household|3-7|p2","t2-q6-p3":"t|Household|3-7|p3","t2-q7":"t|Household|3-8","t2-q7-p0":"t|Household|3-8|p0","t2-q7-p1":"t|Household|3-8|p1","t2-q7-p2":"t|Household|3-8|p2","t2-q7-p3":"t|Household|3-8|p3","t3-q0":"t|Trip|4-1","t3-q0-p0":"t|Trip|4-1|p0","t3-q0-p1":"t|Trip|4-1|p1","t3-q0-p2":"t|Trip|4-1|p2","t3-q0-p3":"t|Trip|4-1|p3","t3-q1":"t|Trip|4-2","t3-q1-p0":"t|Trip|4-2|p0","t3-q1-p1":"t|Trip|4-2|p1","t3-q1-p2":"t|Trip|4-2|p2","t3-q1-p3":"t|Trip|4-2|p3","t3-q2":"t|Trip|4-3","t3-q2-p0":"t|Trip|4-3|p0","t3-q2-p1":"t|Trip|4-3|p1","t3-q2-p2":"t|Trip|4-3|p2","t3-q2-p3":"t|Trip|4-3|p3","t3-q2-p4":"t|Trip|4-3|p4","t3-q3":"t|Trip|4-4","t3-q3-p0":"t|Trip|4-4|p0","t3-q3-p1":"t|Trip|4-4|p1","t3-q3-p2":"t|Trip|4-4|p2","t3-q3-p3":"t|Trip|4-4|p3","t3-q4":"t|Trip|4-5","t3-q4-p0":"t|Trip|4-5|p0","t3-q4-p1":"t|Trip|4-5|p1","t3-q4-p2":"t|Trip|4-5|p2","t3-q4-p3":"t|Trip|4-5|p3","t3-q5":"t|Trip|4-6","t3-q5-p0":"t|Trip|4-6|p0","t3-q5-p1":"t|Trip|4-6|p1","t3-q5-p2":"t|Trip|4-6|p2","t3-q5-p3":"t|Trip|4-6|p3","t4-q0":"t|Academy|5-1","t4-q0-p0":"t|Academy|5-1|p0","t4-q0-p1":"t|Academy|5-1|p1","t4-q0-p2":"t|Academy|5-1|p2","t4-q1":"t|Academy|5-2","t4-q1-p0":"t|Academy|5-2|p0","t4-q1-p1":"t|Academy|5-2|p1","t4-q1-p2":"t|Academy|5-2|p2","t4-q2":"t|Academy|5-3","t4-q2-p0":"t|Academy|5-3|p0","t4-q2-p1":"t|Academy|5-3|p1","t4-q2-p2":"t|Academy|5-3|p2","t4-q2-p3":"t|Academy|5-3|p3","t4-q3":"t|Academy|5-4","t4-q3-p0":"t|Academy|5-4|p0","t4-q3-p1":"t|Academy|5-4|p1","t4-q3-p2":"t|Academy|5-4|p2","t4-q3-p3":"t|Academy|5-4|p3","t4-q3-p4":"t|Academy|5-4|p4","t5-q0":"t|Workplace|6-1","t5-q0-p0":"t|Workplace|6-1|p0","t5-q0-p1":"t|Workplace|6-1|p1","t5-q0-p2":"t|Workplace|6-1|p2","t5-q0-p3":"t|Workplace|6-1|p3","t5-q0-p4":"t|Workplace|6-1|p4","t5-q1":"t|Workplace|6-2","t5-q1-p0":"t|Workplace|6-2|p0","t5-q1-p1":"t|Workplace|6-2|p1","t5-q1-p2":"t|Workplace|6-2|p2","t5-q1-p3":"t|Workplace|6-2|p3","t5-q2":"t|Workplace|6-3","t5-q2-p0":"t|Workplace|6-3|p0","t5-q2-p1":"t|Workplace|6-3|p1","t5-q2-p2":"t|Workplace|6-3|p2","t5-q2-p3":"t|Workplace|6-3|p3","t6-q0":"t|Technology|7-1","t6-q0-p0":"t|Technology|7-1|p0","t6-q0-p1":"t|Technology|7-1|p1","t6-q0-p2":"t|Technology|7-1|p2","t6-q0-p3":"t|Technology|7-1|p3","t6-q0-p4":"t|Technology|7-1|p4","t6-q1":"t|Technology|7-2","t6-q1-p0":"t|Technology|7-2|p0","t6-q1-p1":"t|Technology|7-2|p1","t6-q1-p2":"t|Technology|7-2|p2","t6-q1-p3":"t|Technology|7-2|p3","t6-q2":"t|Technology|7-3","t6-q2-p0":"t|Technology|7-3|p0","t6-q2-p1":"t|Technology|7-3|p1","t6-q2-p2":"t|Technology|7-3|p2","t6-q2-p3":"t|Technology|7-3|p3","t6-q3":"t|Technology|7-4","t6-q3-p0":"t|Technology|7-4|p0","t6-q3-p1":"t|Technology|7-4|p1","t6-q3-p2":"t|Technology|7-4|p2","t6-q3-p3":"t|Technology|7-4|p3","t6-q4":"t|Technology|7-5","t6-q4-p0":"t|Technology|7-5|p0","t6-q4-p1":"t|Technology|7-5|p1","t6-q4-p2":"t|Technology|7-5|p2","t6-q4-p3":"t|Technology|7-5|p3","t6-q5":"t|Technology|7-6","t6-q5-p0":"t|Technology|7-6|p0","t6-q5-p1":"t|Technology|7-6|p1","t6-q5-p2":"t|Technology|7-6|p2","t6-q5-p3":"t|Technology|7-6|p3","t7-q0":"t|Park|8-1","t7-q0-p0":"t|Park|8-1|p0","t7-q0-p1":"t|Park|8-1|p1","t7-q0-p2":"t|Park|8-1|p2","t7-q0-p3":"t|Park|8-1|p3","t7-q0-p4":"t|Park|8-1|p4","t7-q1":"t|Park|8-2","t7-q1-p0":"t|Park|8-2|p0","t7-q1-p1":"t|Park|8-2|p1","t7-q1-p2":"t|Park|8-2|p2","t7-q1-p3":"t|Park|8-2|p3","t7-q2":"t|Park|8-3","t7-q2-p0":"t|Park|8-3|p0","t7-q2-p1":"t|Park|8-3|p1","t7-q2-p2":"t|Park|8-3|p2","t7-q2-p3":"t|Park|8-3|p3","t8-q0":"t|Role Play|10-1","t8-q0-p0":"t|Role Play|10-1|p0","t8-q0-p1":"t|Role Play|10-1|p1","t8-q0-p2":"t|Role Play|10-1|p2","t8-q0-p3":"t|Role Play|10-1|p3","t8-q1":"t|Role Play|10-2","t8-q1-p0":"t|Role Play|10-2|p0","t8-q1-p1":"t|Role Play|10-2|p1","t8-q1-p2":"t|Role Play|10-2|p2","t8-q1-p3":"t|Role Play|10-2|p3","t8-q2":"t|Role Play|10-3","t8-q2-p0":"t|Role Play|10-3|p0","t8-q2-p1":"t|Role Play|10-3|p1","t8-q2-p2":"t|Role Play|10-3|p2","t8-q2-p3":"t|Role Play|10-3|p3","t8-q3":"t|Role Play|10-4","t8-q3-p0":"t|Role Play|10-4|p0","t8-q3-p1":"t|Role Play|10-4|p1","t8-q3-p2":"t|Role Play|10-4|p2","t8-q3-p3":"t|Role Play|10-4|p3","t8-q4":"t|Role Play|10-5","t8-q4-p0":"t|Role Play|10-5|p0","t8-q4-p1":"t|Role Play|10-5|p1","t8-q4-p2":"t|Role Play|10-5|p2","t8-q5":"t|Role Play|10-6","t8-q5-p0":"t|Role Play|10-6|p0","t8-q5-p1":"t|Role Play|10-6|p1","t8-q5-p2":"t|Role Play|10-6|p2","t8-q6":"t|Role Play|10-7","t8-q6-p0":"t|Role Play|10-7|p0","t8-q6-p1":"t|Role Play|10-7|p1","t8-q6-p2":"t|Role Play|10-7|p2","t8-q7":"t|Role Play|10-8","t8-q7-p0":"t|Role Play|10-8|p0","t8-q7-p1":"t|Role Play|10-8|p1","t8-q7-p2":"t|Role Play|10-8|p2","t8-q7-p3":"t|Role Play|10-8|p3","t8-q8":"t|Role Play|10-9","t8-q8-p0":"t|Role Play|10-9|p0","t8-q8-p1":"t|Role Play|10-9|p1","t8-q8-p2":"t|Role Play|10-9|p2","t8-q9":"t|Role Play|10-10","t8-q9-p0":"t|Role Play|10-10|p0","t8-q9-p1":"t|Role Play|10-10|p1","t8-q9-p2":"t|Role Play|10-10|p2","t8-q10":"t|Role Play|10-11","t8-q10-p0":"t|Role Play|10-11|p0","t8-q10-p1":"t|Role Play|10-11|p1","t8-q10-p2":"t|Role Play|10-11|p2","t8-q10-p3":"t|Role Play|10-11|p3","t8-q11":"t|Role Play|10-12","t8-q11-p0":"t|Role Play|10-12|p0","t8-q11-p1":"t|Role Play|10-12|p1","t8-q11-p2":"t|Role Play|10-12|p2","t8-q12":"t|Role Play|10-13","t8-q12-p0":"t|Role Play|10-13|p0","t8-q12-p1":"t|Role Play|10-13|p1","t8-q12-p2":"t|Role Play|10-13|p2","t8-q12-p3":"t|Role Play|10-13|p3","t8-q13":"t|Role Play|10-14","t8-q13-p0":"t|Role Play|10-14|p0","t8-q13-p1":"t|Role Play|10-14|p1","t8-q13-p2":"t|Role Play|10-14|p2","t8-q13-p3":"t|Role Play|10-14|p3","t8-q14":"t|Role Play|10-15","t8-q14-p0":"t|Role Play|10-15|p0","t8-q14-p1":"t|Role Play|10-15|p1","t8-q14-p2":"t|Role Play|10-15|p2","t8-q14-p3":"t|Role Play|10-15|p3","t8-q15":"t|Role Play|10-16","t8-q15-p0":"t|Role Play|10-16|p0","t8-q15-p1":"t|Role Play|10-16|p1","t8-q15-p2":"t|Role Play|10-16|p2","t8-q15-p3":"t|Role Play|10-16|p3","t8-q16":"t|Role Play|10-17","t8-q16-p0":"t|Role Play|10-17|p0","t8-q16-p1":"t|Role Play|10-17|p1","t8-q16-p2":"t|Role Play|10-17|p2","t8-q16-p3":"t|Role Play|10-17|p3","t8-q17":"t|Role Play|10-18","t8-q17-p0":"t|Role Play|10-18|p0","t8-q17-p1":"t|Role Play|10-18|p1","t8-q17-p2":"t|Role Play|10-18|p2","t8-q17-p3":"t|Role Play|10-18|p3","t8-q18":"t|Role Play|10-19","t8-q18-p0":"t|Role Play|10-19|p0","t8-q18-p1":"t|Role Play|10-19|p1","t8-q18-p2":"t|Role Play|10-19|p2","t8-q18-p3":"t|Role Play|10-19|p3","t8-q18-p4":"t|Role Play|10-19|p4","t8-q19":"t|Role Play|10-20","t8-q19-p0":"t|Role Play|10-20|p0","t8-q19-p1":"t|Role Play|10-20|p1","t8-q19-p2":"t|Role Play|10-20|p2","t8-q19-p3":"t|Role Play|10-20|p3","t9-q0":"t|Industry|Industry-1","t9-q0-p0":"t|Industry|Industry-1|p0","t9-q0-p1":"t|Industry|Industry-1|p1","t9-q0-p2":"t|Industry|Industry-1|p2","t9-q0-p3":"t|Industry|Industry-1|p3","t9-q1":"t|Industry|Industry-2","t9-q1-p0":"t|Industry|Industry-2|p0","t9-q1-p1":"t|Industry|Industry-2|p1","t9-q1-p2":"t|Industry|Industry-2|p2","t9-q1-p3":"t|Industry|Industry-2|p3","t9-q2":"t|Industry|Industry-3","t9-q2-p0":"t|Industry|Industry-3|p0","t9-q2-p1":"t|Industry|Industry-3|p1","t9-q2-p2":"t|Industry|Industry-3|p2","t9-q2-p3":"t|Industry|Industry-3|p3","t9-q3":"t|Internet|Internet-1","t9-q3-p0":"t|Internet|Internet-1|p0","t9-q3-p1":"t|Internet|Internet-1|p1","t9-q3-p2":"t|Internet|Internet-1|p2","t9-q3-p3":"t|Internet|Internet-1|p3","t9-q4":"t|Internet|Internet-2","t9-q4-p0":"t|Internet|Internet-2|p0","t9-q4-p1":"t|Internet|Internet-2|p1","t9-q4-p2":"t|Internet|Internet-2|p2","t9-q4-p3":"t|Internet|Internet-2|p3","t9-q5":"t|Weather|Weather-1","t9-q5-p0":"t|Weather|Weather-1|p0","t9-q5-p1":"t|Weather|Weather-1|p1","t9-q5-p2":"t|Weather|Weather-1|p2","t9-q5-p3":"t|Weather|Weather-1|p3","t9-q6":"t|Weather|Weather-2","t9-q6-p0":"t|Weather|Weather-2|p0","t9-q6-p1":"t|Weather|Weather-2|p1","t9-q6-p2":"t|Weather|Weather-2|p2","t9-q6-p3":"t|Weather|Weather-2|p3","t9-q7":"t|Hotel|Hotel-1","t9-q7-p0":"t|Hotel|Hotel-1|p0","t9-q7-p1":"t|Hotel|Hotel-1|p1","t9-q7-p2":"t|Hotel|Hotel-1|p2","t9-q7-p3":"t|Hotel|Hotel-1|p3","t9-q8":"t|Hotel|Hotel-2","t9-q8-p0":"t|Hotel|Hotel-2|p0","t9-q8-p1":"t|Hotel|Hotel-2|p1","t9-q8-p2":"t|Hotel|Hotel-2|p2","t9-q8-p3":"t|Hotel|Hotel-2|p3","t9-q9":"t|Restaurant|Restaurant-1","t9-q9-p0":"t|Restaurant|Restaurant-1|p0","t9-q9-p1":"t|Restaurant|Restaurant-1|p1","t9-q9-p2":"t|Restaurant|Restaurant-1|p2","t9-q9-p3":"t|Restaurant|Restaurant-1|p3","t9-q10":"t|Restaurant|Restaurant-2","t9-q10-p0":"t|Restaurant|Restaurant-2|p0","t9-q10-p1":"t|Restaurant|Restaurant-2|p1","t9-q10-p2":"t|Restaurant|Restaurant-2|p2","t9-q10-p3":"t|Restaurant|Restaurant-2|p3","t9-q11":"t|Food|Food-1","t9-q11-p0":"t|Food|Food-1|p0","t9-q11-p1":"t|Food|Food-1|p1","t9-q11-p2":"t|Food|Food-1|p2","t9-q11-p3":"t|Food|Food-1|p3","t10-q0":"t|Fashion|9-1","t10-q0-p0":"t|Fashion|9-1|p0","t10-q0-p1":"t|Fashion|9-1|p1","t10-q0-p2":"t|Fashion|9-1|p2","t10-q0-p3":"t|Fashion|9-1|p3","t10-q0-p4":"t|Fashion|9-1|p4","t10-q1":"t|Internet|9-2","t10-q1-p0":"t|Internet|9-2|p0","t10-q1-p1":"t|Internet|9-2|p1","t10-q1-p2":"t|Internet|9-2|p2","t10-q1-p3":"t|Internet|9-2|p3","t10-q2":"t|Internet|9-3","t10-q2-p0":"t|Internet|9-3|p0","t10-q2-p1":"t|Internet|9-3|p1","t10-q2-p2":"t|Internet|9-3|p2","t10-q2-p3":"t|Internet|9-3|p3","t10-q3":"t|Recycling|9-4","t10-q3-p0":"t|Recycling|9-4|p0","t10-q3-p1":"t|Recycling|9-4|p1","t10-q3-p2":"t|Recycling|9-4|p2","t10-q3-p3":"t|Recycling|9-4|p3","t10-q4":"t|Recycling|9-5","t10-q4-p0":"t|Recycling|9-5|p0","t10-q4-p1":"t|Recycling|9-5|p1","t10-q4-p2":"t|Recycling|9-5|p2","t10-q4-p3":"t|Recycling|9-5|p3","t10-q5":"t|Recycling|9-6","t10-q5-p0":"t|Recycling|9-6|p0","t10-q5-p1":"t|Recycling|9-6|p1","t10-q5-p2":"t|Recycling|9-6|p2","t10-q5-p3":"t|Recycling|9-6|p3","t10-q6":"t|Recycling|9-7","t10-q6-p0":"t|Recycling|9-7|p0","t10-q6-p1":"t|Recycling|9-7|p1","t10-q6-p2":"t|Recycling|9-7|p2","t10-q6-p3":"t|Recycling|9-7|p3","t10-q7":"t|Geography|9-8","t10-q7-p0":"t|Geography|9-8|p0","t10-q7-p1":"t|Geography|9-8|p1","t10-q7-p2":"t|Geography|9-8|p2","t10-q7-p3":"t|Geography|9-8|p3","t11-q0":"t|Appointment|11-1","t11-q0-p0":"t|Appointment|11-1|p0","t11-q0-p1":"t|Appointment|11-1|p1","t11-q0-p2":"t|Appointment|11-1|p2","t11-q0-p3":"t|Appointment|11-1|p3","t11-q1":"t|Appointment|11-2","t11-q1-p0":"t|Appointment|11-2|p0","t11-q1-p1":"t|Appointment|11-2|p1","t11-q1-p2":"t|Appointment|11-2|p2","t11-q1-p3":"t|Appointment|11-2|p3","t11-q2":"t|Appointment|11-3","t11-q2-p0":"t|Appointment|11-3|p0","t11-q2-p1":"t|Appointment|11-3|p1","t11-q2-p2":"t|Appointment|11-3|p2","t11-q2-p3":"t|Appointment|11-3|p3","t11-q3":"t|Appointment|11-4","t11-q3-p0":"t|Appointment|11-4|p0","t11-q3-p1":"t|Appointment|11-4|p1","t11-q3-p2":"t|Appointment|11-4|p2","t11-q3-p3":"t|Appointment|11-4|p3","t11-q4":"t|Appointment|11-5","t11-q4-p0":"t|Appointment|11-5|p0","t11-q4-p1":"t|Appointment|11-5|p1","t11-q4-p2":"t|Appointment|11-5|p2","t11-q4-p3":"t|Appointment|11-5|p3","t11-q5":"t|Appointment|11-6","t11-q5-p0":"t|Appointment|11-6|p0","t11-q5-p1":"t|Appointment|11-6|p1","t11-q5-p2":"t|Appointment|11-6|p2","t11-q5-p3":"t|Appointment|11-6|p3"};
+  const ID_MIGRATION_DONE_KEY = "opic-id-migration-v1-done";
+  function migrateLegacyLocalStorageKey(prefix, oldId, newId) {
+    let oldVal;
+    try {
+      oldVal = localStorage.getItem(prefix + oldId);
+    } catch (e) {
+      return;
+    }
+    if (oldVal === null) return;
+    try {
+      if (localStorage.getItem(prefix + newId) === null) {
+        localStorage.setItem(prefix + newId, oldVal);
+      }
+      localStorage.removeItem(prefix + oldId);
+    } catch (e) {}
+  }
+  // an old id not directly in the map (a kick id, one level below the
+  // paragraphs the map covers) is walked up to its nearest mapped
+  // ancestor by trimming the old "-segment" separator, same idea as
+  // findAndRevealNearest below -- landing one level up (the paragraph or
+  // question) beats not restoring at all.
+  function nearestMigratedId(oldId) {
+    let candidate = oldId;
+    while (candidate) {
+      if (ID_MIGRATION_MAP[candidate]) return ID_MIGRATION_MAP[candidate];
+      const lastDash = candidate.lastIndexOf("-");
+      if (lastDash === -1) return null;
+      candidate = candidate.slice(0, lastDash);
+    }
+    return null;
+  }
+  async function migrateLegacyIds() {
+    let already = false;
+    try {
+      already = localStorage.getItem(ID_MIGRATION_DONE_KEY) === "1";
+    } catch (e) {}
+    if (already) return;
+
+    for (const oldId in ID_MIGRATION_MAP) {
+      const newId = ID_MIGRATION_MAP[oldId];
+      migrateLegacyLocalStorageKey("opic-script:", oldId, newId);
+      migrateLegacyLocalStorageKey("opic-kicks:", oldId, newId);
+      migrateLegacyLocalStorageKey("opic-takes:", oldId, newId);
+      migrateLegacyLocalStorageKey("opic-practice:", oldId, newId);
+    }
+
+    // recorded audio blobs, in IndexedDB, keyed "<questionId>:<takeN>" --
+    // walk every key in the store and re-key the ones whose id portion
+    // (everything before the last ":") is one of the old ids above.
+    try {
+      const db = await openRecDb();
+      if (db) {
+        const moves = await new Promise((resolve) => {
+          const found = [];
+          const tx = db.transaction(REC_STORE, "readonly");
+          const req = tx.objectStore(REC_STORE).openCursor();
+          req.onsuccess = () => {
+            const cursor = req.result;
+            if (!cursor) {
+              resolve(found);
+              return;
+            }
+            const key = cursor.key;
+            if (typeof key === "string") {
+              const sep = key.lastIndexOf(":");
+              if (sep !== -1) {
+                const idPart = key.slice(0, sep);
+                const takeN = key.slice(sep);
+                const newId = ID_MIGRATION_MAP[idPart];
+                if (newId) found.push({ oldKey: key, newKey: newId + takeN, value: cursor.value });
+              }
+            }
+            cursor.continue();
+          };
+          req.onerror = () => resolve(found);
+        });
+        for (const mv of moves) {
+          await new Promise((resolve) => {
+            const tx = db.transaction(REC_STORE, "readwrite");
+            const store = tx.objectStore(REC_STORE);
+            const getReq = store.get(mv.newKey);
+            getReq.onsuccess = () => {
+              if (getReq.result === undefined) store.put(mv.value, mv.newKey);
+              store.delete(mv.oldKey);
+            };
+            tx.oncomplete = () => resolve();
+            tx.onerror = () => resolve();
+          });
+        }
+      }
+    } catch (e) {}
+
+    // the "last viewed node" pointer, so a restore lands on the same
+    // question/beat instead of silently failing to find the old id.
+    try {
+      const raw = localStorage.getItem(APP_STATE_KEY);
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved === "object" && saved.currentNodeId) {
+          const migrated = ID_MIGRATION_MAP[saved.currentNodeId] || nearestMigratedId(saved.currentNodeId);
+          if (migrated) {
+            saved.currentNodeId = migrated;
+            localStorage.setItem(APP_STATE_KEY, JSON.stringify(saved));
+          }
+        }
+      }
+    } catch (e) {}
+
+    try {
+      localStorage.setItem(ID_MIGRATION_DONE_KEY, "1");
+    } catch (e) {}
+  }
+
   // resume where the last session left off — same topic tree, same node's
   // panel open (revealed through its collapsed ancestors, same as a search
   // result jump), same swiped-to page, same fullscreen state. A no-op the
   // very first time (nothing saved yet) or if the saved node no longer
-  // exists (data was re-parsed/rebuilt since).
-  (function restoreLastState() {
+  // exists (data was re-parsed/rebuilt since). Runs after the id migration
+  // above so a stale positional currentNodeId has already been rewritten.
+  function restoreLastState() {
     let saved = null;
     try {
       saved = JSON.parse(localStorage.getItem(APP_STATE_KEY) || "null");
     } catch (e) {}
     if (!saved || typeof saved !== "object") return;
 
-    const topicIdx = Number(saved.topicIndex);
+    // recategorization can move a question to a different topic than the
+    // one saved.topicIndex pointed at -- when the (possibly just-migrated)
+    // currentNodeId's own "t|<name>|" prefix names a topic that still
+    // exists, trust that over the index, which may now point elsewhere.
+    let topicIdx = Number(saved.topicIndex);
+    if (saved.currentNodeId) {
+      const m = /^t\|([^|]*)\|/.exec(saved.currentNodeId);
+      if (m) {
+        const byName = roots.findIndex((r) => r.name === m[1]);
+        if (byName !== -1) topicIdx = byName;
+      }
+    }
     if (Number.isInteger(topicIdx) && topicIdx >= 0 && topicIdx < roots.length && topicIdx !== state.topicIndex) {
       state.topicIndex = topicIdx;
       renderGrove();
@@ -4808,5 +4954,6 @@
     }
 
     if (saved.focusMode) setFocusMode(true);
-  })();
+  }
+  migrateLegacyIds().then(restoreLastState);
 </script>
