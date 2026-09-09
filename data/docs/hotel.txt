@@ -1,0 +1,29 @@
+﻿Hotel-1 <Tell me about the first hotel that you have ever stayed in. When did you stay, and who did you go with? What kind of services did you enjoy? Please describe everything in detail>
+
+Oh Eva, let me tell you about my hotel stay. It was about five years ago, and I stayed at the Shilla Hotel. As you know, the Shilla is by far the most famous, traditional, and historic hotel in Korea. It has many facilities in it, there are restaurants, bars, and even an arcade where you can shop for luxury collections!
+[kick] the Shilla Hotel; most famous; traditional; and historic
+
+The moment I arrived at the lobby, the staff took care of the valet parking for me. They pulled our heavy luggage right out of the trunk and carried it up to our room safely. The staff who greeted us at check-in were incredibly professional and warm, I was blown away. Once we got to the room, there was a welcome amenity waiting for us, along with a handwritten greeting letter. How thoughtful they were!
+[kick] took care of the valet parking; incredibly professional and warm; a handwritten greeting letter
+
+The room itself was spacious and clean, and since we stayed on the 27th floor, we had the privilege of a spectacular view of Namsan right from our window. But my favorite part of the room was, without a doubt, the bed. The bedding was flawless, and the plush texture of the quilt was so unforgettable that I ended up buying the same one for my house. Even though I spent my fortune, it was worth every penny.
+[kick] spectacular view of Namsan; without a doubt; the bed; worth every penny
+
+Ah, that reminds me of how badly I need a vacation! Eva, do you enjoy traveling too?
+[kick] how badly I need a vacation
+
+
+
+Hotel-2 <Let me ask you more about the hotel's facilities. Was there a pool in the hotel? If so, did you ever go there during your stay? How was it? Please tell me everything in detail>
+
+All right, I like this question, because the Shilla Hotel I mentioned earlier actually has a legendary pool called "Urban Island." Let me tell you all about it.
+[kick] a legendary pool called Urban Island
+
+We were relaxing in our room but we suddenly heard some upbeat music drifting in. We peeked out the window, and down at the outdoor pool, a DJ and a singer were putting on a live show. We headed straight down there.
+[kick] upbeat music drifting in; a DJ and a singer; live show
+
+It was my first time at a pool party, and it was absolutely mind-blowing. The stage set was amazing with up-to-date sound gears, and the moment the DJ dropped the beat, the whole place heated up. We ran into the water and splashed water on each other. We really had a blast. The upbeat sound and lighting made the atmosphere even more electric, and honestly, I was completely blown away by the time when my favorite band, Coldplay's hit song blasted out of the speakers. People around us were singing along and moving to the groove, and the energy just kept building through the night.
+[kick] absolutely mind-blowing; splashed water on each other; Coldplay's hit song
+
+This is everything I remember about my experience at the pool. It was so amazing that it's been lingering in my mind ever since. I can't wait for a chance to get there someday.
+[kick] lingering in my mind ever since

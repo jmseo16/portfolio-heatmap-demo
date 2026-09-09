@@ -1,0 +1,29 @@
+﻿Weather-1 <Tell me about the weather conditions in your country>
+
+Oh Eva, that's an interesting question. Korea actually has four distinct seasons – spring, summer, fall and winter. But these days, due to global warming, summers are getting hotter and winters are getting colder, so spring and fall have almost disappeared in recent years. even there anymore. As a spring-lover, it's too sad, but let me focus on summer and winter, since those are the two seasons that really define my country.
+[kick] four distinct seasons; spring and fall have almost disappeared
+
+Let's begin with summer. It often rains a lot in summer, but due to global warming, we're seeing more tropical-like downpours lately. These torrential rains often hit specific, localized areas and sadly, result in people getting injured. On clear days, it is usually hot and humid so many people head to the beach to cool down from the scorching heat. Beyond just water sports and sunbathing, Korea is also widely known for its delightful summer treats like patbingsu, the traditional shaved ice topped with red beans, or naengmyeon, the traditional cold noodle dish, are loved by both adults and kids.
+[kick] tropical-like downpours; head to the beach; patbingsu; naengmyeon
+
+Now I'd like to describe what winter is like in Korea. From early December, the temperature usually starts to drop noticeably and it gets freezing cold until March. Gangwon-do in particular is famous for its heavy snow, thanks to the Taebaek mountain range, the longest and highest range in Korea. Along its slopes, you'll find plenty of resorts where people enjoy skiing, sledding, you name it, so tons of people flock there every winter to make the most of it.
+[kick] freezing cold until March; Gangwon-do; Taebaek mountain range; skiing and sledding
+
+All in all, though I do miss the gentle days of spring and fall, I've come to appreciate the extremes of summer and winter also, from cooling off at the beach to carving down a snowy slope. That's it, Eva
+[kick] appreciate the extremes of summer and winter
+
+
+
+Weather-2 <Have you ever had a memorable or and unexpected experience because of strange or unusual weather conditions? How was the weather condition on that day? When was it? What happened? Tell me about it in as much detail as possible>
+
+Wow Eva, that reminds me of my terrible memory. I did have a shivering experience that happened to me at Jeju airport last summer.
+[kick] a shivering experience; Jeju airport last summer
+
+As I mentioned earlier, tons of people flock to Jeju island in summer, and my family and I also went there for our summer vacation last year. It was a three-day trip and the weather while we were there was picture-perfect. But here's the thing, Jeju is notorious for its strong winds, and many typhoons tend to strike the island in summer. And wouldn't you know it, on the exact day we were supposed to fly back from Jeju to Incheon, the wind suddenly picked up, out of nowhere. Bursts of lightning lit up the sky, and the sound of strong winds was very loud.
+[kick] notorious for its strong winds; wind suddenly picked up; bursts of lightning
+
+In the end, our flight was delayed for five hours, and we had no choice but to wait at the airport. We managed to kill some time in the airline lounge, but my kids were bored out of their minds, crying and throwing tantrums the whole time. By the time we finally boarded, I was completely drained.
+[kick] delayed for five hours; bored out of their minds; completely drained
+
+After going through that incident, I try to avoid traveling to Jeju in summer. It's also too hot anyway, so I'd rather go in spring or fall. Eva, have you ever run into a similar travel headache?
+[kick] avoid traveling to Jeju in summer

@@ -1,0 +1,45 @@
+﻿Industry-1 <Tell me about one industry in your country that is well-known, Can you tell me about one promising or famous company in the particular industry? Tell me how the company started and all the things that have happened that made it become so-well known.>
+
+Oh Eva, the most famous industry in my country? That's a no-brainer — it's semiconductors. It has been the backbone of our economy for decades, and these days, with the AI boom, it's in the spotlight more than ever. So let me tell you about Samsung Electronics.
+[kick] no-brainer; semiconductors; in the spotlight more than ever
+
+Actually, I work at Samsung as a semiconductor engineer, so I can tell you firsthand. As I see in the news, tons of job seekers are dying to get into my company these days. Samsung is a comprehensive electronics company — the DS division handles chips, while the DX division covers smartphones and home appliances. And the biggest money-maker is the memory business inside DS, which is exactly where I belong. Because of the aggressive investment in AI infrastructure in America these days, the demand for memory has literally skyrocketing, so business is now better than ever.
+[kick] DS division handles chips; DX division; demand for memory skyrocketing
+
+But here's the interesting part. Samsung didn't start as a chip maker at all. Back in 1930's, the founder opened a small trading store in Daegu, and later expanded into electronics like radios and televisions. The true turning point came after his business trip to Japan, when he made up his mind to go all in on semiconductors. And it paid off — Samsung developed the 64K DRAM, the third in the world. There's a legendary story from those days: the engineers went on a 64-kilometer march on foot to demonstrate their unwavering commitment. That tiny chip is what grew into today's world number one memory business.
+[kick] small trading store in Daegu; all in on semiconductors; 64-kilometer march
+
+So yeah, I take great pride in working there, and I really grew a lot with the company. If you're curious about Samsung, why don't you look it up, Eva?
+[kick] take great pride; why don't you look it up
+
+
+
+Industry-2 <Tell me about a time that a product didn't meet the expectation of public. .. or a new smartphone or a software program had problems when it was first released. Tell me all about what happened in detail and describe the reactions of the public and the industry to that issue>
+
+Wow Eva, that's such a tough question, so let me think about it for a second. Well, one case just popped up in my head — the Galaxy Note 7 battery explosion. That incident sent shockwaves throughout society at that time.
+[kick] sent shockwaves throughout society
+
+It was back in 2016. The Note 7 launched with record preorders, and everyone said it was the best phone Samsung had ever made. But within just a few weeks, reports started coming in that the phones were overheating and even catching fire while charging. I couldn't believe my eyes when I saw those burnt devices all over the news. And what's worse, airlines around the world banned the phone! For those who actually owned it, it felt quite embarrassing to use in public. People were making jokes and memes about it everywhere, and the company was in crisis.
+[kick] overheating and catching fire; airlines around the world banned the phone
+
+But looking back, I think my company handled it the right way. It recalled around three million devices worldwide and eventually killed the product for good. The head of the mobile business bowed in front of hundreds of reporters and apologized in person. After that, the engineers in Samsung tested over hundred of thousands devices to find the root cause, and they came up with a brand-new safety check process.
+[kick] recalled around three million devices; bowed and apologized in person
+
+Thanks to that, the next model, the Galaxy S8, was a huge hit, and the company managed to rebuild its reputation. It was a painful lesson, but it made us much stronger. That's it, Eva!
+[kick] a huge hit; rebuild its reputation
+
+
+
+Industry-3 <What are some of the companies that young people want to work for these days? Why do young people want to work for these companies?>
+
+Oh Eva, that's an interesting question. Well, these days young people in Korea are crazy about big tech companies — Samsung and SK Hynix in semiconductors, and IT companies like Naver or Kakao. And in my opinion, it all narrows down to two things: the culture and the benefits.
+[kick] Samsung; SK Hynix; Naver or Kakao; culture and the benefits
+
+First of all, they want a company where they can grow together with the company itself. Nobody wants to be just another cog in the machine — they want a place where they can spread their wings and make their dreams come true. And what really matters to them is a horizontal atmosphere, where even a rookie's opinion is respected instead of being ignored just because of age or position. Not to mention, they put a lot of emphasis on work-life balance. They want to take a vacation without feeling self-conscious about their boss, and they prefer flexible working hours so they can design their own schedule.
+[kick] grow together with the company; horizontal atmosphere; work-life balance
+
+On top of that, benefits and location make a huge difference. Actually, there's a funny expression here in Korea — the "southern limit line." It originally comes from the DMZ, but young job seekers use it to mean the psychological line they refuse to go below. For engineers, that line is Pyeongtaek, so if a company is located any further south, they simply don't apply, no matter how good the offer is. And the small things count too — a nice cafeteria with free meals, a shuttle bus running from Seoul, and a generous allowance for team dinners.
+[kick] the southern limit line; Pyeongtaek; free meals and a shuttle bus
+
+So all in all, young people today are looking for much more than just a high salary. That's it, Eva!
+[kick] much more than just a high salary

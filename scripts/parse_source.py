@@ -67,6 +67,10 @@ QUESTION_LABELS = {
     "3-6": "favorite furniture",
     "3-7": "newest furniture",
     "3-8": "family memory",
+    "3-9": "furniture inquiry call",
+    "3-10": "wrong furniture delivered",
+    "3-11": "planning a farewell party",
+    "3-12": "party venue change",
     "4-1": "travel interests",
     "4-2": "why vacation",
     "4-3": "memorable beach",
@@ -77,6 +81,11 @@ QUESTION_LABELS = {
     "5-2": "class curriculum",
     "5-3": "the instructor",
     "5-4": "finding it & directions",
+    "5-5": "missing class after an accident",
+    "5-6": "lost finding the academy",
+    "5-7": "class too advanced, slow down",
+    "5-8": "questions before enrolling",
+    "5-9": "class is already full",
     "6-1": "the office",
     "6-2": "office then vs. now",
     "6-3": "first job",
@@ -86,29 +95,16 @@ QUESTION_LABELS = {
     "7-4": "tech then vs. now",
     "7-5": "learning new tech",
     "7-6": "tech for a project",
+    "7-7": "phone unavailable",
+    "7-8": "broken new phone",
+    "7-9": "MP3 player inquiry",
+    "7-10": "broke friend's MP3 player",
     "8-1": "favorite park",
     "8-2": "park problems",
     "8-3": "kids vs. adults at the park",
-    "10-1": "park invite call",
-    "10-2": "park closed, plan B",
-    "10-3": "sick day reschedule",
-    "10-4": "furniture inquiry call",
-    "10-5": "wrong furniture delivered",
-    "10-6": "phone unavailable",
-    "10-7": "broken new phone",
-    "10-8": "MP3 player inquiry",
-    "10-9": "broke friend's MP3 player",
-    "10-10": "planning a farewell party",
-    "10-11": "party venue change",
-    "10-12": "missing class after an accident",
-    "10-13": "lost finding the academy",
-    "10-14": "class too advanced, slow down",
-    "10-15": "questions before enrolling",
-    "10-16": "class is already full",
-    "10-17": "hiring a private tutor call",
-    "10-18": "car accident, rescheduling tutor",
-    "10-19": "doctor's office appointment call",
-    "10-20": "car accident, rescheduling doctor",
+    "8-4": "park invite call",
+    "8-5": "park closed, plan B",
+    "8-6": "sick day reschedule",
     "Industry-1": "famous industry & company",
     "Industry-2": "product that let down the public",
     "Industry-3": "companies young people want",
@@ -135,6 +131,10 @@ QUESTION_LABELS = {
     "11-4": "childhood appointment (hair salon)",
     "11-5": "Korean holidays (Seollal)",
     "11-6": "best & worst projects",
+    "11-7": "hiring a private tutor call",
+    "11-8": "car accident, rescheduling tutor",
+    "11-9": "doctor's office appointment call",
+    "11-10": "car accident, rescheduling doctor",
     "12-1": "subway system overview",
     "12-2": "public transit then vs. now",
     "12-3": "the healthiest person you know",
@@ -212,50 +212,41 @@ def parse_csv(path: Path):
 # "1. Movie", "2. Concert/...", etc.) — this is what the topic node's
 # "Show script" button links to. Add an entry here whenever a new topic
 # gets its own script doc.
+#
+# Every topic below has its own dedicated doc — the four catch-all/bundled
+# docs this project used to have ("0. 돌발", "9. Fashion/Internet/
+# Recycling/Geography", "12. 대중교통", and "10. Role Play") have all been
+# split apart: one topic, one doc, matching the mindmap's own categories.
+# Role Play in particular was dissolved entirely — its 20 questions were
+# absorbed into the existing Park/Household/Technology/Academy/Appointment
+# docs by real-world theme (park outing calls -> Park, furniture/party
+# calls -> Household, phone/MP3 player calls -> Technology, academy calls
+# -> Academy, tutor/doctor appointment calls -> Appointment), each getting
+# a new tag in that topic's own numbering sequence.
 TOPIC_SCRIPT_URLS = {
     "Movie": "https://docs.google.com/document/d/1XCXLIe6wjRt_2HMylK4yrDb8MlcjzvA3gd9ams_kgRQ/edit",
     "Concert": "https://docs.google.com/document/d/1hZMUXd-CRytRQ5wgLR6k48_o8_FJoh1BoqCLnIDamkQ/edit",
-    "Household": "https://docs.google.com/document/d/1adWRSbndAjmNzGjEjX1sRsIdvKASEDQ-LHINrpAHe3U/edit",
+    "Household": "https://docs.google.com/document/d/1I2sBLbtC3dF1aHAYsJg2R2eW8gtxH1yC6LkYjbiep_Y/edit",
     "Trip": "https://docs.google.com/document/d/1eBtpCU17N7h5XumYlTyG1MdK1V-_O1TfHMgamti1faA/edit",
-    "Academy": "https://docs.google.com/document/d/1i-JhV_2QyQAfgxThCMMm73UZ6i_LWUVuT9GHtWoT5EM/edit",
+    "Academy": "https://docs.google.com/document/d/1rsppFCWNFYlaUFTNiQNyVNS6JfM45bGUxlheONWmG8Q/edit",
     "Workplace": "https://docs.google.com/document/d/1xWBKQzWvPU-Z9IyI-wNJIXS9rx-Bf89V5VvJFvsRqqE/edit",
-    "Technology": "https://docs.google.com/document/d/1sz_HWeE13roBW2Pz8TgoMDxEd_r6tCkTosXTVn7oV74/edit",
-    "Park": "https://docs.google.com/document/d/18DMnLAq2GkFTKluC3csJqyRTle9ZMycNQv7-wcXA6_8/edit",
-    "Role Play": "https://docs.google.com/document/d/1qBp-jyD1ZZODJ_5GB5bX_s_PRXu6Sy6a5z98zC_C96g/edit",
-    "Appointment": "https://docs.google.com/document/d/19WZIbQtJx8DQPo3Jipg46zuXwwjIQZiuodxg3wQ19FE/edit",
-    # These 9 topics used to be lumped together as two catch-all categories
-    # ("Impromptu" / "0. 돌발" and "Fashion/Internet/Recycling/Geography") —
-    # split apart by category, one topic per real-world theme, while the
-    # underlying script text (keyed by tag, not category) still lives in
-    # the same two source docs. Each new topic's "Show script" link points
-    # back at whichever of those two docs its questions came from; the doc
-    # itself hasn't been split, so the link opens more than just that one
-    # topic's section.
-    "Fashion": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
-    "Recycling": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
-    "Geography": "https://docs.google.com/document/d/1_4FP-efQWma3wE5kyrNt_lmwcWqgFJMKuBGMx4_EhxA/edit",
-    # Internet spans both former docs (9-2/9-3 from the Fashion doc,
-    # Internet-1/Internet-2 from the Impromptu doc) — linked to the
-    # Impromptu doc since Internet-1/2 are its more central discussion
-    # questions.
-    "Internet": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Industry": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Weather": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Hotel": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Restaurant": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Food": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    # Celebration-1/Bank-1/Bank-2/Friends-1 were added to the "0. 돌발" doc
-    # in a later edit than the ones above. Friends-1 started life tagged
-    # "12-1" in that doc too -- renamed here to avoid colliding with the
-    # unrelated "12. 대중교통" doc's own "12-1" (see below).
-    "Celebration": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Bank": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    "Friends": "https://docs.google.com/document/d/1YkFNUYREfa8yvQVmggY80Txa9Tl8bi_9AT6rjsZPme4/edit",
-    # "12. 대중교통" doc: 12-1/12-2 are Public Transportation, 12-3/12-4 are
-    # an unrelated Health topic -- split by theme, same convention as the
-    # "0. 돌발" / "9. Fashion/Internet/Recycling/Geography" catch-all splits.
-    "Public Transportation": "https://docs.google.com/document/d/1if1XoRP3SM0Wmd4KDfHERSpdO2xxCQa6LJ_PnkoncaI/edit",
-    "Health": "https://docs.google.com/document/d/1if1XoRP3SM0Wmd4KDfHERSpdO2xxCQa6LJ_PnkoncaI/edit",
+    "Technology": "https://docs.google.com/document/d/1Z6B1MHNutpUF6Re5Jsyu5RGrppp6j3MhRBrdz2JH-cw/edit",
+    "Park": "https://docs.google.com/document/d/1qth29y2oppLk-DYD0PKvVN2NNETS21kWGYB3loCyvtY/edit",
+    "Appointment": "https://docs.google.com/document/d/1v4FRJU_OtThKJcjcByRSAxeFC0CyPMNaankhg34W6CY/edit",
+    "Industry": "https://docs.google.com/document/d/1avtmb9R4Z-ai9z3cfypKCO814pRvsQwmEUZA27G9-JA/edit",
+    "Internet": "https://docs.google.com/document/d/1jnyAiwK_K6eZS5akG9Ppnw-20jyYusD77JMulq1Mkdw/edit",
+    "Weather": "https://docs.google.com/document/d/1dfFwHIXc2YVYuk6eaX3-phMgosFfnF1h-_Pw4mUEyDk/edit",
+    "Hotel": "https://docs.google.com/document/d/159ug4tfv3CzfGrlvMv7ZAbiYkUOUFqBTm3tXXuvd3Ys/edit",
+    "Restaurant": "https://docs.google.com/document/d/1IzHDoAEGzlN3vKKTX-FJMMzuqxYG4pV9-May2C0HVSQ/edit",
+    "Food": "https://docs.google.com/document/d/1tdj7At-f-BJEn4RUisLYUexfTH3wu0YcR9XdJGaVmX4/edit",
+    "Fashion": "https://docs.google.com/document/d/1GlJe4GjfGN0ARWKtVnCSZrWzkqrU5Fm5nBbfSAh1ZQs/edit",
+    "Recycling": "https://docs.google.com/document/d/1tj1jd_ru2K272E3riyTSs6YOmejGP9NSuDGOrfHvl-M/edit",
+    "Geography": "https://docs.google.com/document/d/1JtAJiqobGnJMaP7BNpptelsQGMJsdUnVhE_2nnPMZNE/edit",
+    "Public Transportation": "https://docs.google.com/document/d/1tep9keGSnck5u88cGaLX4ZeuogqWAEZ5q0MZIdVjfO8/edit",
+    "Health": "https://docs.google.com/document/d/1ym3kKbou1g-ILfgHYl0l5m4cZd4nihBrl62jmZrXAvY/edit",
+    "Celebration": "https://docs.google.com/document/d/1LYRx6_B2TD48KeXkbsyPgAnIwlCkYQ1CZuUrdqW7lUE/edit",
+    "Bank": "https://docs.google.com/document/d/1vbHjewA-uFMJzwoZO7ZzwW9zTNCPAmb8vlEO7EUnD-E/edit",
+    "Friends": "https://docs.google.com/document/d/1MS9p6RG2OpFWpYEHdL5sEJMPE0ywFu-Lq3OlywabgcQ/edit",
 }
 
 

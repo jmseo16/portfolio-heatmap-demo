@@ -1,0 +1,13 @@
+﻿Food-1 <Food can get contaminated because of bacteria. It can go bad or become toxic. Tell me about an incident you heard on the news regarding this issue. What was the problem? How was it dealt with?>
+
+Wow Eva, that's such a tough question, so let me think about it for a second. Well, one case that comes to mind is a mass food poisoning outbreak at a famous seafood restaurant that I saw on the news.
+[kick] a mass food poisoning outbreak; a famous seafood restaurant
+
+At first, everyone just assumed it happened because of the hot, humid summer weather. But after some investigation, it turned out the restaurant had been completely careless about hygiene, leaving ingredients exposed to the heat blast for a long time. It was shocking to see such a contrast between the elegant, upscale dining area and the filthy, unhygienic kitchen.
+[kick] completely careless about hygiene; exposed to the heat blast
+
+You know what? Actually I had a similar thing that happened before. On a trip to Busan, I had some oysters at a seafood restaurant, and not long after, I came down with norovirus. It was brutal, I was throwing up for three straight days and couldn't keep a single thing down, not even water. I remember lying in bed feeling completely drained, and I couldn't step out of the bed.
+[kick] had some oysters; came down with norovirus; throwing up for three straight days
+
+All in all, both that news story and my own experience taught me the same lesson. Never try seafood in summer! Eva, be careful when you visit Korea in summer!
+[kick] never try seafood in summer
