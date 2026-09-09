@@ -324,31 +324,31 @@ Appointment,11-4. An appointment you remember from childhood (the hair salon).,(
 ,,"(body 1) a play corner at the kids' hair salon, but hated the haircut itself","tucked in the corner, slip with the scissors, the cut hair sneaking down my collar, so itchy I couldn't stand it, felt like it lasted forever"
 ,,(body 2) a scratch lottery ticket afterward for a discount,got such a kick out of
 ,,(closing) they really tried to get her to come back,now that I think about it
-Appointment,11-5. Tell me about the holidays in your country.,"(intro) Seollal, the Lunar New Year, is the most meaningful holiday",
-,,"(body 1) dressing up in hanbok, and tteokguk, the rice cake soup","makes you a year older, go for a second bowl"
-,,"(body 2) women used to do all the cooking, now shared or skipped for a hotel breakfast or a trip","pitch in, skipping the home-cooked meal altogether, pack their bags, head overseas"
-,,(closing) asking Eva about her favorite holiday,
-Appointment,11-6. Compare the projects that you've ever gone through. Did you enjoy it or hate it?,(intro) been through many projects,the best and the worst
-,,"(body 1) the best: a college group project, switched meetings to Zoom","a good idea hit my mind, switch to online gatherings, constructive feedback, communicate seamlessly, physical and temporal constraints, learned how to cooperate with others"
-,,"(body 2) the worst: a solo graduation project in English, done all alone","from A to Z, no one to ask, no feedback either, trust my own"
-,,"(closing) prefers working in a team, asking Eva",
-Appointment,11-7. I will give you a situation and ask you to act it out. You are thinking about hiring a private English tutor. Make a call to him or her and ask several questions about his or her service and hiring process.,(intro) calling Sarah about hiring her as a private English tutor,"hiring you as my private English tutor, felt a bit nervous, keep up casual conversations, limit my opportunities diving into the world, break it through"
+Appointment,11-5. I will give you a situation and ask you to act it out. You are thinking about hiring a private English tutor. Make a call to him or her and ask several questions about his or her service and hiring process.,(intro) calling Sarah about hiring her as a private English tutor,"hiring you as my private English tutor, felt a bit nervous, keep up casual conversations, limit my opportunities diving into the world, break it through"
 ,,"(body 1) checking her availability, weekday evenings around 8 PM","as soon as possible, any openings, a bit tight for me"
 ,,"(body 2) asking about rates, $5/hr is steep but worth it, wants an intensive curriculum before her conference","such a steep price, worth every penny, get me ready in time, afford to waste a single session"
 ,,"(closing) hopes to start soon, asks for a call back","everything works out, give me a call back, look forward to working with you"
-Appointment,"11-8. On the way to your meeting with your English tutor, you've been involved in a car accident. Make a call to him and explain the situation. Give several suggestions to re-schedule the meeting.","(intro) got into a fender bender on the way, running late","got into a fender bender, bumped right into us, a bit shaken up, evaluate the accident"
+Appointment,"11-6. On the way to your meeting with your English tutor, you've been involved in a car accident. Make a call to him and explain the situation. Give several suggestions to re-schedule the meeting.","(intro) got into a fender bender on the way, running late","got into a fender bender, bumped right into us, a bit shaken up, evaluate the accident"
 ,,"(body 1) asks to push today's appointment back later, no luck","push my appointment back, completely understand, reschedule for another day"
 ,,"(body 2) asks about tomorrow's opening at the same time, 3 PM, still available","check your openings, still available, that's such a relief"
 ,,"(closing) apologizes, will arrive early tomorrow to make up for it","all this trouble, make up for it, thanks so much for understanding"
-Appointment,11-9. I will give you a situation and ask you to act it out. You don't feel good. Make a call to the doctor's office and ask several questions about making an appointment with doctor.,(intro) calling ABC ENT Clinic about a blocked nose,"a blocked nose, had sinus surgery, more than just a common cold, need antibiotics"
+Appointment,11-7. I will give you a situation and ask you to act it out. You don't feel good. Make a call to the doctor's office and ask several questions about making an appointment with doctor.,(intro) calling ABC ENT Clinic about a blocked nose,"a blocked nose, had sinus surgery, more than just a common cold, need antibiotics"
 ,,(body 1) asking for an opening tomorrow afternoon,"check your openings, do you have an opening, dragging on for a while"
 ,,(body 2) asking the price and whether insurance covers it,"such a steep price, covered by medical insurance, that's such a relief"
 ,,(body 3) asking about parking for her SUV,"parking available, can't fit into the parking tower, park it out front"
 ,,"(closing) confirms tomorrow afternoon, thanks them","see you tomorrow afternoon, thank you so much for your help"
-Appointment,"11-10. I am sorry there is a problem that you have to resolve. On your way to the doctor's, you got involved in a car accident. Make a call and explain the situation and reschedule the meeting.","(intro) got into a fender bender on the way, running late","got into a fender bender, bumped right into us, a bit shaken up, evaluate the accident"
+Appointment,"11-8. I am sorry there is a problem that you have to resolve. On your way to the doctor's, you got involved in a car accident. Make a call and explain the situation and reschedule the meeting.","(intro) got into a fender bender on the way, running late","got into a fender bender, bumped right into us, a bit shaken up, evaluate the accident"
 ,,"(body 1) asks to push today's appointment back later, no luck","push my appointment back, completely understand, reschedule for another day"
 ,,"(body 2) asks about tomorrow's opening at the same time, 3 PM, still available","check your openings, still available, that's such a relief"
 ,,"(closing) apologizes, will arrive early tomorrow to make up for it","all this trouble, make up for it, thanks so much for understanding"
+Holiday,Holiday-1. Tell me about the holidays in your country.,"(intro) Seollal, the Lunar New Year, is the most meaningful holiday",
+,,"(body 1) dressing up in hanbok, and tteokguk, the rice cake soup","makes you a year older, go for a second bowl"
+,,"(body 2) women used to do all the cooking, now shared or skipped for a hotel breakfast or a trip","pitch in, skipping the home-cooked meal altogether, pack their bags, head overseas"
+,,(closing) asking Eva about her favorite holiday,
+Project,Project-1. Compare the projects that you've ever gone through. Did you enjoy it or hate it?,(intro) been through many projects,the best and the worst
+,,"(body 1) the best: a college group project, switched meetings to Zoom","a good idea hit my mind, switch to online gatherings, constructive feedback, communicate seamlessly, physical and temporal constraints, learned how to cooperate with others"
+,,"(body 2) the worst: a solo graduation project in English, done all alone","from A to Z, no one to ask, no feedback either, trust my own"
+,,"(closing) prefers working in a team, asking Eva",
 Public Transportation,12-1. Tell me about the public transportation system in your country. What kind of transportation do you use the most often? Why? Tell me the details.,"(intro) picks the subway as Korea's top transportation, lines up to 9, multilingual signage","if I had to pick just one, number 9, its own colors, finding your way around is surprisingly easy"
 ,,"(body 1) free transfers between subway lines, unlike Japan's per-company fares","switch over, won't be charged a single extra cent, end up paying more, basically free"
 ,,"(body 2) cheap fares, transit card discount, but Seoul Metro runs a deficit","way cheaper, public transportation card, The catch is, run a deficit, make up for it"

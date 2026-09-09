@@ -129,12 +129,12 @@ QUESTION_LABELS = {
     "11-2": "making appointments",
     "11-3": "childhood appointment (dentist)",
     "11-4": "childhood appointment (hair salon)",
-    "11-5": "Korean holidays (Seollal)",
-    "11-6": "best & worst projects",
-    "11-7": "hiring a private tutor call",
-    "11-8": "car accident, rescheduling tutor",
-    "11-9": "doctor's office appointment call",
-    "11-10": "car accident, rescheduling doctor",
+    "11-5": "hiring a private tutor call",
+    "11-6": "car accident, rescheduling tutor",
+    "11-7": "doctor's office appointment call",
+    "11-8": "car accident, rescheduling doctor",
+    "Holiday-1": "Korean holidays (Seollal)",
+    "Project-1": "best & worst projects",
     "12-1": "subway system overview",
     "12-2": "public transit then vs. now",
     "12-3": "the healthiest person you know",
@@ -213,16 +213,20 @@ def parse_csv(path: Path):
 # "Show script" button links to. Add an entry here whenever a new topic
 # gets its own script doc.
 #
-# Every topic below has its own dedicated doc — the four catch-all/bundled
-# docs this project used to have ("0. 돌발", "9. Fashion/Internet/
-# Recycling/Geography", "12. 대중교통", and "10. Role Play") have all been
-# split apart: one topic, one doc, matching the mindmap's own categories.
-# Role Play in particular was dissolved entirely — its 20 questions were
+# Every topic below has its own dedicated doc — the catch-all/bundled docs
+# this project used to have ("0. 돌발", "9. Fashion/Internet/Recycling/
+# Geography", "11. 예약/명절/프로젝트비교", "12. 대중교통", and "10. Role Play")
+# have all been split apart: one topic, one doc, matching the mindmap's own
+# categories. Role Play was dissolved entirely — its 20 questions were
 # absorbed into the existing Park/Household/Technology/Academy/Appointment
 # docs by real-world theme (park outing calls -> Park, furniture/party
 # calls -> Household, phone/MP3 player calls -> Technology, academy calls
 # -> Academy, tutor/doctor appointment calls -> Appointment), each getting
-# a new tag in that topic's own numbering sequence.
+# a new tag in that topic's own numbering sequence. "11. 예약/명절/프로젝트비교"
+# bundled three unrelated real-world themes under one doc/topic the same
+# way "9." and "12." did, but was missed in that first pass -- it's now
+# split into "Appointment" (actual appointment scenarios, 11-1..11-8),
+# "Holiday" (Seollal, formerly 11-5), and "Project" (formerly 11-6).
 TOPIC_SCRIPT_URLS = {
     "Movie": "https://docs.google.com/document/d/1XCXLIe6wjRt_2HMylK4yrDb8MlcjzvA3gd9ams_kgRQ/edit",
     "Concert": "https://docs.google.com/document/d/1hZMUXd-CRytRQ5wgLR6k48_o8_FJoh1BoqCLnIDamkQ/edit",
@@ -232,7 +236,9 @@ TOPIC_SCRIPT_URLS = {
     "Workplace": "https://docs.google.com/document/d/1xWBKQzWvPU-Z9IyI-wNJIXS9rx-Bf89V5VvJFvsRqqE/edit",
     "Technology": "https://docs.google.com/document/d/1Z6B1MHNutpUF6Re5Jsyu5RGrppp6j3MhRBrdz2JH-cw/edit",
     "Park": "https://docs.google.com/document/d/1qth29y2oppLk-DYD0PKvVN2NNETS21kWGYB3loCyvtY/edit",
-    "Appointment": "https://docs.google.com/document/d/1v4FRJU_OtThKJcjcByRSAxeFC0CyPMNaankhg34W6CY/edit",
+    "Appointment": "https://docs.google.com/document/d/1RzGc13ieVtTYhAgYWy--UFsbdtf4YFRRUEZnw7E_S-8/edit",
+    "Holiday": "https://docs.google.com/document/d/1KOlod6F9xefk4uQ9CV4osQ20Y6lqQ54Tz-5nvPtkuec/edit",
+    "Project": "https://docs.google.com/document/d/1XdqI6wec-zdVrgtvT66MPbYnmv96d00IL4McqYsHWHA/edit",
     "Industry": "https://docs.google.com/document/d/1avtmb9R4Z-ai9z3cfypKCO814pRvsQwmEUZA27G9-JA/edit",
     "Internet": "https://docs.google.com/document/d/1jnyAiwK_K6eZS5akG9Ppnw-20jyYusD77JMulq1Mkdw/edit",
     "Weather": "https://docs.google.com/document/d/1dfFwHIXc2YVYuk6eaX3-phMgosFfnF1h-_Pw4mUEyDk/edit",

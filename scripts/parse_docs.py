@@ -164,7 +164,7 @@ def load_doc_scripts(docs_dir: Path = DOCS_DIR) -> dict:
     scripts = {}
     for path in sorted(docs_dir.glob("*.txt")):
         text = path.read_text(encoding="utf-8-sig")
-        if path.name == "6-workplace.txt":
+        if path.stem.endswith("-workplace"):
             parsed = _parse_workplace(text)
         else:
             parsed = _parse_tagged(text)
@@ -184,7 +184,7 @@ def load_doc_kicks(docs_dir: Path = DOCS_DIR) -> dict:
     kicks = {}
     for path in sorted(docs_dir.glob("*.txt")):
         text = path.read_text(encoding="utf-8-sig")
-        if path.name == "6-workplace.txt":
+        if path.stem.endswith("-workplace"):
             parsed = _parse_workplace(text, with_kicks=True)
         else:
             parsed = _parse_tagged(text, with_kicks=True)
