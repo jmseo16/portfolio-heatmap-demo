@@ -1,0 +1,24 @@
+﻿RentACar-1. <I would like to give you a situation and ask you to act it out. You are visiting New York on vacation. You go to a car rental agency to rent a car. Imagine you are speaking to a rental car agent. Ask three or four questions about renting a car for a week.>
+
+
+Hello, is this Hertz rental shop? My name is Jungmin and I'm calling to rent a car. I need my car from next Monday to Sunday. Yeah, I already checked the cars available from your website. I want a white Porsche Cayenne with gasoline-powered. It's available right? Great.
+[kick] Hertz rental shop; white Porsche Cayenne; gasoline-powered
+
+
+By the way, how much is the price for the car per day? I guess it would be quite expensive because it's Porsche… Wow, a hundred dollars per day? That's such a hefty price. Oh, I was almost forgot. Actually I have a credit card which has a partnership with Hertz. As far as I remember, I can get a discount if I pay with this card. Oh, I have 20% billing discount. Great. Thank you for let me know.
+[kick] such a hefty price; credit card partnership; 20% billing discount
+
+
+Well, I have my flight next Monday, so let me drop by your store as soon as I arrive at the airport. Ok, I'll make sure to bring my driver license. See you then. Thank you.
+[kick] bring my driver license; see you then
+
+
+RentACar-2. <I am sorry but there is a problem which I need you to resolve. I am not sure if I can let you rent a car because I am not familiar with your non-US driver's license. Can you explain to me what your license says and why it is the same as a valid US license?>
+
+
+Hi this is Jungmin, and here's my driver's license. What? I can't rent a car because of my driver's license? Look, here says, it can be used worldwide including the US. I definitely checked over and over again that it is valid in the US! Still you can't? Oh, my how can I resolve it?
+[kick] valid in the US; still you can't
+
+
+You know, I have my schedule right after this so I don't have enough time to go back and forth here. Oh yes! This is my friend Jeffry Hwang and he is a US citizen. Hey Jeffry, you have your US driver's license right? Why don't you let them see yours? Now all right? Wow, I'm about to mess up all the things without you. Thank you bro.
+[kick] my friend Jeffry Hwang; US citizen; thank you bro

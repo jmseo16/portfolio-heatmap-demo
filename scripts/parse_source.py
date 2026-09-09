@@ -105,6 +105,7 @@ QUESTION_LABELS = {
     "8-4": "park invite call",
     "8-5": "park closed, plan B",
     "8-6": "sick day reschedule",
+    "Industry-0": "Korea's most famous industry",
     "Industry-1": "famous industry & company",
     "Industry-2": "product that let down the public",
     "Industry-3": "companies young people want",
@@ -143,6 +144,11 @@ QUESTION_LABELS = {
     "Bank-1": "a recent bank visit",
     "Bank-2": "bank then vs. now",
     "Friends-1": "conversation topics then vs. now",
+    "Repairman-1": "calling about a jammed window",
+    "Repairman-2": "repairman can't come today",
+    "Repairman-3": "a broken computer, fixed just in time",
+    "RentACar-1": "renting a car for a trip",
+    "RentACar-2": "non-US license rejected",
 }
 
 # Short gists for paragraphs whose own text has no leading "(Cue)" — those
@@ -253,6 +259,8 @@ TOPIC_SCRIPT_URLS = {
     "Celebration": "https://docs.google.com/document/d/1LYRx6_B2TD48KeXkbsyPgAnIwlCkYQ1CZuUrdqW7lUE/edit",
     "Bank": "https://docs.google.com/document/d/1vbHjewA-uFMJzwoZO7ZzwW9zTNCPAmb8vlEO7EUnD-E/edit",
     "Friends": "https://docs.google.com/document/d/1MS9p6RG2OpFWpYEHdL5sEJMPE0ywFu-Lq3OlywabgcQ/edit",
+    "Repairman": "https://docs.google.com/document/d/1KpNv9GQ9yXF8h7-SyEnhKEUgcDByGam7kTl4fo2DqZk/edit",
+    "Rent-A-Car": "https://docs.google.com/document/d/13lQ8bSSUD6kqy8imMLCxPSUPdY53vKl2G6BoIFC8jsQ/edit",
 }
 
 

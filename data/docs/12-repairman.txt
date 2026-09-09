@@ -1,0 +1,47 @@
+﻿Repairman-1. <I will give you a situation and ask you to act it out. There is something wrong with your window. Make a call to the repairman and explain the situation and ask him to visit your home to fix your window.>
+
+
+Hello, is this ABC repair shop? My name is Jungmin and I'm calling to ask for your help with my jammed window.
+[kick] jammed window; ABC repair shop
+
+
+According to the weather forecast, it's going to rain heavily tomorrow all day. That's why I like to fit it up as soon as possible. Can you visit today? I need to leave home at least 12 PM, so it would be great if you can make it in the morning. Well, how much would it take? An hour? Then, before 11 would be okay with me.
+[kick] rain heavily tomorrow; before 11 would be okay with me
+
+
+By the way, may I ask how much the repair cost will be? I'll send you the picture of my window right away. I sent you, can I get an estimate? 500 dollars? Wow, that's such a steep price. I don't have that money for fixing a window. Oh, I almost forgot it. Actually I have a 10% discount coupon from a flyer. I wonder if I can use it. Ok, great.
+[kick] such a steep price; 10% discount coupon
+
+
+Right, here's my address. Olympic street 435 and the unit number is 601. Thanks for your help. Bye.
+[kick] here's my address; thanks for your help
+
+
+Repairman-2. <I am sorry but there is a problem that you have to resolve. The repairman called you back and said he won't be able to visit your house today. The earliest visit is next week. Make a call to him again and explain why your window should be fixed today. Give several suggestions to make him come today.>
+
+
+Hi, this is Jungmin, I got your call that you can't come today to fix my window. However, my window should be fixed tonight, as the heavy rain is forecasted tomorrow. I don't want my things to get wet from the rain. I know your schedule is already packed, but by any chance, if you can help fix my window today, I am willing to pay double the original service fee. Oh, you can't though? That's too bad.
+[kick] willing to pay double; that's too bad
+
+
+Do you offer emergency repair service for situations like this? I've heard from my friend that other repair shops do offer the emergency service. You don't? Oh no! What am I going to do?
+[kick] emergency repair service; what am I going to do
+
+
+Then, can you refer to another repairman who is open right now? Oh you can! Thank you. I'll give a call to him right now.
+[kick] refer to another repairman; give a call to him right now
+
+
+Repairman-3. <Did you ever get into trouble because something in your house broke? Maybe it was a piece of furniture or electronic equipment? What made you panic? And how did you solve the problem? Please tell me about the steps you took to solve that problem.>
+
+
+Yeah, it happened very recently, and it was my computer.
+[kick] happened very recently; my computer
+
+
+I was doing my English project, but all of a sudden the screen went blue. I panicked because I had to give a presentation two days later! I kept my cool, and called my frequent-visit service center to ask if I could make a house call, I mean the door-to-door service. Unfortunately, there were no engineers open and I had to wait for a week. I didn't have such time, so I called to another service center, and he said he could check it if I visited his office. I took a taxi right away, carrying the heavy computer.
+[kick] the screen went blue; kept my cool; no engineers open; took a taxi
+
+
+You know, my computer had an electrostatic overstress, so he told me that the whole printed circuit board should be replaced. You know, replacing the whole really cost a lot, and I have no choice but to spend my fortune, but it was worth every penny. My computer operated well as it used to, and he was indeed my savior. Without his help, I would have had to start over from scratch. That's it Eva!
+[kick] electrostatic overstress; worth every penny; my savior

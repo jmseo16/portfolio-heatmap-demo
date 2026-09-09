@@ -43,3 +43,19 @@ On top of that, benefits and location make a huge difference. Actually, there's 
 
 So all in all, young people today are looking for much more than just a high salary. That's it, Eva!
 [kick] much more than just a high salary
+
+
+
+Industry-0 <Tell me about one industry in your country that is well-known.>
+
+Okay Eva, the most famous industry in my country? That's a no-brainer — it's electronics. Korea has been leading this field not just at home but all over the world, and the most representative companies are definitely Samsung and SK Hynix. Let me talk more about Samsung, because Samsung is indeed a huge company having a wide portfolio running from consumer electronics to semiconductors.
+[kick] that's a no-brainer; the most representative companies
+
+First off, let's talk more about the consumer electronics side, which is handled by the DX division. Samsung's home appliances are quite familiar and famous all over the world — fans, air conditioners, washing machines, and you name it. But the real star is the TV. I've heard that Samsung TVs are hugely popular in the US and even Europe. Actually I saw a big advertisement at Milano during my trip to Italy. I was so proud of the fact that I'm Korean. And honestly, I have one at my home, because I'm such a homebody myself. Nothing beats binge-watching TV while lying on my couch.
+[kick] the DX division; and you name it; such a homebody; binge-watch TV while lying on my couch
+
+And on the other side, there's the semiconductor business, the DS division, which is exactly where I belong. These days, memory chips are in the spotlight more than ever. To be honest, memory used to be just a subsidiary peripheral component in the overall AI system, and the CPUs and GPUs took all the credit. But with the big shortage of memory and with the opening of an agentic AI era, memory is playing a significant role in the AI system, comparable to GPU and CPU. The demand is literally skyrocketing, it's now one of the most valuable chips in the whole AI system.
+[kick] the DS division; in the spotlight more than ever; playing a significant role; demand skyrocketing
+
+So that's all about the famous industry in Korea. How about you, Eva?
+[kick]
